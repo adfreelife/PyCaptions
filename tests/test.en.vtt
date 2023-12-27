@@ -1,0 +1,50 @@
+WEBVTT - This file has cues.
+
+REGION
+id:styling
+width:40%
+lines:3
+regionanchor:0%,100%
+viewportanchor:10%,90%
+scroll:up
+
+STYLE
+::cue(b) {
+  color: peachpuff;
+}
+::cue(#test) { color: lime; }
+
+00:00.500 --> 00:02.000
+This is a test file
+
+NOTE
+This is a 
+multiline
+comment
+
+00:02.500 --> 00:04.000 region:styling align:left
+This 
+is 
+multiline sentence
+
+NOTE comment blocks can be used between style blocks.
+
+1
+00:04.500 --> 00:10.000 region:styling align:left
+Some text
+
+Slide 1
+00:04.500 --> 00:05.000 region:styling align:left
+This is chapter
+
+test
+00:05.00 --> 00:10.000
+This is a <i.foreignphrase><lang es>palabra española</lang></i>
+
+2
+00:10.000 --> 00.12.000
+{
+ "type": "LongLat",
+ "lat" : "36.198269",
+ "long": "137.2315355"
+}

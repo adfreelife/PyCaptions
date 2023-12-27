@@ -1,0 +1,3 @@
+beautifulsoup4==4.12.2
+budoux==0.6.1
+iso639-lang==2.2.2
