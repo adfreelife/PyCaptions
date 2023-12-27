@@ -68,13 +68,20 @@ with open("tests/test.en.srt", encoding="UTF-8") as f:
         captions.saveVTT("test")
 ```
 
-### Multilangual
+### Multilingual
 ```python
 from pycaptions import Captions
 
+# if the format supports multiple languages
+with Captions("tests/test.en.ttml") as captions:
+    # first line will be in english, second one in spanish
+    captions.saveSRT("test", ["en","es"]) 
+    
+# if you have multiple files and you want to make multilingual one
 with Captions("tests/test.en.srt") as captions:
     with Captions("tests/test.es.srt") as captions2:
-        captions+=captions2
+        # only subtitle text and comments (if format supports them) are added
+        captions+=captions2 
     # first line will be in english, second one in spanish
     captions.save("test", ["en","es"]) 
 ```
