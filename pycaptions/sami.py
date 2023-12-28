@@ -1,6 +1,8 @@
 import io, os
-from .caption import CaptionsFormat, Caption
+from .caption import CaptionsFormat, Block
 from bs4 import BeautifulSoup
+
+EXTENSION = ".sami"
 
 @staticmethod
 def detectSAMI(content: str | io.IOBase) -> bool:
@@ -52,9 +54,10 @@ class SAMI(CaptionsFormat):
     with SAMI("path/to/file.sami") as sami:
         sami.saveSRT("file")
     """
+    EXTENSION = EXTENSION
     detect = staticmethod(detectSAMI)
     _read = readSAMI
-    save = saveSAMI
+    _save = saveSAMI
 
     from .srt import saveSRT
     from .sub import saveSUB

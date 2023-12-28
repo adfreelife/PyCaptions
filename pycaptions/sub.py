@@ -1,5 +1,7 @@
 import io, re, os
-from .caption import CaptionsFormat, Caption
+from .caption import CaptionsFormat, Block
+
+EXTENSION = ".sub"
 
 @staticmethod
 def detectSUB(content: str | io.IOBase) -> bool:
@@ -51,9 +53,10 @@ class MicroDVD(CaptionsFormat):
     with MicroDVD("path/to/file.sub") as sub:
         sub.saveSRT("file")
     """
+    EXTENSION = EXTENSION
     detect = staticmethod(detectSUB)
     _read = readSUB
-    save = saveSUB
+    _save = saveSUB
    
     from .sami import saveSAMI
     from .srt import saveSRT

@@ -1,16 +1,8 @@
-"""
-Timed Text Markup Language
-
-Read more about it https://www.w3.org/TR/ttml/
-
-Example:
-
-with TTML("path/to/file.ttml") as ttml:
-    ttml.saveSRT("file")
-"""
 import io, os
-from .caption import CaptionsFormat, Caption
+from .caption import CaptionsFormat, Block
 from bs4 import BeautifulSoup
+
+EXTENSION = ".ttml"
 
 @staticmethod
 def detectTTML(content: str | io.IOBase) -> bool:
@@ -64,9 +56,10 @@ class TTML(CaptionsFormat):
     with TTML("path/to/file.ttml") as ttml:
         ttml.saveSRT("file")
     """
+    EXTENSION = EXTENSION
     detect = staticmethod(detectTTML)
     _read = readTTML
-    save = saveTTML
+    _save = saveTTML
 
     from .sami import saveSAMI
     from .srt import saveSRT

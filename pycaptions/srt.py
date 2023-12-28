@@ -1,6 +1,8 @@
 import io, os
 from typing import NoReturn
-from .caption import CaptionsFormat, Caption
+from .caption import CaptionsFormat, Block, BlockType
+
+EXTENSION = ".srt"
 
 @staticmethod
 def detectSRT(content: str | io.IOBase) -> bool:
@@ -34,7 +36,7 @@ def readSRT(self, content: str | io.IOBase, lang: str = None, **kwargs):
     start = _convertFromSRTTime(start)
     end = _convertFromSRTTime(end)
     line = content.readline()
-    caption = Caption(lang, start, end, line)
+    caption = Block(BlockType.CAPTION, lang, start, end, line)
     while line:
         if not line.strip():
             self.append(caption)
@@ -43,7 +45,7 @@ def readSRT(self, content: str | io.IOBase, lang: str = None, **kwargs):
             start = _convertFromSRTTime(start)
             end = _convertFromSRTTime(end)
             line = content.readline()
-            caption = Caption(lang, start, end, line)
+            caption = Block(BlockType.CAPTION, lang, start, end, line)
         else:
             caption.append(line, lang)
         line = content.readline()
@@ -64,23 +66,17 @@ def _convertToSRTTime(time: int) -> str:
     return f"{hours}:{minutes}:{seconds},{miliseconds}"
 
 def saveSRT(self, filename: str, languages: [str] = [], **kwargs):
-    languages = languages or [self.default_language]
-    if not filename.endswith(".srt"):
-        filename += ".srt"
-
-    for i in languages:
-        if i not in filename:
-            file, ext = os.path.splitext(filename)
-            filename = f"{file}.{i}{ext}"
-    
     try:
         with open(filename,"w",encoding="UTF-8") as file:
-            for index, data in enumerate(self.caption_list, 1):
+            index = 1
+            for data in self.caption_list:
+                if data.block_type != BlockType.CAPTION:
+                    continue
                 file.write(f"{index}\n")
                 file.write(f"{_convertToSRTTime(data.start_time)} --> {_convertToSRTTime(data.end_time)}\n")
-                for i in languages:
-                    file.writable("\n".join(data.get(i)))
+                file.write("\n".join(data.get(i) for i in languages))
                 file.write("\n")
+                index += 1
     except IOError as e:
         print(f"I/O error({e.errno}): {e.strerror}")
     except Exception as e:
@@ -97,17 +93,12 @@ class SubRip(CaptionsFormat):
     with SubRip("path/to/file.srt") as srt:
         srt.saveVTT("file")
     """
+    EXTENSION = EXTENSION
     detect = staticmethod(detectSRT)
     _read = readSRT
-    save = saveSRT
+    _save = saveSRT
 
     from .sami import saveSAMI
     from .sub import saveSUB
     from .ttml import saveTTML
     from .vtt import saveVTT
-
-if __name__ == "__main__":
-    srt = SubRip()
-    with open("tests/test.en.srt", encoding="UTF-8") as file:
-        if(srt.detect(file)):
-            srt.read(file)

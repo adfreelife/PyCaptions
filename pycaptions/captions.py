@@ -12,12 +12,26 @@ class Captions(CaptionsFormat):
     with Captions("path/to/file.srt") as captions:
         captions.saveSRT("file")
     """
+    def __init__(self, filename: str = None, default_language: str = "und", **options):
+        self.fileFormat = "srt"
+        super().__init__(filename, default_language, **options)
     
-    from .sami import detectSAMI, saveSAMI, readSAMI
-    from .srt import detectSRT, saveSRT, readSRT
-    from .sub import detectSUB, saveSUB, readSUB
-    from .ttml import detectTTML, saveTTML, readTTML
-    from .vtt import detectVTT, saveVTT, readVTT
+    from .sami import detectSAMI, saveSAMI, readSAMI, EXTENSION as sami_extension
+    from .srt import detectSRT, saveSRT, readSRT, EXTENSION as srt_extension
+    from .sub import detectSUB, saveSUB, readSUB, EXTENSION as sub_extension
+    from .ttml import detectTTML, saveTTML, readTTML, EXTENSION as ttml_extension
+    from .vtt import detectVTT, saveVTT, readVTT, EXTENSION as vtt_extension
+
+    extensions = {
+        "sami": sami_extension,
+        "srt": srt_extension,
+        "sub": sub_extension,
+        "ttml": ttml_extension,
+        "vtt": vtt_extension
+    }
+
+    def getExtension(self):
+        return self.extensions[self.fileFormat]
 
     readers = {
         "sami" : readSAMI,
@@ -61,6 +75,6 @@ class Captions(CaptionsFormat):
         if not format:
             return
         self.readers[format](self, content, lang, **kwargs)
-    
+
     def save(self, filename: str, format: str = "srt", lang: str = None, **kwargs):
         self.savers[format](self, filename, lang, **kwargs)
