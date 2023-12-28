@@ -76,5 +76,8 @@ class Captions(CaptionsFormat):
             return
         self.readers[format](self, content, lang, **kwargs)
 
-    def save(self, filename: str, format: str = "srt", lang: str = None, **kwargs):
+    def _save(self, filename: str, format: str = "srt", lang: str = None, **kwargs):
         self.savers[format](self, filename, lang, **kwargs)
+
+    def save(self, filename: str, format: str = "srt", lang: str = None, **kwargs):
+        return super().save(filename, format, lang, **kwargs)
