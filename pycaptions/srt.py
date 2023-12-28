@@ -34,7 +34,7 @@ def readSRT(self, content: str | io.IOBase, lang: str = None, **kwargs):
     start = _convertFromSRTTime(start)
     end = _convertFromSRTTime(end)
     line = content.readline()
-    caption = Caption(start,end, line, lang)
+    caption = Caption(lang, start, end, line)
     while line:
         if not line.strip():
             self.append(caption)
@@ -43,7 +43,7 @@ def readSRT(self, content: str | io.IOBase, lang: str = None, **kwargs):
             start = _convertFromSRTTime(start)
             end = _convertFromSRTTime(end)
             line = content.readline()
-            caption = Caption(start, end, line, lang)
+            caption = Caption(lang, start, end, line)
         else:
             caption.append(line, lang)
         line = content.readline()

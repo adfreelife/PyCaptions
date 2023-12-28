@@ -3,20 +3,14 @@ from collections import defaultdict
 from langcodes import standardize_tag, tag_is_valid
 
 class Caption:
-    def __init__(self, start_time: int = 0, end_time: int = 0, text: str = "", lang: str = None, comment: list[str] = [], style = {}, layout=None, is_chapter=False):
+    def __init__(self, lang, start_time: int = 0, end_time: int = 0, text: str = "", **options):
         self.languages = defaultdict(str)
-        self.comments = defaultdict(str)
         self.default_language = lang
-        if lang:
-            if(text):
-                self.languages[lang] = text.strip()
-            if(comment):
-                self.comments[lang] = comment
+        if(text):
+            self.languages[lang] = text.strip()
         self.start_time = start_time
         self.end_time = end_time
-        self.style = style
-        self.layout = layout
-        self.is_chapter = is_chapter
+        self.options = options or {}
 
     def getLines(self, lang: str, lines: int) -> list[str]:
         text = self.get(lang)
@@ -60,37 +54,27 @@ class Caption:
     def __iadd__(self, value):
         if not isinstance(value, Caption):
             raise ValueError("Unsupported type. Must be an instance of `Caption`")
-        for key, language, comment in value:
+        for key, language in value:
             self.languages[key] = language
-            if comment:
-                self.comments[key] = comment
         return self
 
     def __add__(self, value):
         if not isinstance(value, Caption):
             raise ValueError("Unsupported type. Must be an instance of `Caption`")
         out = Caption(start_time=self.start_time,end_time=self.end_time,lang=self.default_language,style=self.style,layout=self.layout,is_chapter=self.is_chapter)
-        out.comments = self.comments.copy()
         out.languages = self.languages.copy()
         for key, language, comment in value:
             out.languages[key] = language
-            if comment:
-                out.comments[key] = comment
         return out
     
     def __isub__(self, language: str):
-        if language in self.comments:
-            del self.comments[language]
         if language in self.languages:
             del self.languages[language]
         return self
 
     def __sub__(self, language: str):
         out = Caption(start_time=self.start_time,end_time=self.end_time,lang=self.default_language,style=self.style,layout=self.layout,is_chapter=self.is_chapter)
-        out.comments = self.comments.copy()
         out.languages = self.languages.copy()
-        if language in out.comments:
-            del out.comments[language]
         if language in out.languages:
             del out.languages[language]
         return out
@@ -102,17 +86,18 @@ class Caption:
     def __next__(self):
         try:
             key = next(self._keys_iterator)
-            return key, self.languages.get(key), self.comments.get(key)
+            return key, self.languages.get(key)
         except StopIteration:
             raise StopIteration
   
 class CaptionsFormat:
-    def __init__(self, filename: str = None, default_language: str = "und"):
+    def __init__(self, filename: str = None, default_language: str = "und", **options):
         self.filename = filename
+        self.options = options or {}
         self._caption_list: list[Caption] = []
-        self.setLanguage(default_language)
+        self.setDefaultLanguage(default_language)
 
-    def setLanguage(self, language: str):
+    def setDefaultLanguage(self, language: str):
         standardized = standardize_tag(language, macro=True)
         self.default_language = standardized if(tag_is_valid(standardized)) else "und"
 
@@ -156,7 +141,7 @@ class CaptionsFormat:
         filename, ext = os.path.splitext(self.filename)
         filename, lang = os.path.splitext(filename)
         if(lang):
-            self.setLanguage(lang[1:])
+            self.setDefaultLanguage(lang[1:])
         if(ext == ".json"):
             self.fromJson(self.filename)
         else:
