@@ -114,13 +114,10 @@ def readVTT(self, content: str | io.IOBase, languages: list[str], **kwargs):
             start, end = line.split(" --> ", 1)
             end = end.split(" ", 1)
             if len(end) > 1:
-                styling = end[1]
-            else:
-                styling = None
+                caption.options["style"] = end[1]
             end = end[0]
             caption.start_time = _convertFromVTTTime(start)
             caption.end_time = _convertFromVTTTime(end)
-            caption.options["style"] = styling
             counter = 1
             line = content.readline().strip()
             if line.startswith("{"):

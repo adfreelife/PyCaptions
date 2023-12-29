@@ -40,7 +40,11 @@ def readSRT(self, content: str | io.IOBase, languages: list[str], **kwargs):
             counter = 1
             self.append(caption)
             content.readline()
-            start, end = content.readline().split("-->")
+            start, end = content.readline().split(" --> ", 1)
+            end = end.split(" ", 1)
+            if len(end) > 1:
+                caption.options["style"] = end[1]
+            end = end[0]
             start = _convertFromSRTTime(start)
             end = _convertFromSRTTime(end)
             line = content.readline()
@@ -56,7 +60,6 @@ def readSRT(self, content: str | io.IOBase, languages: list[str], **kwargs):
 
 
 def _convertFromSRTTime(time: str) -> int:
-    time = time.strip()
     return (int(time[0:2])*3_600_000_000 +
             int(time[3:5])*60_000_000 +
             int(time[6:8])*1_000_000 +
@@ -85,7 +88,6 @@ def saveSRT(self, filename: str, languages: list[str], **kwargs):
                 file.write(f"{index}\n")
                 file.write(f"{_convertToSRTTime(data.start_time)} --> {_convertToSRTTime(data.end_time)}\n")
                 file.write("\n".join(data.get(i) for i in languages))
-               
                 index += 1
     except IOError as e:
         print(f"I/O error({e.errno}): {e.strerror}")
