@@ -1,6 +1,11 @@
 import io
-from .caption import CaptionsFormat, Caption
+import re
+from .caption import CaptionsFormat, Block, BlockType
 from cssutils import CSSParser
+
+EXTENSION = ".vtt"
+STYLE_PATERN = re.compile(r"::cue\((#[^)]+)\)")
+
 
 @staticmethod
 def detectVTT(content: str | io.IOBase) -> bool:
@@ -22,7 +27,9 @@ def detectVTT(content: str | io.IOBase) -> bool:
     content.seek(offset)
     return False
 
+
 def readVTT(self, content: str | io.IOBase, lang: str = 'en', **kwargs):
+    global STYLE_PATERN
     if not isinstance(content, io.IOBase):
         if not isinstance(content, str):
             raise ValueError("The content is not a unicode string or I/O stream.")
@@ -30,30 +37,34 @@ def readVTT(self, content: str | io.IOBase, lang: str = 'en', **kwargs):
 
     content.readline()
     line = content.readline().strip()
-    self.options["metadata"] = dict()
+    self.options["blocks"] = []
+    metadata = Block(BlockType.METADATA, lang)
     while line:
         line = line.split(": ",1)
-        self.options["metadata"][line[0]] = line[1]
+        metadata.options[line[0]] = line[1]
         line = content.readline().strip()
+    self.options["blocks"].append(metadata)
 
     comment_count = 0
-    counter = 1
     line = content.readline()
-    self.options["comments"] = []
-    self.options["style"] = {}
-    self.options["layout"] = {}
+    self.options["style"] = dict()
+    self.options["style"]["styles"] = []
+    self.options["style"]["identifier_to_original"] = dict()
+    self.options["style"]["identifier_to_new"] = dict() 
+    self.options["style"]["style_id_counter"] = 0
+
     while line:
         if line.startswith("NOTE"):
             comment_count+=1
             temp = line.split(" ",1)
-            comment = []
+            comment = Block(BlockType.COMMENT, lang)
             if len(temp) > 1:
-                comment.append[temp[1]]
+                comment.append(temp[1],lang)
             line = line.readline().strip()
             while line:
-                comment.append(line)
+                comment.append(line,lang)
                 line = line.readline().strip()
-            self.options["comments"].append({"line":counter, "comment": comment})
+            self.options["blocks"].append(comment)
         elif line == "STYLE":
             style = ""
             line = line.readline().strip()
@@ -61,16 +72,29 @@ def readVTT(self, content: str | io.IOBase, lang: str = 'en', **kwargs):
             while line:
                 style += line  
                 line = line.readline().strip()
-            parser.parseString(cssText=style, encoding="UTF-8")
 
+            def replace_style(match):
+                if match.group(1).startswith("#"):
+                    if match.group(1) not in self.options["style"]["identifier_to_new"]:
+                        return self.options["style"]["identifier_to_new"][match.group(1)]
+                    self.options["style"]["style_id_counter"] += 1
+                    style_name = f"#style{self.options['style']['style_id_counter']}"
+                    self.options["style"]["identifier_to_original"][style_name] = match.group(1)
+                    self.options["style"]["identifier_to_new"][match.group(1)] = style_name
+                    return style_name
+                return match.group(1)
+            self.options["style"]["styles"].append({"order":counter, "style":
+                parser.parseString(cssText=re.sub(STYLE_PATERN, replace_style, style), encoding="UTF-8")})
         elif line == "REGION":
             line = line.readline().strip()
+            temp = dict()
             while line:
-                comment.append(line)
+                line = line.split(":",1)
+                temp[line[0]] = line[1]
                 line = line.readline().strip()
+            self.options["layout"].append({"order":counter, "layout":temp})
         else:
             break
-        counter+=1
         line = content.readline()
 
     while line:
@@ -86,12 +110,13 @@ def readVTT(self, content: str | io.IOBase, lang: str = 'en', **kwargs):
                 line = line.readline().strip()
         else:
             pass
-            
         line = content.readline()
+
 
 def saveVTT(self, filename: str, languages: [str] = [], **kwargs):
     pass
-    
+
+
 class WebVTT(CaptionsFormat):
     """
     Web Video Text Tracks
@@ -104,10 +129,11 @@ class WebVTT(CaptionsFormat):
     with WebVTT("path/to/file.vtt") as vtt:
         vtt.saveSRT("file")
     """
+    EXTENSION = EXTENSION
     detect = staticmethod(detectVTT)
     _read = readVTT
-    save = saveVTT
-   
+    _save = saveVTT
+
     from .sami import saveSAMI
     from .srt import saveSRT
     from .sub import saveSUB
