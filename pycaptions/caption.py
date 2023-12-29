@@ -6,8 +6,6 @@ import os
 from collections import defaultdict
 from langcodes import standardize_tag, tag_is_valid
 
-EXTENSION = None
-
 
 class BlockType:
     CAPTION = 1
@@ -15,6 +13,14 @@ class BlockType:
     STYLE = 3
     LAYOUT = 4
     METADATA = 5
+
+
+class FileExtensions:
+    SAMI = ".sami"
+    SRT = ".srt"
+    SUB = ".sub"
+    TTML = ".ttml"
+    VTT = ".vtt"
 
 
 class Block:
@@ -35,7 +41,7 @@ class Block:
     def __setitem__(self, index: str, value: str):
         self.languages[index] = value
 
-    def getLines(self, lang: str, lines: int) -> list[str]:
+    def getLines(self, lang: str = "und", lines: int = 0) -> list[str]:
         text = self.get(lang)
         if lang == "ja":
             parser = budoux.load_default_japanese_parser()
@@ -52,7 +58,7 @@ class Block:
     def get(self, lang: str) -> str:
         return self.languages.get(lang)
 
-    def append(self, text: str, lang: str):
+    def append(self, text: str, lang: str = "und"):
         if not self.default_language:
             self.default_language = lang
         if lang not in ["ja", "zh", "zh-CN", "zh-SG", "zh-Hans",
@@ -120,10 +126,7 @@ class Block:
 
 
 class CaptionsFormat:
-    EXTENSION = EXTENSION
-
-    def getExtension(self):
-        return self.EXTENSION
+    extensions = FileExtensions()
 
     def __init__(self, filename: str = None, default_language: str = "und", **options):
         self.filename = filename
@@ -168,33 +171,30 @@ class CaptionsFormat:
     def detect(self, file: str | io.IOBase = None):
         raise ValueError("Not implemented")
 
-    def _read(self, content: str | io.IOBase, languages: list[str], **kwargs):
+    def read(self, content: str | io.IOBase, languages: list[str], **kwargs):
         raise ValueError("Not implemented")
 
-    def read(self, content: str | io.IOBase, languages: list[str] = None, **kwargs):
+    def checkContent(self, content: str | io.IOBase, languages: list[str] = None, **kwargs):
         if not isinstance(content, io.IOBase):
             if not not isinstance(content, str):
                 raise ValueError("The content is not a unicode string or I/O stream.")
             content = io.StringIO(content)
-        self._read(content, languages or [self.default_language], **kwargs)
+        return content
 
-    def _save(self, filename: str, lang: str = None, **kwargs):
+    def save(self, filename: str, languages: list[str], **kwargs):
         raise ValueError("Not implemented")
 
-    def save(self, filename: str, languages: list[str] = None, include_languages_in_filename: bool = True, **kwargs):
+    def makeFilename(self, filename: str, extension: str, languages: list[str] = None,
+                     include_languages_in_filename: bool = True, **kwargs):
         languages = languages or [self.default_language]
-        if filename.endswith(self.getExtension()):
+        if filename.endswith(extension):
             file, _ = os.path.splitext(filename)
         else:
             file = filename
         if include_languages_in_filename:
             file = ".".join((val for val in file.split('.') if val not in languages))+"."+".".join(languages)
-        try:
-            self._save(file+self.getExtension(), languages, **kwargs)
-        except IOError as e:
-            print(f"I/O error({e.errno}): {e.strerror}")
-        except Exception as e:
-            print(f"Error {e}")
+
+        return file+extension
 
     def __len__(self):
         return len(self._block_list)
@@ -211,7 +211,7 @@ class CaptionsFormat:
                     try:
                         if tag_is_valid(standardize_tag(i, macro=True)):
                             languages.append(i)
-                    except:
+                    except Exception:
                         continue
                 if languages:
                     self.setDefaultLanguage(languages[0])
@@ -221,7 +221,7 @@ class CaptionsFormat:
                 languages = [self.default_language]
             with open(self.filename, "r", encoding="UTF-8") as stream:
                 if self.detect(stream):
-                    self._read(stream, languages)
+                    self.read(stream, languages)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):

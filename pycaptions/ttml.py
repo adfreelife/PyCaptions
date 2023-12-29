@@ -33,10 +33,19 @@ def detectTTML(content: str | io.IOBase) -> bool:
 
 
 def readTTML(self, content: str | io.IOBase, languages: list[str], **kwargs):
+    content = self.checkContent(content=content, languages=languages, **kwargs)
     raise ValueError("Not Implemented")
 
 
 def saveTTML(self, filename: str, languages: list[str], **kwargs):
+    filename = self.makeFilename(filename=filename, extension=self.extensions.TTML,
+                                 languages=languages, **kwargs)
+    try:
+        pass
+    except IOError as e:
+        print(f"I/O error({e.errno}): {e.strerror}")
+    except Exception as e:
+        print(f"Error {e}")
     raise ValueError("Not Implemented")
 
 

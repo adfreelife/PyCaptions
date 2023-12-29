@@ -14,25 +14,13 @@ class Captions(CaptionsFormat):
         captions.saveSRT("file")
     """
     def __init__(self, filename: str = None, default_language: str = "und", **options):
-        self.fileFormat = "srt"
         super().__init__(filename, default_language, **options)
 
-    from .sami import detectSAMI, saveSAMI, readSAMI, EXTENSION as sami_extension
-    from .srt import detectSRT, saveSRT, readSRT, EXTENSION as srt_extension
-    from .sub import detectSUB, saveSUB, readSUB, EXTENSION as sub_extension
-    from .ttml import detectTTML, saveTTML, readTTML, EXTENSION as ttml_extension
-    from .vtt import detectVTT, saveVTT, readVTT, EXTENSION as vtt_extension
-
-    extensions = {
-        "sami": sami_extension,
-        "srt": srt_extension,
-        "sub": sub_extension,
-        "ttml": ttml_extension,
-        "vtt": vtt_extension
-    }
-
-    def getExtension(self):
-        return self.extensions[self.fileFormat]
+    from .sami import detectSAMI, saveSAMI, readSAMI
+    from .srt import detectSRT, saveSRT, readSRT
+    from .sub import detectSUB, saveSUB, readSUB
+    from .ttml import detectTTML, saveTTML, readTTML
+    from .vtt import detectVTT, saveVTT, readVTT
 
     readers = {
         "sami": readSAMI,
@@ -68,19 +56,14 @@ class Captions(CaptionsFormat):
             return False
         return True
 
-    def _read(self, content: str | io.IOBase, languages: list[str], **kwargs):
-        self.readers[self.fileFormat](self, content, languages, **kwargs)
-
     def read(self, content: str | io.IOBase, languages: list[str] = None, **kwargs):
         format = self.get_format(content)
         if not format:
             return
         self.readers[format](self, content, languages, **kwargs)
 
-    def _save(self, filename: str, languages: list[str], output_format: str = "srt", **kwargs):
-        self.savers[output_format](self, filename, languages, **kwargs)
-
-    def save(self, filename: str, languages: list[str] = None, output_format: str = "srt",
-             include_languages_in_filename: bool = True, **kwargs):
-        return super().save(filename=filename, languages=languages, output_format=output_format,
-                            include_languages_in_filename=include_languages_in_filename, **kwargs)
+    def save(self, filename: str, languages: list[str] = None, output_format: str = None, **kwargs):
+        output_format = output_format or self.fileFormat
+        if output_format not in self.savers:
+            raise ValueError("Incorect output format")
+        self.savers[output_format](filename=filename, languages=languages, **kwargs)

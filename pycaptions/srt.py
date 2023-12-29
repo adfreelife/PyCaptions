@@ -27,6 +27,7 @@ def detectSRT(content: str | io.IOBase) -> bool:
 
 
 def readSRT(self, content: str | io.IOBase, languages: list[str], **kwargs):
+    content = self.checkContent(content=content, languages=languages, **kwargs)
     content.readline()
     start, end = content.readline().split("-->")
     start = _convertFromSRTTime(start)
@@ -71,17 +72,24 @@ def _convertToSRTTime(time: int) -> str:
 
 
 def saveSRT(self, filename: str, languages: list[str], **kwargs):
-    with open(filename, "w", encoding="UTF-8") as file:
-        index = 1
-        for data in self:
-            print(data.block_type)
-            if data.block_type != BlockType.CAPTION:
-                continue
-            file.write(f"{index}\n")
-            file.write(f"{_convertToSRTTime(data.start_time)} --> {_convertToSRTTime(data.end_time)}\n")
-            file.write("\n".join(data.get(i) for i in languages))
-            file.write("\n")
-            index += 1
+    filename = self.makeFilename(filename=filename, extension=self.extensions.SRT,
+                                 languages=languages, **kwargs)
+    try:
+        with open(filename, "w", encoding="UTF-8") as file:
+            index = 1
+            for i, data in enumerate(self):
+                if data.block_type != BlockType.CAPTION:
+                    continue
+                file.write(f"{index}\n")
+                file.write(f"{_convertToSRTTime(data.start_time)} --> {_convertToSRTTime(data.end_time)}\n")
+                file.write("\n".join(data.get(i) for i in languages))
+                if i != len(self)-1:
+                    file.write("\n\n")
+                index += 1
+    except IOError as e:
+        print(f"I/O error({e.errno}): {e.strerror}")
+    except Exception as e:
+        print(f"Error {e}")
 
 
 class SubRip(CaptionsFormat):
@@ -97,8 +105,8 @@ class SubRip(CaptionsFormat):
     """
     EXTENSION = EXTENSION
     detect = staticmethod(detectSRT)
-    _read = readSRT
-    _save = saveSRT
+    read = readSRT
+    save = saveSRT
 
     from .sami import saveSAMI
     from .sub import saveSUB

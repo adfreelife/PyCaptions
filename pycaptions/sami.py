@@ -1,4 +1,5 @@
 import io
+from io import IOBase
 import os
 from .caption import CaptionsFormat, Block
 from bs4 import BeautifulSoup
@@ -28,10 +29,19 @@ def detectSAMI(content: str | io.IOBase) -> bool:
 
 
 def readSAMI(self, content: str | io.IOBase, languages: list[str], **kwargs):
+    content = self.checkContent(content=content, languages=languages, **kwargs)
     raise ValueError("Not Implemented")
 
 
 def saveSAMI(self, filename: str, languages: list[str], **kwargs):
+    filename = self.makeFilename(filename=filename, extension=self.extensions.SAMI,
+                                 languages=languages, **kwargs)
+    try:
+        pass
+    except IOError as e:
+        print(f"I/O error({e.errno}): {e.strerror}")
+    except Exception as e:
+        print(f"Error {e}")
     raise ValueError("Not Implemented")
 
 
@@ -46,10 +56,10 @@ class SAMI(CaptionsFormat):
     with SAMI("path/to/file.sami") as sami:
         sami.saveSRT("file")
     """
-    EXTENSION = EXTENSION
     detect = staticmethod(detectSAMI)
-    _read = readSAMI
-    _save = saveSAMI
+
+    read = readSAMI
+    save = saveSAMI
 
     from .srt import saveSRT
     from .sub import saveSUB
