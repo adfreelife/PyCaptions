@@ -26,13 +26,13 @@ def detectSRT(content: str | io.IOBase) -> bool:
     return False
 
 
-def readSRT(self, content: str | io.IOBase, lang: list[str] = None, **kwargs):
+def readSRT(self, content: str | io.IOBase, languages: list[str], **kwargs):
     content.readline()
     start, end = content.readline().split("-->")
     start = _convertFromSRTTime(start)
     end = _convertFromSRTTime(end)
     line = content.readline()
-    caption = Block(BlockType.CAPTION, lang[0], start, end, line)
+    caption = Block(BlockType.CAPTION, languages[0], start, end, line)
     counter = 1
     while line:
         if not line.strip():
@@ -43,13 +43,13 @@ def readSRT(self, content: str | io.IOBase, lang: list[str] = None, **kwargs):
             start = _convertFromSRTTime(start)
             end = _convertFromSRTTime(end)
             line = content.readline()
-            caption = Block(BlockType.CAPTION, lang[0], start, end, line)
+            caption = Block(BlockType.CAPTION, languages[0], start, end, line)
         else:
-            if len(lang) > 1:
-                caption.append(line, lang[counter])
+            if len(languages) > 1:
+                caption.append(line, languages[counter])
                 counter += 1
             else:
-                caption.append(line, lang[0])
+                caption.append(line, languages[0])
         line = content.readline()
     self.append(caption)
 
@@ -67,13 +67,14 @@ def _convertToSRTTime(time: int) -> str:
     minutes, reminder = divmod(reminder, 60_000_000)
     seconds, miliseconds = divmod(reminder, 1_000_000)
     miliseconds = int(miliseconds/1_000)
-    return f"{hours}:{minutes}:{seconds},{miliseconds}"
+    return f"{hours:02}:{minutes:02}:{seconds:02},{miliseconds:03}"
 
 
-def saveSRT(self, filename: str, languages: [str] = [], **kwargs):
+def saveSRT(self, filename: str, languages: list[str], **kwargs):
     with open(filename, "w", encoding="UTF-8") as file:
         index = 1
-        for data in self.caption_list:
+        for data in self:
+            print(data.block_type)
             if data.block_type != BlockType.CAPTION:
                 continue
             file.write(f"{index}\n")

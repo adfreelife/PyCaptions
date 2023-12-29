@@ -28,7 +28,7 @@ def detectVTT(content: str | io.IOBase) -> bool:
     return False
 
 
-def readVTT(self, content: str | io.IOBase, lang: str = 'en', **kwargs):
+def readVTT(self, content: str | io.IOBase, languages: list[str], **kwargs):
     global STYLE_PATERN
     if not isinstance(content, io.IOBase):
         if not isinstance(content, str):
@@ -38,7 +38,7 @@ def readVTT(self, content: str | io.IOBase, lang: str = 'en', **kwargs):
     content.readline()
     line = content.readline().strip()
     self.options["blocks"] = []
-    metadata = Block(BlockType.METADATA, lang)
+    metadata = Block(BlockType.METADATA, languages[0])
     while line:
         line = line.split(": ",1)
         metadata.options[line[0]] = line[1]
@@ -113,7 +113,7 @@ def readVTT(self, content: str | io.IOBase, lang: str = 'en', **kwargs):
         line = content.readline()
 
 
-def saveVTT(self, filename: str, languages: [str] = [], **kwargs):
+def saveVTT(self, filename: str, languages: list[str], **kwargs):
     pass
 
 

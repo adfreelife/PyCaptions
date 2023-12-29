@@ -27,16 +27,12 @@ def detectSUB(content: str | io.IOBase) -> bool:
     return False
 
 
-def readSUB(self, content: str | io.IOBase, lang: str = 'en', **kwargs):
+def readSUB(self, content: str | io.IOBase, languages: list[str] = [], **kwargs):
     frame_rate = kwargs.get("frame_rate") or 25
-    if not isinstance(content, io.IOBase):
-        if not isinstance(content, str):
-            raise ValueError("The content is not a unicode string or I/O stream.")
-        content = io.StringIO(content)
     raise ValueError("Not Implemented")
 
 
-def saveSUB(self, filename: str, languages: [str] = [], **kwargs):
+def saveSUB(self, filename: str, languages: list[str] = [], **kwargs):
     raise ValueError("Not Implemented")
 
 

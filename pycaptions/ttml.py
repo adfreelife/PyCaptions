@@ -32,11 +32,11 @@ def detectTTML(content: str | io.IOBase) -> bool:
     return False
 
 
-def readTTML(self, content: str | io.IOBase, lang: str = 'en', **kwargs):
+def readTTML(self, content: str | io.IOBase, languages: list[str], **kwargs):
     raise ValueError("Not Implemented")
 
 
-def saveTTML(self, filename: str, languages: [str] = [], **kwargs):
+def saveTTML(self, filename: str, languages: list[str], **kwargs):
     raise ValueError("Not Implemented")
 
 

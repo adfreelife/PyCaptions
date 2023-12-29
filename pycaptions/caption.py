@@ -168,21 +168,21 @@ class CaptionsFormat:
     def detect(self, file: str | io.IOBase = None):
         raise ValueError("Not implemented")
 
-    def _read(self, content: str | io.IOBase, lang: str = None, **kwargs):
+    def _read(self, content: str | io.IOBase, languages: list[str], **kwargs):
         raise ValueError("Not implemented")
 
-    def read(self, content: str | io.IOBase, lang: str = None, **kwargs):
+    def read(self, content: str | io.IOBase, languages: list[str] = None, **kwargs):
         if not isinstance(content, io.IOBase):
             if not not isinstance(content, str):
                 raise ValueError("The content is not a unicode string or I/O stream.")
             content = io.StringIO(content)
-        self._read(content, lang, **kwargs)
+        self._read(content, languages or [self.default_language], **kwargs)
 
     def _save(self, filename: str, lang: str = None, **kwargs):
         raise ValueError("Not implemented")
 
-    def save(self, filename: str, lang: str = None, include_languages_in_filename: bool = True, **kwargs):
-        languages = lang or [self.default_language]
+    def save(self, filename: str, languages: list[str] = None, include_languages_in_filename: bool = True, **kwargs):
+        languages = languages or [self.default_language]
         if filename.endswith(self.getExtension()):
             file, _ = os.path.splitext(filename)
         else:
@@ -201,15 +201,27 @@ class CaptionsFormat:
 
     def __enter__(self):
         filename, ext = os.path.splitext(self.filename)
-        filename, lang = os.path.splitext(filename)
-        if lang:
-            self.setDefaultLanguage(lang[1:])
         if ext == ".json":
             self.fromJson(self.filename)
         else:
+            filename = filename.split(".")
+            if len(filename) > 1:
+                languages = []
+                for i in filename:
+                    try:
+                        if tag_is_valid(standardize_tag(i, macro=True)):
+                            languages.append(i)
+                    except:
+                        continue
+                if languages:
+                    self.setDefaultLanguage(languages[0])
+                else:
+                    languages = [self.default_language]
+            else:
+                languages = [self.default_language]
             with open(self.filename, "r", encoding="UTF-8") as stream:
                 if self.detect(stream):
-                    self._read(stream)
+                    self._read(stream, languages)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):

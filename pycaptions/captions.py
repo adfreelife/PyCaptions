@@ -68,19 +68,19 @@ class Captions(CaptionsFormat):
             return False
         return True
 
-    def _read(self, content: str | io.IOBase, lang: str = None, **kwargs):
-        self.readers[self.fileFormat](self, content, lang, **kwargs)
+    def _read(self, content: str | io.IOBase, languages: list[str], **kwargs):
+        self.readers[self.fileFormat](self, content, languages, **kwargs)
 
-    def read(self, content: str | io.IOBase, lang: str = None, **kwargs):
+    def read(self, content: str | io.IOBase, languages: list[str] = None, **kwargs):
         format = self.get_format(content)
         if not format:
             return
-        self.readers[format](self, content, lang, **kwargs)
+        self.readers[format](self, content, languages, **kwargs)
 
-    def _save(self, filename: str, output_format: str = "srt", lang: str = None, **kwargs):
-        self.savers[output_format](self, filename, lang, **kwargs)
+    def _save(self, filename: str, languages: list[str], output_format: str = "srt", **kwargs):
+        self.savers[output_format](self, filename, languages, **kwargs)
 
-    def save(self, filename: str, output_format: str = "srt", lang: str = None,
+    def save(self, filename: str, languages: list[str] = None, output_format: str = "srt",
              include_languages_in_filename: bool = True, **kwargs):
-        return super().save(filename=filename, lang=lang, output_format=output_format,
+        return super().save(filename=filename, languages=languages, output_format=output_format,
                             include_languages_in_filename=include_languages_in_filename, **kwargs)

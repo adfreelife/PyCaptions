@@ -27,11 +27,11 @@ def detectSAMI(content: str | io.IOBase) -> bool:
     return False
 
 
-def readSAMI(self, content: str | io.IOBase, languages: str = 'en', **kwargs):
+def readSAMI(self, content: str | io.IOBase, languages: list[str], **kwargs):
     raise ValueError("Not Implemented")
 
 
-def saveSAMI(self, filename: str, languages: [str] = [], **kwargs):
+def saveSAMI(self, filename: str, languages: list[str], **kwargs):
     raise ValueError("Not Implemented")
 
 
