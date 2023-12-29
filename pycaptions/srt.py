@@ -77,14 +77,15 @@ def saveSRT(self, filename: str, languages: list[str], **kwargs):
     try:
         with open(filename, "w", encoding="UTF-8") as file:
             index = 1
-            for i, data in enumerate(self):
+            for data in self:
                 if data.block_type != BlockType.CAPTION:
                     continue
+                elif index != 1:
+                    file.write("\n\n")
                 file.write(f"{index}\n")
                 file.write(f"{_convertToSRTTime(data.start_time)} --> {_convertToSRTTime(data.end_time)}\n")
                 file.write("\n".join(data.get(i) for i in languages))
-                if i != len(self)-1:
-                    file.write("\n\n")
+               
                 index += 1
     except IOError as e:
         print(f"I/O error({e.errno}): {e.strerror}")

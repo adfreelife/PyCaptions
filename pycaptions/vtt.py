@@ -123,6 +123,8 @@ def readVTT(self, content: str | io.IOBase, languages: list[str], **kwargs):
             caption.options["style"] = styling
             counter = 1
             line = content.readline().strip()
+            if line.startswith("{"):
+                caption.block_type = BlockType.METADATA
             while line:
                 if len(languages) > 1:
                     caption.append(line, languages[counter])

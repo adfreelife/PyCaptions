@@ -63,7 +63,10 @@ class Block:
             self.default_language = lang
         if lang not in ["ja", "zh", "zh-CN", "zh-SG", "zh-Hans",
                         "zh-HK", "zh-MO", "zh-TW", "zh-Hant"]:
-            self.languages[lang] += " " + text.strip()
+            if self.languages[lang]:
+                self.languages[lang] += " " + text.strip()
+            else:
+                self.languages[lang] = text.strip()
         else:
             self.languages[lang] += text
 
