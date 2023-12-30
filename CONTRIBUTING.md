@@ -4,7 +4,7 @@ Thank you for considering contributing! To maintain a clean and consistent code,
 ## Code style
 The code should be [PEP8](https://peps.python.org/pep-0008/) complient code.
 
-Exception is E501, line length can be up to 110 characters long for a single line, if it's more follow the standard of 79 characters.
+Exception is E501, line length can be up to 110 characters long for a single line, if it's more follow the standard of 79 characters. Completly ignore this exception for docstrings.
 
 For redability purposes multiline if statements should be written as follows:
 - line breaks should only be before logical operators (and, or, not)

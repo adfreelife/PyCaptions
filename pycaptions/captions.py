@@ -41,13 +41,13 @@ class Captions(CaptionsFormat):
     def get_format(self, file: str | io.IOBase) -> str | None:
         if self.detectSAMI(file):
             self.fileFormat = "sami"
-        if self.detectSRT(file):
+        elif self.detectSRT(file):
             self.fileFormat = "srt"
-        if self.detectSUB(file):
+        elif self.detectSUB(file):
             self.fileFormat = "sub"
-        if self.detectTTML(file):
+        elif self.detectTTML(file):
             self.fileFormat = "ttml"
-        if self.detectVTT(file):
+        elif self.detectVTT(file):
             self.fileFormat = "vtt"
         return self.fileFormat
 
@@ -66,4 +66,4 @@ class Captions(CaptionsFormat):
         output_format = output_format or self.fileFormat
         if output_format not in self.savers:
             raise ValueError("Incorect output format")
-        self.savers[output_format](filename=filename, languages=languages, **kwargs)
+        self.savers[output_format](self,filename=filename, languages=languages, **kwargs)

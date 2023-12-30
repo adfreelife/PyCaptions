@@ -32,14 +32,17 @@ def detectTTML(content: str | io.IOBase) -> bool:
 
 def readTTML(self, content: str | io.IOBase, languages: list[str], **kwargs):
     content = self.checkContent(content=content, languages=languages, **kwargs)
+    time_offset = kwargs.get("time_offset") or 0
     raise ValueError("Not Implemented")
 
 
 def saveTTML(self, filename: str, languages: list[str], **kwargs):
     filename = self.makeFilename(filename=filename, extension=self.extensions.TTML,
                                  languages=languages, **kwargs)
+    encoding = kwargs.get("file_encoding") or "UTF-8"
     try:
-        pass
+        with open(filename, "w", encoding=encoding) as file:
+            pass
     except IOError as e:
         print(f"I/O error({e.errno}): {e.strerror}")
     except Exception as e:

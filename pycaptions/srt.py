@@ -26,35 +26,25 @@ def detectSRT(content: str | io.IOBase) -> bool:
 
 def readSRT(self, content: str | io.IOBase, languages: list[str], **kwargs):
     content = self.checkContent(content=content, languages=languages, **kwargs)
-    content.readline()
-    start, end = content.readline().split("-->")
-    start = _convertFromSRTTime(start)
-    end = _convertFromSRTTime(end)
-    line = content.readline()
-    caption = Block(BlockType.CAPTION, languages[0], start, end, line)
+    time_offset = kwargs.get("time_offset") or 0
+    
     counter = 1
+    line = content.readline()
     while line:
-        if not line.strip():
-            counter = 1
-            self.append(caption)
-            content.readline()
-            start, end = content.readline().split(" --> ", 1)
-            end = end.split(" ", 1)
-            if len(end) > 1:
-                caption.options["style"] = end[1]
-            end = end[0]
-            start = _convertFromSRTTime(start)
-            end = _convertFromSRTTime(end)
-            line = content.readline()
-            caption = Block(BlockType.CAPTION, languages[0], start, end, line)
-        else:
+        start, end = content.readline().split(" --> ")
+        caption = Block(BlockType.CAPTION, languages[0], _convertFromSRTTime(start),
+                        _convertFromSRTTime(end), content.readline().strip())
+        line = content.readline().strip()
+        while line:
             if len(languages) > 1:
                 caption.append(line, languages[counter])
                 counter += 1
             else:
                 caption.append(line, languages[0])
+            line = content.readline().strip()
+        caption.shift_time(time_offset)
+        self.append(caption)
         line = content.readline()
-    self.append(caption)
 
 
 def _convertFromSRTTime(time: str) -> int:
@@ -75,8 +65,9 @@ def _convertToSRTTime(time: int) -> str:
 def saveSRT(self, filename: str, languages: list[str], **kwargs):
     filename = self.makeFilename(filename=filename, extension=self.extensions.SRT,
                                  languages=languages, **kwargs)
+    encoding = kwargs.get("file_encoding") or "UTF-8"
     try:
-        with open(filename, "w", encoding="UTF-8") as file:
+        with open(filename, "w", encoding=encoding) as file:
             index = 1
             for data in self:
                 if data.block_type != BlockType.CAPTION:

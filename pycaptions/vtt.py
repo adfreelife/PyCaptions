@@ -29,9 +29,10 @@ def detectVTT(content: str | io.IOBase) -> bool:
 
 def readVTT(self, content: str | io.IOBase, languages: list[str], **kwargs):
     content = self.checkContent(content=content, languages=languages, **kwargs)
-    global STYLE_PATERN
+    time_offset = kwargs.get("time_offset") or 0
 
-    self.options["blocks"] = []
+    if not self.options.get("blocks"):
+        self.options["blocks"] = []
     metadata = Block(BlockType.METADATA)
     content.readline()
     line = content.readline().strip()
@@ -41,10 +42,14 @@ def readVTT(self, content: str | io.IOBase, languages: list[str], **kwargs):
         line = content.readline().strip()
     self.options["blocks"].append(metadata)
 
-    self.options["style"] = dict()
-    self.options["style"]["identifier_to_original"] = dict()
-    self.options["style"]["identifier_to_new"] = dict()
-    self.options["style"]["style_id_counter"] = 0
+    if not self.options.get("style"):
+        self.options["style"] = dict()
+    if not self.options["style"].get("identifier_to_original"):
+        self.options["style"]["identifier_to_original"] = dict()
+    if not self.options["style"].get("identifier_to_new"):
+        self.options["style"]["identifier_to_new"] = dict()
+    if not self.options["style"].get("style_id_counter"):
+        self.options["style"]["style_id_counter"] = 0
 
     line = content.readline()
     while line:
@@ -128,6 +133,7 @@ def readVTT(self, content: str | io.IOBase, languages: list[str], **kwargs):
                 else:
                     caption.append(line, languages[0])
                 line = content.readline().strip()
+            caption.shift_time(time_offset)
             self.append(caption)
         line = content.readline()
 
@@ -148,8 +154,10 @@ def _convertToVTTTime(time: int) -> str:
 def saveVTT(self, filename: str, languages: list[str], **kwargs):
     filename = self.makeFilename(filename=filename, extension=self.extensions.VTT,
                                  languages=languages, **kwargs)
+    encoding = kwargs.get("file_encoding") or "UTF-8"
     try:
-        pass
+        with open(filename, "w", encoding=encoding) as file:
+            pass
     except IOError as e:
         print(f"I/O error({e.errno}): {e.strerror}")
     except Exception as e:

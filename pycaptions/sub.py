@@ -1,6 +1,5 @@
 import io
 import re
-import os
 from .caption import CaptionsFormat, Block, BlockType
 
 PATTERN = r"\{.*?\}"
@@ -30,9 +29,15 @@ def detectSUB(content: str | io.IOBase) -> bool:
 
 def readSUB(self, content: str | io.IOBase, languages: list[str] = [], **kwargs):
     content = self.checkContent(content=content, languages=languages, **kwargs)
+    time_offset = kwargs.get("time_offset") or 0
+
     if not self.options.get("frame_rate"):
         self.options["frame_rate"] = kwargs.get("frame_rate") or 25
     frame_rate = kwargs.get("frame_rate") or self.options.get("frame_rate")
+
+    if not self.options.get("blocks"):
+        self.options["blocks"] = []
+
     line = content.readline().strip()
     while line:
         if line.startswith(r"{DEFAULT}"):
@@ -40,14 +45,16 @@ def readSUB(self, content: str | io.IOBase, languages: list[str] = [], **kwargs)
         else:
             lines = line.split("|")
             params = re.findall(PATTERN, lines[0])
-            start = _convertFromSUBTime(params[0].strip("{}"),frame_rate)
-            end = _convertFromSUBTime(params[1].strip("{}"),frame_rate)
-            caption = Block(BlockType.CAPTION, start_time=start, end_time=end, style = [p.strip("{}") for p in params[2:]])
+            start = _convertFromSUBTime(params[0].strip("{}"), frame_rate)
+            end = _convertFromSUBTime(params[1].strip("{}"), frame_rate)
+            caption = Block(BlockType.CAPTION, start_time=start, end_time=end,
+                            style=[p.strip("{}") for p in params[2:]])
             for counter, line in enumerate(lines):
                 if len(languages) > 1:
                     caption.append(re.sub(PATTERN, "", line), languages[counter])
                 else:
                     caption.append(re.sub(PATTERN, "", line), languages[0])
+            caption.shift_time(time_offset)
             self.append(caption)
         line = content.readline().strip()
 
@@ -64,8 +71,10 @@ def saveSUB(self, filename: str, languages: list[str] = [], **kwargs):
     filename = self.makeFilename(filename=filename, extension=self.extensions.SUB,
                                  languages=languages, **kwargs)
     frame_rate = kwargs.get("frame_rate") or self.options.get("frame_rate") or 25
+    encoding = kwargs.get("file_encoding") or "UTF-8"
     try:
-        pass
+        with open(filename, "w", encoding=encoding) as file:
+            pass
     except IOError as e:
         print(f"I/O error({e.errno}): {e.strerror}")
     except Exception as e:
