@@ -329,15 +329,16 @@ class CaptionsFormat:
 
     def fromJson(self, file: str):
         try:
+            if not file.endswith(".json"):
+                file+=".json"
             with open(file, "r", encoding="UTF-8") as f:
                 data = json.load(f)
                 self.default_language = data["default_language"]
                 self.filename = data["filename"]
                 for key, value in data["extensions"].items():
                     setattr(FileExtensions, key, value)
-                self.options = data["options"]
-                for key, caption in data["block_list"].items():
-                    self.block_list = [Block(**item) for item in caption]
+                self.options = data["options"]   
+                self._block_list = [Block(**caption) for caption in data["block_list"]]
         except IOError as e:
             print(f"I/O error({e.errno}): {e.strerror}")
         except Exception as e:
@@ -351,7 +352,7 @@ class CaptionsFormat:
                 json.dump({
                     "default_language": self.default_language,
                     "filename": self.filename,
-                    "extensions": json.dumps(self.extensions, default=vars),
+                    "extensions": vars(self.extensions),
                     "options": self.options,
                     "block_list": self._block_list
                            }, f, default=vars)

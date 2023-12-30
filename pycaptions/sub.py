@@ -42,7 +42,6 @@ def readSUB(self, content: str | io.IOBase, languages: list[str] = [], **kwargs)
             params = re.findall(PATTERN, lines[0])
             start = _convertFromSUBTime(params[0].strip("{}"),frame_rate)
             end = _convertFromSUBTime(params[1].strip("{}"),frame_rate)
-            print(start,end)
             caption = Block(BlockType.CAPTION, start_time=start, end_time=end, style = [p.strip("{}") for p in params[2:]])
             for counter, line in enumerate(lines):
                 if len(languages) > 1:
