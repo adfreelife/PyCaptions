@@ -29,6 +29,7 @@ def detectSUB(content: str | io.IOBase) -> bool:
 
 def readSUB(self, content: str | io.IOBase, languages: list[str] = [], **kwargs):
     content = self.checkContent(content=content, languages=languages, **kwargs)
+    languages = languages or [self.default_language]
     time_offset = kwargs.get("time_offset") or 0
 
     if not self.options.get("frame_rate"):
@@ -70,6 +71,7 @@ def _convertToSUBTime(time: int, frame_rate: int):
 def saveSUB(self, filename: str, languages: list[str] = [], **kwargs):
     filename = self.makeFilename(filename=filename, extension=self.extensions.SUB,
                                  languages=languages, **kwargs)
+    languages = languages or [self.default_language]
     frame_rate = kwargs.get("frame_rate") or self.options.get("frame_rate") or 25
     encoding = kwargs.get("file_encoding") or "UTF-8"
     try:

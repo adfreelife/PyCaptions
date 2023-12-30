@@ -85,3 +85,10 @@ with Captions("tests/test.en.srt") as captions:
     # first line will be in english, second one in spanish
     captions.save("test", ["en","es"]) 
 ```
+
+### Combine files
+```python
+with Captions("tests/test.en.srt") as captions:
+    captions.joinFile("tests/test.en.srt", add_end_time=True)
+    captions.save("test")
+```

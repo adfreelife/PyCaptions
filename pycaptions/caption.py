@@ -73,7 +73,7 @@ class Block:
         self.start_time = start_time
         self.end_time = end_time
         self.options = options or {}
-    
+
     def __getitem__(self, index: str):
         return self.languages[index]
 
