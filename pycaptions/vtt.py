@@ -3,7 +3,6 @@ import re
 from .caption import CaptionsFormat, Block, BlockType
 from cssutils import CSSParser
 
-EXTENSION = ".vtt"
 STYLE_PATERN = re.compile(r"::cue\((#[^)]+)\)")
 
 
@@ -143,7 +142,7 @@ def _convertToVTTTime(time: int) -> str:
     minutes, reminder = divmod(reminder, 60_000_000)
     seconds, miliseconds = divmod(reminder, 1_000_000)
     miliseconds = int(miliseconds/1_000)
-    return f"{hours:02}:{minutes:02}:{seconds:02}.{miliseconds:03}"
+    return f"{int(hours):02}:{int(minutes):02}:{int(seconds):02}.{int(miliseconds):03}"
 
 
 def saveVTT(self, filename: str, languages: list[str], **kwargs):
@@ -170,7 +169,6 @@ class WebVTT(CaptionsFormat):
     with WebVTT("path/to/file.vtt") as vtt:
         vtt.saveSRT("file")
     """
-    EXTENSION = EXTENSION
     detect = staticmethod(detectVTT)
     _read = readVTT
     _save = saveVTT

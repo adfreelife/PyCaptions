@@ -3,8 +3,6 @@ import os
 from .caption import CaptionsFormat, Block
 from bs4 import BeautifulSoup
 
-EXTENSION = ".ttml"
-
 
 @staticmethod
 def detectTTML(content: str | io.IOBase) -> bool:
@@ -60,7 +58,6 @@ class TTML(CaptionsFormat):
     with TTML("path/to/file.ttml") as ttml:
         ttml.saveSRT("file")
     """
-    EXTENSION = EXTENSION
     detect = staticmethod(detectTTML)
     _read = readTTML
     _save = saveTTML

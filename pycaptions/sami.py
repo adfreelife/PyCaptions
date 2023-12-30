@@ -4,8 +4,6 @@ import os
 from .caption import CaptionsFormat, Block
 from bs4 import BeautifulSoup
 
-EXTENSION = ".sami"
-
 
 @staticmethod
 def detectSAMI(content: str | io.IOBase) -> bool:
@@ -57,7 +55,6 @@ class SAMI(CaptionsFormat):
         sami.saveSRT("file")
     """
     detect = staticmethod(detectSAMI)
-
     read = readSAMI
     save = saveSAMI
 

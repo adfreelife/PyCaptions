@@ -1,9 +1,9 @@
 import io
 import re
 import os
-from .caption import CaptionsFormat, Block
+from .caption import CaptionsFormat, Block, BlockType
 
-EXTENSION = ".sub"
+PATTERN = r"\{.*?\}"
 
 
 @staticmethod
@@ -20,7 +20,8 @@ def detectSUB(content: str | io.IOBase) -> bool:
         content = io.StringIO(content)
 
     offset = content.tell()
-    if re.match(r"^{\d+}{\d+}", content.readline()):
+    line = content.readline()
+    if re.match(r"^{\d+}{\d+}", line) or line.startswith(r"{DEFAULT}"):
         content.seek(offset)
         return True
     content.seek(offset)
@@ -29,13 +30,41 @@ def detectSUB(content: str | io.IOBase) -> bool:
 
 def readSUB(self, content: str | io.IOBase, languages: list[str] = [], **kwargs):
     content = self.checkContent(content=content, languages=languages, **kwargs)
-    frame_rate = kwargs.get("frame_rate") or 25
-    raise ValueError("Not Implemented")
+    if not self.options.get("frame_rate"):
+        self.options["frame_rate"] = kwargs.get("frame_rate") or 25
+    frame_rate = kwargs.get("frame_rate") or self.options.get("frame_rate")
+    line = content.readline().strip()
+    while line:
+        if line.startswith(r"{DEFAULT}"):
+            self.options["blocks"].append(Block(BlockType.STYLE, style=line))
+        else:
+            lines = line.split("|")
+            params = re.findall(PATTERN, lines[0])
+            start = _convertFromSUBTime(params[0].strip("{}"),frame_rate)
+            end = _convertFromSUBTime(params[1].strip("{}"),frame_rate)
+            print(start,end)
+            caption = Block(BlockType.CAPTION, start_time=start, end_time=end, style = [p.strip("{}") for p in params[2:]])
+            for counter, line in enumerate(lines):
+                if len(languages) > 1:
+                    caption.append(re.sub(PATTERN, "", line), languages[counter])
+                else:
+                    caption.append(re.sub(PATTERN, "", line), languages[0])
+            self.append(caption)
+        line = content.readline().strip()
+
+
+def _convertFromSUBTime(time: str, frame_rate: int):
+    return int(time) * 1_000_000 / frame_rate
+
+
+def _convertToSUBTime(time: int, frame_rate: int):
+    return int(time * frame_rate / 1_000_000)
 
 
 def saveSUB(self, filename: str, languages: list[str] = [], **kwargs):
     filename = self.makeFilename(filename=filename, extension=self.extensions.SUB,
                                  languages=languages, **kwargs)
+    frame_rate = kwargs.get("frame_rate") or self.options.get("frame_rate") or 25
     try:
         pass
     except IOError as e:
@@ -56,7 +85,6 @@ class MicroDVD(CaptionsFormat):
     with MicroDVD("path/to/file.sub") as sub:
         sub.saveSRT("file")
     """
-    EXTENSION = EXTENSION
     detect = staticmethod(detectSUB)
     _read = readSUB
     _save = saveSUB

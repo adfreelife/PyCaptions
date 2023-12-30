@@ -1,8 +1,6 @@
 import io
 from .caption import CaptionsFormat, Block, BlockType
 
-EXTENSION = ".srt"
-
 
 @staticmethod
 def detectSRT(content: str | io.IOBase) -> bool:
@@ -71,7 +69,7 @@ def _convertToSRTTime(time: int) -> str:
     minutes, reminder = divmod(reminder, 60_000_000)
     seconds, miliseconds = divmod(reminder, 1_000_000)
     miliseconds = int(miliseconds/1_000)
-    return f"{hours:02}:{minutes:02}:{seconds:02},{miliseconds:03}"
+    return f"{int(hours):02}:{int(minutes):02}:{int(seconds):02},{int(miliseconds):03}"
 
 
 def saveSRT(self, filename: str, languages: list[str], **kwargs):
@@ -106,7 +104,6 @@ class SubRip(CaptionsFormat):
     with SubRip("path/to/file.srt") as srt:
         srt.saveVTT("file")
     """
-    EXTENSION = EXTENSION
     detect = staticmethod(detectSRT)
     read = readSRT
     save = saveSRT

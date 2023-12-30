@@ -24,10 +24,45 @@ class FileExtensions:
 
 
 class Block:
+    """
+    Represents a block of content in a multimedia file or document.
+
+    Methods:
+        getLines: Format text of specific language into multiple lines
+        get: Get the text content of the block for a specific language.
+        append: Append text to the block for a specific language.
+        shift_time: Shift the start and end times of the block by a specified duration.
+        shift_start: Shift the start time of the block by a specified duration.
+        shif_end: Shift the end time of the block by a specified duration.
+        __getitem__: Retrieve the text of specific language.
+        __setitem__: Set the text of specific language.
+        __str__: Return a string representation of the block.
+        __iadd__: In-place addition for the Block.
+        __add__: Addition for the Blocks.
+        __isub__: In-place subtraction for a specific language.
+        __sub__: Subtraction for a specific language.
+        __iter__: Iterator for iterating through the block languages.
+        __next__: Iterator method returning a tuple of language and text.
+    """
     def __init__(self, block_type: int, lang: str = "und", start_time: int = 0,
                  end_time: int = 0, text: str = "", **options):
+        """
+        Initialize a new instance of the Block class.
+
+        Parameters:
+        - block_type (int): The type of the block, represented as an integer, options in BlockType class
+        - lang (str, optional): The language of the text in the block (default is "und" for undefined).
+        - start_time (int, optional): The starting time of the block in microseconds (default is 0).
+        - end_time (int, optional): The ending time of the block in microseconds (default is 0).
+        - text (str, optional): The content of the block (default is an empty string).
+        - **options: Additional keyword arguments for customization (e.g style, layout, ...).
+        """
         self.block_type = block_type
         self.languages = defaultdict(str)
+        if options.get("languages"):
+            for i,j in options.get("languages").items():
+                self.languages[i] = j
+            del options["languages"]
         self.default_language = lang
         if text:
             self.languages[lang] = text.strip()
@@ -42,6 +77,16 @@ class Block:
         self.languages[index] = value
 
     def getLines(self, lang: str = "und", lines: int = 0) -> list[str]:
+        """
+        Format text of specific language into multiple lines.
+
+        Args:
+            lang (str, optional): Language code (default is "und" for undefined).
+            lines (int, optional): The number of lines to format to. (default is 0 - autoformat).
+
+        Returns:
+            list[str]: A list of text lines.
+        """
         text = self.get(lang)
         if lang == "ja":
             parser = budoux.load_default_japanese_parser()
@@ -94,9 +139,8 @@ class Block:
     def __add__(self, value):
         if not isinstance(value, Block):
             raise ValueError("Unsupported type. Must be an instance of `Block`")
-        out = Block(start_time=self.start_time, end_time=self.end_time,
-                    lang=self.default_language, style=self.style,
-                    layout=self.layout, is_chapter=self.is_chapter)
+        out = Block(block_type=self.block_type, start_time=self.start_time, 
+                    end_time=self.end_time, lang=self.default_language, options=self.options)
         out.languages = self.languages.copy()
         for key, language, comment in value:
             out.languages[key] = language
@@ -108,9 +152,8 @@ class Block:
         return self
 
     def __sub__(self, language: str):
-        out = Block(start_time=self.start_time, end_time=self.end_time,
-                    lang=self.default_language, style=self.style,
-                    layout=self.layout, is_chapter=self.is_chapter)
+        out = Block(block_type=self.block_type, start_time=self.start_time, 
+                    end_time=self.end_time, lang=self.default_language, options=self.options)
         out.languages = self.languages.copy()
         if language in out.languages:
             del out.languages[language]
@@ -129,9 +172,48 @@ class Block:
 
 
 class CaptionsFormat:
+    """
+    Represents a format for handling captions in a multimedia context.
+
+    Attributes:
+        extensions (FileExtensions): An instance of the FileExtensions class for managing file extensions.
+
+     Methods:
+        setDefaultLanguage: Set the default language for captions.
+        insert: Insert a block at the specified index.
+        detect: Detect the format of the captions file.
+        read: Read captions from content.
+        checkContent: Check if the content is valid type.
+        save: Save captions to a file.
+        makeFilename: Adds languages and extension to filename.
+        append: Append a Block to the list of blocks.
+        shift_time: Shift the timing of all blocks by the specified duration.
+        shift_start: Shift the start time of all blocks by the specified duration.
+        shift_end: Shift the end time of all blocks by the specified duration.
+        fromJson: Load captions format from a JSON file.
+        toJson: Save captions format to a JSON file.
+        __getitem__: Retrieve the block at the specified index.
+        __setitem__: Set the block at the specified index.
+        __str__: Return a string representation of the captions format.
+        __iadd__: In-place addition for concatenating blocks.
+        __isub__: In-place subtraction for removing blocks in a specific language.
+        __iter__: Iterator for iterating through blocks.
+        __len__: Return the number of blocks in the captions format.
+        __enter__: Enter the context for managing resources.
+        __exit__: Exit the context, handling exceptions.
+    """
+
     extensions = FileExtensions()
 
     def __init__(self, filename: str = None, default_language: str = "und", **options):
+        """
+        Initialize a new instance of CaptionsFormat class.
+
+        Parameters:
+        - filename (str, optional): The name of the file associated with the captions, used for "with" keyword (default is None).
+        - default_language (str, optional): The default language for captions (default is "und" for undefined).
+        - **options: Additional keyword arguments for customization (e.g. metadata, style, ...).
+        """
         self.filename = filename
         self.options = options or {}
         self._block_list: list[Block] = []
@@ -250,8 +332,12 @@ class CaptionsFormat:
             with open(file, "r", encoding="UTF-8") as f:
                 data = json.load(f)
                 self.default_language = data["default_language"]
-                for key, caption in data["_caption_list"].items():
-                    self._block_list = [Block(**item) for item in caption]
+                self.filename = data["filename"]
+                for key, value in data["extensions"].items():
+                    setattr(FileExtensions, key, value)
+                self.options = data["options"]
+                for key, caption in data["block_list"].items():
+                    self.block_list = [Block(**item) for item in caption]
         except IOError as e:
             print(f"I/O error({e.errno}): {e.strerror}")
         except Exception as e:
@@ -259,13 +345,16 @@ class CaptionsFormat:
 
     def toJson(self, file: str):
         try:
+            if not file.endswith(".json"):
+                file+=".json"
             with open(file, "w", encoding="UTF-8") as f:
-                if len(self._block_list) == 1 or self.default_language not in self._block_list:
-                    default_language = next(iter(self._block_list.keys()))
-                else:
-                    default_language = self.default_language
-                json.dump({"default_language": default_language,
-                           "_caption_list": self._block_list}, f, default=vars)
+                json.dump({
+                    "default_language": self.default_language,
+                    "filename": self.filename,
+                    "extensions": json.dumps(self.extensions, default=vars),
+                    "options": self.options,
+                    "block_list": self._block_list
+                           }, f, default=vars)
         except IOError as e:
             print(f"I/O error({e.errno}): {e.strerror}")
         except Exception as e:
