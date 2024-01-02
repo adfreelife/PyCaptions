@@ -101,7 +101,8 @@ class CaptionsFormat:
             with open(self.filename, "r", encoding=encoding) as stream:
                 if self.detect(stream):
                     languages = self.getLanguagesFromFilename(self.filename)
-                    self.setDefaultLanguage(languages[0])
+                    if languages:
+                        self.setDefaultLanguage(languages[0])
                     self.read(stream, languages)
         return self
 
@@ -124,7 +125,7 @@ class CaptionsFormat:
     def read(self, content: str | io.IOBase, languages: list[str], **kwargs):
         raise ValueError("Not implemented")
 
-    def checkContent(self, content: str | io.IOBase, languages: list[str] = None, **kwargs):
+    def checkContent(self, content: str | io.IOBase, **kwargs):
         if not isinstance(content, io.IOBase):
             if not not isinstance(content, str):
                 raise ValueError("The content is not a unicode string or I/O stream.")
@@ -158,9 +159,9 @@ class CaptionsFormat:
                 except Exception:
                     continue
             if not languages:
-                languages = [self.default_language]
+                return None
         else:
-            languages = [self.default_language]
+            return None
         return languages
 
     def append(self, item: Block):

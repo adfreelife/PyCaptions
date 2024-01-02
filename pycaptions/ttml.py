@@ -34,26 +34,38 @@ def detectTTML(content: str | io.IOBase) -> bool:
 
 # ttp:frameRate, ttp:frameRateMultiplier, ttp:subFrameRate, ttp:tickRate, ttp:timeBase
 def readTTML(self, content: str | io.IOBase, languages: list[str], **kwargs):
-    content = self.checkContent(content=content, languages=languages, **kwargs)
-    languages = languages or [self.default_language]
+    content = self.checkContent(content=content, **kwargs)
     time_offset = kwargs.get("time_offset") or 0
     content = BeautifulSoup(content, "xml")
-    for langs in content.body.find_all("div"):
+    if not languages:
+        if not content.tt.get("xml:lang"):
+            languages = [self.default_language]
+        else:
+            languages = [content.tt.get("xml:lang")]
+    self.setDefaultLanguage(languages[0])
+    for index, langs in enumerate(content.body.find_all("div")):
         lang = langs.get("xml:lang")
         p_start, p_end = MT.fromTTMLTime(langs.get("begin"), langs.get("dur"), langs.get("end"))
-        for i in langs.find_all("p"):
-            start, end = MT.fromTTMLTime(i.get("begin"), i.get("dur"), i.get("end"))
+        for block, line in enumerate(langs.find_all("p")):
+            start, end = MT.fromTTMLTime(line.get("begin"), line.get("dur"), line.get("end"))
             start += p_start
             if start > p_end:
                 start = p_end
                 end = p_end
             elif end > p_end:
                 end = p_end
-            caption = Block(BlockType.CAPTION, lang or languages[0], start, end)
-            for line in i.get_text().split("\n"):
-                caption.append(line, lang or languages[0])
+            if index == 0:
+                caption = Block(BlockType.CAPTION, start_time=start, end_time=end)
+            else:
+                caption = self[block]
+            for l, text in enumerate(line.get_text().strip().split("\n")):
+                if len(languages) > 1:
+                    caption.append(text, lang or languages[l])
+                else:
+                    caption.append(text, lang or languages[0])
             caption.shift_time(time_offset)
-            self.append(caption)
+            if index == 0:
+                self.append(caption)
 
 
 def saveTTML(self, filename: str, languages: list[str] = None, **kwargs):

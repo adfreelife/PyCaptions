@@ -73,7 +73,7 @@ with open("tests/test.en.srt", encoding="UTF-8") as f:
 from pycaptions import Captions
 
 # if the format supports multiple languages
-with Captions("tests/test.en.ttml") as captions:
+with Captions("tests/test.ttml") as captions:
     # first line will be in english, second one in spanish
     captions.saveSRT("test", ["en","es"]) 
     

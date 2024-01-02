@@ -30,7 +30,7 @@ def detectSAMI(content: str | io.IOBase) -> bool:
 
 
 def readSAMI(self, content: str | io.IOBase, languages: list[str], **kwargs):
-    content = self.checkContent(content=content, languages=languages, **kwargs)
+    content = self.checkContent(content=content, **kwargs)
     languages = languages or [self.default_language]
     time_offset = kwargs.get("time_offset") or 0
     raise ValueError("Not Implemented")
