@@ -1,5 +1,8 @@
 import io
-from .caption import CaptionsFormat, Block, BlockType
+
+from .block import Block, BlockType
+from .captionsFormat import CaptionsFormat
+from .microTime import MicroTime as MT
 
 
 @staticmethod
@@ -33,8 +36,8 @@ def readSRT(self, content: str | io.IOBase, languages: list[str], **kwargs):
     line = content.readline()
     while line:
         start, end = content.readline().split(" --> ")
-        caption = Block(BlockType.CAPTION, languages[0], _convertFromSRTTime(start),
-                        _convertFromSRTTime(end), content.readline().strip())
+        caption = Block(BlockType.CAPTION, languages[0], MT.fromSRTTime(start),
+                        MT.fromSRTTime(end), content.readline().strip())
         line = content.readline().strip()
         while line:
             if len(languages) > 1:
@@ -48,22 +51,7 @@ def readSRT(self, content: str | io.IOBase, languages: list[str], **kwargs):
         line = content.readline()
 
 
-def _convertFromSRTTime(time: str) -> int:
-    return (int(time[0:2])*3_600_000_000 +
-            int(time[3:5])*60_000_000 +
-            int(time[6:8])*1_000_000 +
-            int(time[9:])*1_000)
-
-
-def _convertToSRTTime(time: int) -> str:
-    hours, reminder = divmod(time, 3_600_000_000)
-    minutes, reminder = divmod(reminder, 60_000_000)
-    seconds, miliseconds = divmod(reminder, 1_000_000)
-    miliseconds = int(miliseconds/1_000)
-    return f"{int(hours):02}:{int(minutes):02}:{int(seconds):02},{int(miliseconds):03}"
-
-
-def saveSRT(self, filename: str, languages: list[str], **kwargs):
+def saveSRT(self, filename: str, languages: list[str] = None, **kwargs):
     filename = self.makeFilename(filename=filename, extension=self.extensions.SRT,
                                  languages=languages, **kwargs)
     encoding = kwargs.get("file_encoding") or "UTF-8"
@@ -77,7 +65,7 @@ def saveSRT(self, filename: str, languages: list[str], **kwargs):
                 elif index != 1:
                     file.write("\n\n")
                 file.write(f"{index}\n")
-                file.write(f"{_convertToSRTTime(data.start_time)} --> {_convertToSRTTime(data.end_time)}\n")
+                file.write(f"{data.start_time.toSRTTime()} --> {data.end_time.toSRTTime()}\n")
                 file.write("\n".join(data.get(i) for i in languages))
                 index += 1
     except IOError as e:

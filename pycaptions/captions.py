@@ -1,5 +1,5 @@
 import io
-from .caption import CaptionsFormat
+from .captionsFormat import CaptionsFormat
 
 
 class Captions(CaptionsFormat):

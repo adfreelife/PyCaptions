@@ -1,6 +1,10 @@
 import io
 import re
-from .caption import CaptionsFormat, Block, BlockType
+
+from .block import Block, BlockType
+from .captionsFormat import CaptionsFormat
+from .microTime import MicroTime as MT
+
 
 PATTERN = r"\{.*?\}"
 
@@ -46,8 +50,8 @@ def readSUB(self, content: str | io.IOBase, languages: list[str] = [], **kwargs)
         else:
             lines = line.split("|")
             params = re.findall(PATTERN, lines[0])
-            start = _convertFromSUBTime(params[0].strip("{}"), frame_rate)
-            end = _convertFromSUBTime(params[1].strip("{}"), frame_rate)
+            start = MT.fromSUBTime(params[0].strip("{}"), frame_rate)
+            end = MT.fromSUBTime(params[1].strip("{}"), frame_rate)
             caption = Block(BlockType.CAPTION, start_time=start, end_time=end,
                             style=[p.strip("{}") for p in params[2:]])
             for counter, line in enumerate(lines):
@@ -60,20 +64,12 @@ def readSUB(self, content: str | io.IOBase, languages: list[str] = [], **kwargs)
         line = content.readline().strip()
 
 
-def _convertFromSUBTime(time: str, frame_rate: int):
-    return int(time) * 1_000_000 / frame_rate
-
-
-def _convertToSUBTime(time: int, frame_rate: int):
-    return int(time * frame_rate / 1_000_000)
-
-
-def saveSUB(self, filename: str, languages: list[str] = [], **kwargs):
+def saveSUB(self, filename: str, languages: list[str] = None, **kwargs):
     filename = self.makeFilename(filename=filename, extension=self.extensions.SUB,
                                  languages=languages, **kwargs)
+    encoding = kwargs.get("file_encoding") or "UTF-8"
     languages = languages or [self.default_language]
     frame_rate = kwargs.get("frame_rate") or self.options.get("frame_rate") or 25
-    encoding = kwargs.get("file_encoding") or "UTF-8"
     try:
         with open(filename, "w", encoding=encoding) as file:
             pass

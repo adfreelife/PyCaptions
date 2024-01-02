@@ -1,6 +1,9 @@
 import io
 import re
-from .caption import CaptionsFormat, Block, BlockType
+
+from .block import Block, BlockType
+from .captionsFormat import CaptionsFormat
+from .microTime import MicroTime as MT
 from cssutils import CSSParser
 
 STYLE_PATERN = re.compile(r"::cue\((#[^)]+)\)")
@@ -121,8 +124,8 @@ def readVTT(self, content: str | io.IOBase, languages: list[str], **kwargs):
             if len(end) > 1:
                 caption.options["style"] = end[1]
             end = end[0]
-            caption.start_time = _convertFromVTTTime(start)
-            caption.end_time = _convertFromVTTTime(end)
+            caption.start_time = MT.fromVTTTime(start)
+            caption.end_time = MT.fromVTTTime(end)
             counter = 1
             line = content.readline().strip()
             if line.startswith("{"):
@@ -139,20 +142,7 @@ def readVTT(self, content: str | io.IOBase, languages: list[str], **kwargs):
         line = content.readline()
 
 
-def _convertFromVTTTime(time: str) -> int:
-    converter = [1_000_000, 60_000_000, 3_600_000_000]
-    return int(time[-3:])*1_000+sum(int(t)*c for t, c in zip(reversed(time[:-4].split(":")), converter))
-
-
-def _convertToVTTTime(time: int) -> str:
-    hours, reminder = divmod(time, 3_600_000_000)
-    minutes, reminder = divmod(reminder, 60_000_000)
-    seconds, miliseconds = divmod(reminder, 1_000_000)
-    miliseconds = int(miliseconds/1_000)
-    return f"{int(hours):02}:{int(minutes):02}:{int(seconds):02}.{int(miliseconds):03}"
-
-
-def saveVTT(self, filename: str, languages: list[str], **kwargs):
+def saveVTT(self, filename: str, languages: list[str] = None, **kwargs):
     filename = self.makeFilename(filename=filename, extension=self.extensions.VTT,
                                  languages=languages, **kwargs)
     encoding = kwargs.get("file_encoding") or "UTF-8"

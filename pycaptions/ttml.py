@@ -1,6 +1,9 @@
 import io
 import os
-from .caption import CaptionsFormat, Block
+
+from .block import Block, BlockType
+from .captionsFormat import CaptionsFormat
+from .microTime import MicroTime as MT
 from bs4 import BeautifulSoup
 
 
@@ -29,15 +32,31 @@ def detectTTML(content: str | io.IOBase) -> bool:
     content.seek(offset)
     return False
 
-
+# ttp:frameRate, ttp:frameRateMultiplier, ttp:subFrameRate, ttp:tickRate, ttp:timeBase
 def readTTML(self, content: str | io.IOBase, languages: list[str], **kwargs):
     content = self.checkContent(content=content, languages=languages, **kwargs)
     languages = languages or [self.default_language]
     time_offset = kwargs.get("time_offset") or 0
-    raise ValueError("Not Implemented")
+    content = BeautifulSoup(content, "xml")
+    for langs in content.body.find_all("div"):
+        lang = langs.get("xml:lang")
+        p_start, p_end = MT.fromTTMLTime(langs.get("begin"), langs.get("dur"), langs.get("end"))
+        for i in langs.find_all("p"):
+            start, end = MT.fromTTMLTime(i.get("begin"), i.get("dur"), i.get("end"))
+            start += p_start
+            if start > p_end:
+                start = p_end
+                end = p_end
+            elif end > p_end:
+                end = p_end
+            caption = Block(BlockType.CAPTION, lang or languages[0], start, end)
+            for line in i.get_text().split("\n"):
+                caption.append(line, lang or languages[0])
+            caption.shift_time(time_offset)
+            self.append(caption)
 
 
-def saveTTML(self, filename: str, languages: list[str], **kwargs):
+def saveTTML(self, filename: str, languages: list[str] = None, **kwargs):
     filename = self.makeFilename(filename=filename, extension=self.extensions.TTML,
                                  languages=languages, **kwargs)
     encoding = kwargs.get("file_encoding") or "UTF-8"
