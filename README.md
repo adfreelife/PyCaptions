@@ -10,7 +10,7 @@ PyCaptions is a caption reading/writing library.
 Table of Contents
 - [Installation](#installation)
 - [Supported Formats](#supported-formats)
-- [Plans](#Format support plans)
+- [Plans](#future-plans)
 - [Examples](#examples)
 * * *
 
