@@ -3,13 +3,19 @@
 PyCaptions is a caption reading/writing library.
 
 * * *
+
+**Why [LGPL-3.0](https://choosealicense.com/licenses/lgpl-3.0/)?** This is just to ensure that source code for the library is always under the same licence and cannot be closed-sourced. All the conditions for this licence only apply for the the library itself and it's modifications. We reccomend to just contribute to the project if you are making modifications, unless they are drastic and specific to your case.
+
+* * *
+Table of Contents
 - [Installation](#installation)
 - [Supported Formats](#supported-formats)
+- [Plans](#future-plans)
 - [Examples](#examples)
 * * *
 
 ## Installation
-- PIP
+- PIP (soon)
     ```
     pip install --upgrade pycaptions
     ```
@@ -21,11 +27,19 @@ PyCaptions is a caption reading/writing library.
     ```
 
 ## Supported Formats
-- [Synchronized Accessible Media Interchange (SAMI)](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/dnacc/understanding-sami-1.0)
 - [SubRip (SRT)](https://en.wikipedia.org/wiki/SubRip)
-- [MicroDVD (SUB)](https://en.wikipedia.org/wiki/MicroDVD)
-- [Timed Text Markup Language (TTML, DFXP, ...)](https://www.w3.org/TR/ttml/)
-- [Web Video Text Tracks Format (VTT)](https://www.w3.org/TR/webvtt/)
+- [MicroDVD (SUB)](https://en.wikipedia.org/wiki/MicroDVD) (reader only)
+- [Timed Text Markup Language (TTML, DFXP, ...)](https://www.w3.org/TR/ttml/) (basic reader only)
+- [Web Video Text Tracks Format (VTT)](https://www.w3.org/TR/webvtt/) (reader only)
+
+## Future plans
+- add writers to all supported formats
+- auto-fit lines into multilines or split captions blocks into two parts
+- add support for more formats
+    - [Synchronized Accessible Media Interchange (SAMI)](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/dnacc/understanding-sami-1.0)
+    - [Universal Subtitle Format (USF)](https://en.wikipedia.org/wiki/Universal_Subtitle_Format)
+    - [LyRiCs (LRC)](https://en.wikipedia.org/wiki/LRC_(file_format))
+    - open an issue with "enhancement" label for more
 
 ## Examples
 
@@ -56,7 +70,7 @@ captions = Captions(srt) # or captions = Captions()
 captions.saveVTT("test")
 ```
 
-### Specific
+### Specific reader
 Have the same functions as generic, except
 
 ```python
