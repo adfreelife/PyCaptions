@@ -1,5 +1,4 @@
 __version__ = "0.2.0"
-__author__ = "Ad Free Life"
 
 import pycaptions.srt as srt
 import pycaptions.sub as sub
