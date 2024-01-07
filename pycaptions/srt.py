@@ -5,6 +5,9 @@ from .captionsFormat import CaptionsFormat
 from .microTime import MicroTime as MT
 
 
+EXTENSIONS = [".srt"]
+
+
 @staticmethod
 def detectSRT(content: str | io.IOBase) -> bool:
     """

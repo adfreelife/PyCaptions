@@ -6,6 +6,8 @@ from .captionsFormat import CaptionsFormat
 from .microTime import MicroTime as MT
 from cssutils import CSSParser
 
+
+EXTENSIONS = [".vtt"]
 STYLE_PATERN = re.compile(r"::cue\((#[^)]+)\)")
 
 

@@ -6,6 +6,7 @@ from .captionsFormat import CaptionsFormat
 from .microTime import MicroTime as MT
 
 
+EXTENSIONS = [".sub"]
 PATTERN = r"\{.*?\}"
 
 

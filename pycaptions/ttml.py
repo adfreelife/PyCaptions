@@ -7,6 +7,9 @@ from .microTime import MicroTime as MT
 from bs4 import BeautifulSoup
 
 
+EXTENSIONS = [".ttml", ".dfxp", ".xml"]
+
+
 @staticmethod
 def detectTTML(content: str | io.IOBase) -> bool:
     """

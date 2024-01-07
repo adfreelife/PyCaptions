@@ -8,6 +8,9 @@ from .microTime import MicroTime as MT
 from bs4 import BeautifulSoup
 
 
+EXTENSIONS = [".sami"]
+
+
 @staticmethod
 def detectSAMI(content: str | io.IOBase) -> bool:
     """
