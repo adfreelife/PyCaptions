@@ -15,7 +15,7 @@ Table of Contents
 * * *
 
 ## Installation
-- PIP (soon)
+- PIP
     ```
     pip install --upgrade pycaptions
     ```
