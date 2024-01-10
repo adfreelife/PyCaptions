@@ -3,19 +3,18 @@ import io
 from .block import Block, BlockType
 from .captionsFormat import CaptionsFormat
 from .microTime import MicroTime as MT
-from bs4 import BeautifulSoup
 
 
-EXTENSIONS = [".sami"]
+EXTENSIONS = [".usf"]
 
 
 @staticmethod
-def detectSAMI(content: str | io.IOBase) -> bool:
+def detectUSF(content: str | io.IOBase) -> bool:
     """
-    Used to detect Synchronized Accessible Media Interchange caption format.
+    Used to detect Universal Subtitle Format caption format.
 
     It returns True if:
-     - the first line starts with <SAMI>
+     - the first line starts with <USFSubtitles
     """
     if not isinstance(content, io.IOBase):
         if not isinstance(content, str):
@@ -23,21 +22,21 @@ def detectSAMI(content: str | io.IOBase) -> bool:
         content = io.StringIO(content)
 
     offset = content.tell()
-    if content.readline().lstrip().startswith("<SAMI>"):
+    if content.readline().lstrip().startswith("<USFSubtitles"):
         content.seek(offset)
         return True
     content.seek(offset)
     return False
 
 
-def readSAMI(self, content: str | io.IOBase, languages: list[str], **kwargs):
+def readUSF(self, content: str | io.IOBase, languages: list[str], **kwargs):
     content = self.checkContent(content=content, **kwargs)
     languages = languages or [self.default_language]
     time_offset = kwargs.get("time_offset") or 0
     raise ValueError("Not Implemented")
 
 
-def saveSAMI(self, filename: str, languages: list[str] = None, **kwargs):
+def saveUSF(self, filename: str, languages: list[str] = None, **kwargs):
     filename = self.makeFilename(filename=filename, extension=self.extensions.SAMI,
                                  languages=languages, **kwargs)
     encoding = kwargs.get("file_encoding") or "UTF-8"
@@ -52,24 +51,24 @@ def saveSAMI(self, filename: str, languages: list[str] = None, **kwargs):
     raise ValueError("Not Implemented")
 
 
-class SAMI(CaptionsFormat):
+class USF(CaptionsFormat):
     """
-    Synchronized Accessible Media Interchange
+    Universal Subtitle Format
 
-    Read more about it https://learn.microsoft.com/en-us/previous-versions/windows/desktop/dnacc/understanding-sami-1.0
+    Read more about it https://en.wikipedia.org/wiki/Universal_Subtitle_Format
 
     Example:
 
-    with SAMI("path/to/file.sami") as sami:
-        sami.saveSRT("file")
+    with USF("path/to/file.usf") as usf:
+        usf.saveSRT("file")
     """
-    detect = staticmethod(detectSAMI)
-    read = readSAMI
-    save = saveSAMI
+    detect = staticmethod(detectUSF)
+    read = readUSF
+    save = saveUSF
 
     from .lrc import saveLRC
+    from .sami import saveSAMI
     from .srt import saveSRT
     from .sub import saveSUB
     from .ttml import saveTTML
-    from .usf import saveUSF
-    from .vtt import saveVTT
+    from .vtt import saveVTT   

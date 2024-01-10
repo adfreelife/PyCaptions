@@ -1,5 +1,4 @@
 import io
-import os
 
 from .block import Block, BlockType
 from .captionsFormat import CaptionsFormat
@@ -101,7 +100,9 @@ class TTML(CaptionsFormat):
     _read = readTTML
     _save = saveTTML
 
+    from .lrc import saveLRC
     from .sami import saveSAMI
     from .srt import saveSRT
     from .sub import saveSUB
+    from .usf import saveUSF
     from .vtt import saveVTT

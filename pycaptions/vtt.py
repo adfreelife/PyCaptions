@@ -17,7 +17,7 @@ def detectVTT(content: str | io.IOBase) -> bool:
     Used to detect WebVTT caption format.
 
     It returns True if:
-     - the first line matches `WebVTT`
+     - the first line starts with `WebVTT`
     """
     if not isinstance(content, io.IOBase):
         if not isinstance(content, str):
@@ -182,7 +182,9 @@ class WebVTT(CaptionsFormat):
     _read = readVTT
     _save = saveVTT
 
+    from .lrc import saveLRC
     from .sami import saveSAMI
     from .srt import saveSRT
     from .sub import saveSUB
+    from .usf import saveUSF
     from .ttml import saveTTML

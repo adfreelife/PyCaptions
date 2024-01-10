@@ -152,7 +152,9 @@ class SubRip(CaptionsFormat):
     read = readSRT
     save = saveSRT
 
+    from .lrc import saveLRC
     from .sami import saveSAMI
     from .sub import saveSUB
     from .ttml import saveTTML
+    from .usf import saveUSF
     from .vtt import saveVTT
