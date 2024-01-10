@@ -213,7 +213,7 @@ class MicroTime:
         return MicroTime.fromTime(int(time) * 1_000_000 / frame_rate)
 
     def toSUBTime(self, frame_rate: int):
-        return int(self.toTime() * frame_rate / 1_000_000)
+        return str(int(self.toTime() * frame_rate / 1_000_000))
 
     @staticmethod
     def parseTTMLTime(time: str, **kwargs):

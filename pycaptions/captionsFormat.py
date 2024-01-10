@@ -2,7 +2,7 @@ import json
 import io
 import os
 from langcodes import standardize_tag, tag_is_valid
-from .block import Block
+from .block import Block, BlockType
 from .microTime import MicroTime as MT
 
 
@@ -49,7 +49,8 @@ class CaptionsFormat:
     """
 
     def __init__(self, filename: str = None, default_language: str = "und",
-                 time_length: MT = None, file_extensions = None, **options):
+                 time_length: MT = None, file_extensions = None,
+                 media_height: int = None, media_width: int = None, **options):
         """
         Initialize a new instance of CaptionsFormat class.
 
@@ -60,7 +61,25 @@ class CaptionsFormat:
         """
         self.time_length = MT() or time_length
         self.filename = filename
+        self.media_height = media_height or 1080
+        self.media_width = media_width or 1920
         self.options = options or {}
+        if not self.options.get("blocks"):
+            self.options["blocks"] = []
+        if not self.options.get("layout"):
+            self.options["layout"] = dict()
+        if not self.options.get("style"):
+            self.options["style"] = dict()
+        if not self.options.get("metadata"):
+            self.options["metadata"] = dict()
+        if not self.options.get("style_metadata"):
+            self.options["style_metadata"] = dict()
+        if not self.options["style_metadata"].get("identifier_to_original"):
+            self.options["style_metadata"]["identifier_to_original"] = dict()
+        if not self.options["style_metadata"].get("identifier_to_new"):
+            self.options["style_metadata"]["identifier_to_new"] = dict()
+        if not self.options["style_metadata"].get("style_id_counter"):
+            self.options["style_metadata"]["style_id_counter"] = 0
         self._block_list: list[Block] = []
         self.setDefaultLanguage(default_language)
         self.extensions = file_extensions or FileExtensions()
@@ -70,6 +89,9 @@ class CaptionsFormat:
 
     def __setitem__(self, index: int, value: Block):
         self._block_list[index] = value
+
+    def __delitem__(self, index: int):
+        del self._block_list[index]
 
     def __iadd__(self, value):
         if not isinstance(value, CaptionsFormat):
@@ -111,6 +133,65 @@ class CaptionsFormat:
 
     def __len__(self):
         return len(self._block_list)
+    
+    def setOptionsBlockId(self, index1, index2):
+        block = self.options["blocks"][index1]
+        if block.type == BlockType.LAYOUT:
+            self.options["layout"][block.options["id"]] = index2
+        elif block.type == BlockType.STYLE:
+            self.options["style"][block.options["id"]] = index2
+        elif block.type == BlockType.METADATA:
+            self.options["metadata"][block.options["id"]] = index2
+    
+    def swapOptionsBlock(self, index1: int, index2: int):
+        if index1 == index2 or index1 < 0 or index2 < 0:
+            return
+        self.setOptionsBlockId(index1, index2)
+        self.setOptionsBlockId(index2, index1)
+        self.options["blocks"][index1], self.options["blocks"][index2] = self.options["blocks"][index2], self.options["blocks"][index1]
+    
+    def deleteOptionsBlock(self, index: int):
+        block = self.options["blocks"][index]
+        if block.type == BlockType.LAYOUT:
+            del self.options["layout"][block.options["id"]]
+        elif block.type == BlockType.STYLE:
+            del self.options["style"][block.options["id"]]
+        elif block.type == BlockType.METADATA:
+            del self.options["metadata"][block.options["id"]]
+        del self.options["blocks"][index]
+    
+    def addLayout(self, id: str, layout: Block):
+        if layout.block_type != BlockType.LAYOUT:
+            raise ValueError(f"Expected BlockType {BlockType.METADATA} got {layout.block_type}")
+        self.options["blocks"].append(layout)
+        self.options["layout"][id] = len(self.options["blocks"])
+
+    def getLayout(self, id: str):
+        if id in self.options["layout"]:
+            return self.options["blocks"][self.options["layout"][id]]
+        return None
+    
+    def addStyle(self, id: str, style: Block):
+        if style.block_type != BlockType.STYLE:
+            raise ValueError(f"Expected BlockType {BlockType.METADATA} got {style.block_type}")
+        self.options["blocks"].append(style)
+        self.options["style"][id] = len(self.options["blocks"])
+    
+    def getStyle(self, id: str):
+        if id in self.options["style"]:
+            return self.options["blocks"][self.options["style"][id]]
+        return None
+
+    def addMetadata(self, id: str, metadata: Block):
+        if metadata.block_type != BlockType.METADATA:
+            raise ValueError(f"Expected BlockType {BlockType.METADATA} got {metadata.block_type}")
+        self.options["blocks"].append(metadata)
+        self.options["metadata"][id] = len(self.options["blocks"])
+    
+    def getMetadata(self, id: str):
+        if id in self.options["metadata"]:
+            return self.options["blocks"][self.options["metadata"][id]]
+        return None
 
     def setDefaultLanguage(self, language: str):
         standardized = standardize_tag(language, macro=True)

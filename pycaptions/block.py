@@ -2,6 +2,7 @@ import budoux
 import textwrap
 from collections import defaultdict
 from .microTime import MicroTime as MT
+from bs4 import BeautifulSoup
 
 
 class BlockType:
@@ -143,7 +144,10 @@ class Block:
             return textwrap.wrap(text)
 
     def get(self, lang: str) -> str:
-        return self.languages.get(lang)
+        return BeautifulSoup(self.languages.get(lang), "html.parser").get_text()
+    
+    def get_style(self, lang: str) -> str:
+        return BeautifulSoup(self.languages.get(lang), "html.parser")
 
     def append(self, text: str, lang: str = "und"):
         if not self.default_language:

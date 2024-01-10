@@ -63,7 +63,7 @@ class Captions(CaptionsFormat):
         self.readers[format](self, content, languages, **kwargs)
 
     def save(self, filename: str, languages: list[str] = None, output_format: str = None, **kwargs):
-        output_format = output_format or self.fileFormat
+        output_format = output_format.lstrip(".") or self.fileFormat
         if output_format not in self.savers:
             raise ValueError("Incorect output format")
         self.savers[output_format](self, filename=filename, languages=languages, **kwargs)

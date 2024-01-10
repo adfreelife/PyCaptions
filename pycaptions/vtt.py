@@ -36,28 +36,17 @@ def readVTT(self, content: str | io.IOBase, languages: list[str], **kwargs):
     content = self.checkContent(content=content, **kwargs)
     languages = languages or [self.default_language]
     time_offset = kwargs.get("time_offset") or 0
-
-    if not self.options.get("blocks"):
-        self.options["blocks"] = []
-    metadata = Block(BlockType.METADATA)
+    metadata = Block(BlockType.METADATA, id="default")
     content.readline()
     line = content.readline().strip()
     while line:
         line = line.split(": ", 1)
         metadata.options[line[0]] = line[1]
         line = content.readline().strip()
-    self.options["blocks"].append(metadata)
-
-    if not self.options.get("style"):
-        self.options["style"] = dict()
-    if not self.options["style"].get("identifier_to_original"):
-        self.options["style"]["identifier_to_original"] = dict()
-    if not self.options["style"].get("identifier_to_new"):
-        self.options["style"]["identifier_to_new"] = dict()
-    if not self.options["style"].get("style_id_counter"):
-        self.options["style"]["style_id_counter"] = 0
+    self.addMetadata("default", metadata)
 
     line = content.readline()
+    style_block_count = 0
     while line:
         line = line.strip()
         if line.startswith("NOTE"):
@@ -71,6 +60,7 @@ def readVTT(self, content: str | io.IOBase, languages: list[str], **kwargs):
                 line = content.readline().strip()
             self.options["blocks"].append(comment)
         elif line == "STYLE":
+            style_block_count += 1
             style = ""
             line = content.readline().strip()
             while line:
@@ -79,12 +69,12 @@ def readVTT(self, content: str | io.IOBase, languages: list[str], **kwargs):
 
             def replace_style(match):
                 if match.group(1).startswith("#"):
-                    if match.group(1) in self.options["style"]["identifier_to_new"]:
-                        return self.options["style"]["identifier_to_new"][match.group(1)]
-                    self.options["style"]["style_id_counter"] += 1
-                    style_name = f"#style{self.options['style']['style_id_counter']}"
-                    self.options["style"]["identifier_to_original"][style_name] = match.group(1)
-                    self.options["style"]["identifier_to_new"][match.group(1)] = style_name
+                    if match.group(1) in self.options["style_metadata"]["identifier_to_new"]:
+                        return self.options["style_metadata"]["identifier_to_new"][match.group(1)]
+                    self.options["style_metadata"]["style_id_counter"] += 1
+                    style_name = f"#style{self.options['style_metadata']['style_id_counter']}"
+                    self.options["style_metadata"]["identifier_to_original"][style_name] = match.group(1)
+                    self.options["style_metadata"]["identifier_to_new"][match.group(1)] = style_name
                     return style_name
                 return match.group(1)
             parser = CSSParser(validate=False)
@@ -92,7 +82,7 @@ def readVTT(self, content: str | io.IOBase, languages: list[str], **kwargs):
                         cssText=re.sub(STYLE_PATERN, replace_style, style),
                         encoding="UTF-8"
                     )
-            self.options["blocks"].append(Block(BlockType.STYLE, style=style))
+            self.addStyle(str(style_block_count), Block(BlockType.STYLE, id=str(style_block_count), style=style))
         elif line == "REGION":
             line = content.readline().strip()
             temp = dict()
@@ -100,7 +90,17 @@ def readVTT(self, content: str | io.IOBase, languages: list[str], **kwargs):
                 line = line.split(":", 1)
                 temp[line[0]] = line[1]
                 line = content.readline().strip()
-            self.options["blocks"].append(Block(BlockType.LAYOUT, layout=temp))
+            if temp.get("width"):
+                temp["width"] = int(temp["width"][:-1])/100.0
+            if temp.get("lines"):
+                temp["lines"] = int(temp["lines"])
+            if temp.get("regionanchor"):
+                ra = temp["regionanchor"].split(",")
+                temp["regionanchor"] = [int(ra[0][:-1])/100.0, int(ra[1][:-1])/100.0]
+            if temp.get("viewportanchor"):
+                vp = temp["viewportanchor"].split(",")
+                temp["viewportanchor"] = [int(vp[0][:-1])/100.0, int(vp[1][:-1])/100.0]
+            self.addLayout(temp["id"], Block(BlockType.LAYOUT, id=temp["id"], layout=temp))
         else:
             break
         line = content.readline()
@@ -119,15 +119,14 @@ def readVTT(self, content: str | io.IOBase, languages: list[str], **kwargs):
         else:
             caption = Block(BlockType.CAPTION)
             if "-->" not in line:
-                caption.options["indentificator"] = line.strip()
+                caption.options["id"] = line.strip()
                 line = content.readline().strip()
             start, end = line.split(" --> ", 1)
             end = end.split(" ", 1)
             if len(end) > 1:
                 caption.options["style"] = end[1]
-            end = end[0]
             caption.start_time = MT.fromVTTTime(start)
-            caption.end_time = MT.fromVTTTime(end)
+            caption.end_time = MT.fromVTTTime(end[0])
             counter = 1
             line = content.readline().strip()
             if line.startswith("{"):
