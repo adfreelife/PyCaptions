@@ -161,6 +161,17 @@ class Block:
         else:
             self.languages[lang] += text
 
+    def append_without_common_part(self, text: str, lang: str):
+        common_lenght = 0
+        current = self.get(lang)
+        min_length = min(len(current), len(text))
+
+        for i in range(min_length):
+            if current[-i:] == text[:i]:
+                common_lenght = i
+        
+        self.languages[lang] = current + text[common_lenght:]
+
     def shift_time_us(self, microseconds: int):
         self.start_time += microseconds
         self.end_time += microseconds
