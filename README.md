@@ -35,9 +35,11 @@ Table of Contents
 
 ## Supported Formats
 - [SubRip (SRT)](https://en.wikipedia.org/wiki/SubRip) (reader + writer)
-- [MicroDVD (SUB)](https://en.wikipedia.org/wiki/MicroDVD) (reader only)
+- [MicroDVD (SUB)](https://en.wikipedia.org/wiki/MicroDVD) (reader + writer)
 - [Timed Text Markup Language (TTML, DFXP, ...)](https://www.w3.org/TR/ttml/) (basic reader only)
-- [Web Video Text Tracks Format (VTT)](https://www.w3.org/TR/webvtt/) (basic writer + reader)
+- [Web Video Text Tracks Format (VTT)](https://www.w3.org/TR/webvtt/) (reader + writer)
+  
+*Note that writers do not write styling/layouts/metadata yet*
 
 ## Future plans
 - add writers to all supported formats
