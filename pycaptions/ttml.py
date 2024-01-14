@@ -37,7 +37,7 @@ def detectTTML(content: str | io.IOBase) -> bool:
 # ttp:frameRate, ttp:frameRateMultiplier, ttp:subFrameRate, ttp:tickRate, ttp:timeBase
 def readTTML(self, content: str | io.IOBase, languages: list[str], **kwargs):
     content = self.checkContent(content=content, **kwargs)
-    time_offset = kwargs.get("time_offset") or 0
+    time_offset = kwargs.get("time_offset") or MT()
     content = BeautifulSoup(content, "xml")
     if not languages:
         if not content.tt.get("xml:lang"):
@@ -89,7 +89,8 @@ class TTML(CaptionsFormat):
     """
     Timed Text Markup Language
 
-    Read more about it https://www.w3.org/TR/ttml/
+    Read more about it: https://www.speechpad.com/captions/ttml
+    Full specification: https://www.w3.org/TR/ttml/
 
     Example:
 

@@ -31,20 +31,17 @@ def detectSUB(content: str | io.IOBase) -> bool:
     content.seek(offset)
     return False
 
-controlCodes = {
-    "{y:i}": "<i>{}</i>",
-    "{y:b}": "<b>{}</b>",
-    "{y:u}": "<u>{}</u>",
-    "{y:s}": "<s>{}</s>",
-    
-}
 
 def formatLine(self, pattern):
     start = ""
     end = ""
     font_vars = []
     for control_code in pattern:
-        control_code, value = control_code.strip("{} ").split(":",1)
+        print(control_code)
+        control_code = control_code.strip("{} ").split(":")
+        if len(control_code) != 2:
+            continue
+        control_code, value = control_code[0], control_code[1]
         control_code = control_code.upper()
         if control_code == "Y":
             value = value.split(",")
@@ -80,8 +77,7 @@ def formatLine(self, pattern):
 def readSUB(self, content: str | io.IOBase, languages: list[str] = [], **kwargs):
     content = self.checkContent(content=content, **kwargs)
     languages = languages or [self.default_language]
-    time_offset = kwargs.get("time_offset") or 0
-
+    time_offset = kwargs.get("time_offset") or MT()
     if not self.options.get("frame_rate"):
         self.options["frame_rate"] = kwargs.get("frame_rate") or 25
     frame_rate = kwargs.get("frame_rate") or self.options.get("frame_rate")

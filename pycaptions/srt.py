@@ -3,6 +3,7 @@ import io
 from .block import Block, BlockType
 from .captionsFormat import CaptionsFormat
 from .microTime import MicroTime as MT
+from .styling import Styling
 
 
 EXTENSIONS = [".srt"]
@@ -78,14 +79,14 @@ def readSRT(self, content: str | io.IOBase, languages: list[str], **kwargs):
     width = kwargs.get("media_width") or self.media_width
     height = kwargs.get("media_height") or self.media_height
 
-    counter = 1
+    counter = 0
     id = content.readline()
     while id:
         start, end = content.readline().split(" --> ")
         end = end.strip().split(" ", 1)
         
         caption = Block(BlockType.CAPTION, languages[0], MT.fromSRTTime(start),
-                        MT.fromSRTTime(end[0]), content.readline().strip())
+                        MT.fromSRTTime(end[0]))
         if len(end) == 2:
             convertFromSRTLayout(self, id.strip(), end[1], width, height)
         line = content.readline().strip()
@@ -94,7 +95,7 @@ def readSRT(self, content: str | io.IOBase, languages: list[str], **kwargs):
                 caption.append(line, languages[counter])
                 counter += 1
             else:
-                caption.append(line, languages[0])
+                caption.append(Styling.fromSRT(line), languages[0])
             line = content.readline().strip()
         caption.shift_time(time_offset)
         self.append(caption)
@@ -115,6 +116,7 @@ def saveSRT(self, filename: str, languages: list[str] = None, **kwargs):
     width = kwargs.get("media_width") or self.media_width
     height = kwargs.get("media_height") or self.media_height
     isExtended = kwargs.get("srt_extended") or False
+    noStyle = kwargs.get("no_styling") or False
     extended = ""
     languages = languages or [self.default_language]
     try:
@@ -129,7 +131,10 @@ def saveSRT(self, filename: str, languages: list[str] = None, **kwargs):
                     extended = getSRTLayout(self, index, width, height)
                 file.write(f"{index}\n")
                 file.write(f"{data.start_time.toSRTTime()} --> {data.end_time.toSRTTime()}{extended}\n")
-                file.write("\n".join(data.get(i) for i in languages))
+                if noStyle:
+                    file.write("\n".join(data.get(i) for i in languages))
+                else:
+                    file.write("\n".join(data.get_style(i).getSRT() for i in languages))
                 index += 1
     except IOError as e:
         print(f"I/O error({e.errno}): {e.strerror}")

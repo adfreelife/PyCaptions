@@ -35,7 +35,7 @@ def detectLRC(content: str | io.IOBase) -> bool:
 def readLRC(self, content: str | io.IOBase, languages: list[str], **kwargs):
     content = self.checkContent(content=content, **kwargs)
     languages = languages or [self.default_language]
-    time_offset = kwargs.get("time_offset") or 0
+    time_offset = kwargs.get("time_offset") or MT()
     raise ValueError("Not Implemented")
 
 

@@ -23,7 +23,7 @@ class MicroTime:
         return self.milliseconds
 
     @milli.setter
-    def milli(self, value):
+    def milli(self, value: int):
         self.milliseconds = value
 
     @property
@@ -31,7 +31,7 @@ class MicroTime:
         return self.microseconds
 
     @micro.setter
-    def micro(self, value):
+    def micro(self, value: int):
         self.microseconds = value
 
     def __str__(self) -> str:
@@ -203,7 +203,7 @@ class MicroTime:
         else:
             minutes = t[0]
             seconds = t[1]
-        return MicroTime(milliseconds=int(time[-3:]), seconds=seconds, minutes=minutes, hours=hours)
+        return MicroTime(milliseconds=int(time[-3:]), seconds=int(seconds), minutes=int(minutes), hours=int(hours))
 
     def toVTTTime(self) -> str:
         return f"{int(self.hours):02}:{int(self.minutes):02}:{int(self.seconds):02}.{int(self.milli):03}"

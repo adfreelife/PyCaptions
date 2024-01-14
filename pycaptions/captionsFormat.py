@@ -246,7 +246,7 @@ class CaptionsFormat:
         return languages
 
     def append(self, item: Block):
-        if item.end_time > self.time_length:
+        if item.end_time and item.end_time > self.time_length:
             self.time_length = item.end_time
         self._block_list.append(item)
 
