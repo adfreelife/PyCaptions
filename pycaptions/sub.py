@@ -37,7 +37,6 @@ def formatLine(self, pattern):
     end = ""
     font_vars = []
     for control_code in pattern:
-        print(control_code)
         control_code = control_code.strip("{} ").split(":")
         if len(control_code) != 2:
             continue

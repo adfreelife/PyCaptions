@@ -1,6 +1,9 @@
 from pycaptions import Captions, supported_extensions
 
-with Captions("test/captions/test.en.vtt") as c:
-    for i in supported_extensions:
-        c.save("tmp/out", output_format=i)
+test_file_path = "test/captions/"
+
+for filename in ["test.en.srt", "test.en.sub", "test.en.vtt", "test.ttml"]:
+    with Captions(test_file_path+filename) as c:
+        for ext in supported_extensions:
+            c.save(f"tmp/from_{filename.split('.')[-1]}", output_format=ext)
 
