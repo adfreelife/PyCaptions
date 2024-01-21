@@ -35,7 +35,7 @@ def detectTTML(content: str | io.IOBase) -> bool:
     return False
 
 # ttp:frameRate, ttp:frameRateMultiplier, ttp:subFrameRate, ttp:tickRate, ttp:timeBase
-def readTTML(self, content: str | io.IOBase, languages: list[str], **kwargs):
+def readTTML(self, content: str | io.IOBase, languages: list[str] = None, **kwargs):
     content = self.checkContent(content=content, **kwargs)
     time_offset = kwargs.get("time_offset") or MT()
     content = BeautifulSoup(content, "xml")

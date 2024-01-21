@@ -4,6 +4,8 @@ import os
 from langcodes import standardize_tag, tag_is_valid
 from .block import Block, BlockType
 from .microTime import MicroTime as MT
+import budoux
+
 
 
 class FileExtensions:
@@ -48,19 +50,21 @@ class CaptionsFormat:
         __exit__: Exit the context, handling exceptions.
     """
 
-    def __init__(self, filename: str = None, default_language: str = "und",
+    def __init__(self, file_name_or_content: str = None, default_language: str = "und",
                  time_length: MT = None, file_extensions = None,
-                 media_height: int = None, media_width: int = None, **options):
+                 media_height: int = None, media_width: int = None, isFile = True, **options):
         """
         Initialize a new instance of CaptionsFormat class.
 
         Parameters:
-        - filename (str, optional): The name of the file associated with the captions, used for "with" keyword (default is None).
+        - file_name_or_content (str, optional): The name of the file or file content/string associated with the captions, used for "with" keyword (default is None).
+        - isFile (str, bool): Defines if file_name_or_content parameter is file name, used for "with" keyword (default is True).
         - default_language (str, optional): The default language for captions (default is "und" for undefined).
         - **options: Additional keyword arguments for customization (e.g. metadata, style, ...).
         """
         self.time_length = MT() or time_length
-        self.filename = filename
+        self.file_name_or_content = file_name_or_content
+        self.isFile = isFile
         self.media_height = media_height or 1080
         self.media_width = media_width or 1920
         self.options = options or {}
@@ -116,16 +120,21 @@ class CaptionsFormat:
 
     def __enter__(self):
         encoding = self.options.get("encoding") or "UTF-8"
-        filename, ext = os.path.splitext(self.filename)
-        if ext == ".json":
-            self.fromJson(self.filename)
+        if self.isFile:
+            _, ext = os.path.splitext(self.file_name_or_content)
+            if ext == ".json":
+                self.fromJson(self.file_name_or_content)
+            else:
+                
+                    with open(self.file_name_or_content, "r", encoding=encoding) as stream:
+                        if self.detect(stream):
+                            languages = self.getLanguagesFromFilename(self.file_name_or_content)
+                            if languages and self.default_language == "und":
+                                self.setDefaultLanguage(languages[0])
+                            self.read(stream, languages)
         else:
-            with open(self.filename, "r", encoding=encoding) as stream:
-                if self.detect(stream):
-                    languages = self.getLanguagesFromFilename(self.filename)
-                    if languages:
-                        self.setDefaultLanguage(languages[0])
-                    self.read(stream, languages)
+            if self.detect(self.file_name_or_content):
+                self.read(self.file_name_or_content)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -133,6 +142,73 @@ class CaptionsFormat:
 
     def __len__(self):
         return len(self._block_list)
+    
+    def getLines(self, lang: str = "und", lines: int = 0, split_block: bool = False, character_limit: int = 47, split_ratios: list[float] = [0.7, 1]) -> list[str]:
+        """
+        Format text of specific language into multiple lines.
+
+        Args:
+            lang (str, optional): Language code (default is "und" for undefined).
+            lines (int, optional): The number of lines to format to. (default is 0 - autoformat). Ignores character limit and split ratios if it cannot fit in the desired amount.
+            split_block (bool, optional): If the text cannot fit in desired lines (or 2 if autoformat), it will split the block (default is False).
+            character_limit (int, optional) How many characters should be in a line. (default is 47)
+            split_ratios (list[float], optional): Affects character_limit for n-th line. (default [0.7, 1])
+        Returns:
+            list[str]: A list of text lines.
+            list[Block]: A list of extra blocks
+        """
+        text = self.get(lang)
+        
+        if lines == 1:
+            return [text]
+
+        if lang == "ja":
+            parser = budoux.load_default_japanese_parser()
+            phrases = parser.parse(text)
+        elif lang in ["zh", "zh-CN", "zh-SG", "zh-Hans"]:
+            parser = budoux.load_default_simplified_chinese_parser()
+            phrases = parser.parse(text)
+        elif lang in ["zh-HK", "zh-MO", "zh-TW", "zh-Hant"]:
+            parser = budoux.load_default_simplified_chinese_parser()
+            phrases = parser.parse(text)
+        elif lang == "th":
+            parser = budoux.load_default_thai_parser()
+            phrases = parser.parse(text)
+        else:
+            phrases = text.split(" ")
+
+        if lines != 0:
+            total_characters = len(text)
+            target_characters = total_characters - lines + 1
+            current_limit = sum(character_limit * ratio for ratio in split_ratios)
+            if current_limit < target_characters:
+                remaining = (target_characters - current_limit) / total_characters
+                for index, _ in enumerate(split_ratios):
+                    split_ratios[index] += remaining  
+
+        formatted_lines = []
+        current_line = ""
+        current_character_count = 0
+
+        for phrase in phrases:
+            current_ratio_index = min(len(formatted_lines), len(split_ratios) - 1)
+            effective_limit = int(character_limit * split_ratios[current_ratio_index])
+            print(effective_limit)
+
+            if current_character_count + len(phrase) <= effective_limit:
+                current_line += phrase + " "
+                current_character_count += len(phrase) + 1  # +1 for the space
+            else:
+                formatted_lines.append(current_line.strip())
+                current_line = phrase + " "
+                current_character_count = len(phrase) + 1
+
+        if current_line:
+            formatted_lines.append(current_line.strip())
+
+        return formatted_lines
+
+     
     
     def setOptionsBlockId(self, index1, index2):
         block = self.options["blocks"][index1]
@@ -203,7 +279,7 @@ class CaptionsFormat:
     def detect(self, file: str | io.IOBase = None):
         raise ValueError("Not implemented")
 
-    def read(self, content: str | io.IOBase, languages: list[str], **kwargs):
+    def read(self, content: str | io.IOBase, languages: list[str] = None, **kwargs):
         raise ValueError("Not implemented")
 
     def checkContent(self, content: str | io.IOBase, **kwargs):
@@ -213,7 +289,7 @@ class CaptionsFormat:
             content = io.StringIO(content)
         return content
 
-    def save(self, filename: str, languages: list[str], **kwargs):
+    def save(self, filename: str, languages: list[str] = None, **kwargs):
         raise ValueError("Not implemented")
 
     def makeFilename(self, filename: str, extension: str, languages: list[str] = None,

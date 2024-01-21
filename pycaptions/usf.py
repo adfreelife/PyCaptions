@@ -29,7 +29,7 @@ def detectUSF(content: str | io.IOBase) -> bool:
     return False
 
 
-def readUSF(self, content: str | io.IOBase, languages: list[str], **kwargs):
+def readUSF(self, content: str | io.IOBase, languages: list[str] = None, **kwargs):
     content = self.checkContent(content=content, **kwargs)
     languages = languages or [self.default_language]
     time_offset = kwargs.get("time_offset") or MT()

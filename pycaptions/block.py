@@ -1,5 +1,3 @@
-import budoux
-import textwrap
 from collections import defaultdict
 from .microTime import MicroTime as MT
 from .styling import Styling
@@ -69,6 +67,9 @@ class Block:
     def __setitem__(self, index: str, value: str):
         self.languages[index] = value
 
+    def __delitem__(self, index: str):
+        del self.languages[index]
+
     def __str__(self):
         temp = '\n'.join(f" {lang}: {text}" for lang, text in self.languages.items())
         return f"start: {self.start_time} end: {self.end_time}\n{temp}"
@@ -116,31 +117,7 @@ class Block:
 
     def copy(self):
         return Block(self.block_type, self.default_language, self.start_time,
-                     self.end_time, languages=self.languages, **self.options)
-
-    def getLines(self, lang: str = "und", lines: int = 0) -> list[str]:
-        """
-        Format text of specific language into multiple lines.
-
-        Args:
-            lang (str, optional): Language code (default is "und" for undefined).
-            lines (int, optional): The number of lines to format to. (default is 0 - autoformat).
-
-        Returns:
-            list[str]: A list of text lines.
-        """
-        text = self.get(lang)
-        if lang == "ja":
-            parser = budoux.load_default_japanese_parser()
-            return parser.parse(text)
-        elif lang in ["zh", "zh-CN", "zh-SG", "zh-Hans"]:
-            parser = budoux.load_default_simplified_chinese_parser()
-            return parser.parse(text)
-        elif lang in ["zh-HK", "zh-MO", "zh-TW", "zh-Hant"]:
-            parser = budoux.load_default_simplified_chinese_parser()
-            return parser.parse(text)
-        else:
-            return textwrap.wrap(text)
+                     self.end_time, languages=self.languages, **self.options)   
 
     def get(self, lang: str) -> str:
         return Styling(self.languages.get(lang), "html.parser").get_text()

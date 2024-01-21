@@ -1,4 +1,4 @@
 beautifulsoup4==4.12.2
-budoux==0.6.1
+budoux==0.6.2
 langcodes>=3.2.0
 cssutils==2.9.0
