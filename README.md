@@ -3,7 +3,7 @@
   <a href="https://pypi.org/project/pycaptions"><img alt="PyPI - Version" src="https://img.shields.io/pypi/v/pycaptions.svg?color=blue"></a>
   <a href="https://pypi.org/project/pycaptions"><img alt="PyPI - License" src="https://img.shields.io/pypi/l/pycaptions.svg"></a>
   <a href="https://pypi.org/project/pycaptions"><img alt="PyPI - Python" src="https://img.shields.io/pypi/pyversions/pycaptions.svg?color=blue"></a>
-  <a href="https://pypi.org/project/pycaptions"><img alt="PyPI - Wheel" src="https://img.shields.io/badge/wheel-yes-brightgreen.svg"></a>
+  <a href="https://pypi.org/project/pycaptions"><img alt="PyPI - Wheel" src="https://img.shields.io/pypi/wheel/pycaptions.svg"></a>
   <a href="https://pypi.org/project/pycaptions"><img alt="PyPI - Status" src="https://img.shields.io/pypi/status/pycaptions.svg"></a>
   <a href="https://pypi.org/project/pycaptions"><img alt="PyPI - Downloads" src="https://static.pepy.tech/personalized-badge/pycaptions?period=total&units=international_system&left_text=downloads&left_color=grey&right_color=blue"></a>
 </p>
@@ -19,6 +19,7 @@ Table of Contents
 - [Supported Formats](#supported-formats)
 - [Plans](#future-plans)
 - [Examples](#examples)
+- [Changelog](#changelog)
 * * *
 
 ## Installation
@@ -34,12 +35,13 @@ Table of Contents
     ```
 
 ## Supported Formats
-- [SubRip (SRT)](https://en.wikipedia.org/wiki/SubRip) (reader + writer with inline styling conversion)
-- [MicroDVD (SUB)](https://en.wikipedia.org/wiki/MicroDVD) (reader + writer)
-- [Timed Text Markup Language (TTML, DFXP, XML)](https://www.w3.org/TR/ttml/) (basic reader only)
-- [Web Video Text Tracks Format (VTT)](https://www.w3.org/TR/webvtt/) (reader + writer)
+- [SubRip (SRT)](https://en.wikipedia.org/wiki/SubRip) (reader + writer)
+- [MicroDVD (SUB)](https://en.wikipedia.org/wiki/MicroDVD) (reader + writer*)
+- [Timed Text Markup Language (TTML, DFXP, XML)](https://www.w3.org/TR/ttml/) (reader* + writer*)
+- [Web Video Text Tracks Format (VTT)](https://www.w3.org/TR/webvtt/) (reader + writer*)
 
-*Note that writers do not write styling/layouts/metadata yet unless specified*
+*reader\* - does not read styling/layout/metadata*
+<br>*writer\* - does not write styling layout/metadata*
 
 ## Future plans
 - add writers to all supported formats
@@ -115,3 +117,22 @@ with Captions("tests/test.en.srt") as captions:
     captions.joinFile("tests/test.en.srt", add_end_time=True)
     captions.save("test")
 ```
+
+## Changelog
+### v0.5.0
+Release date: 2024-01-21
+
+Changes:
+- SRT writer optimization
+- Keyword `with` now supports string/iostream with parameter `isFile = False`
+- budoux version upgrade for Thai formating support
+- `languages`` is now not required parameter for readers
+- Added basic ttml writer
+- `detectTTML` now detects valid xml with empty lines
+- Changed `CaptionsFormat.getLayout` to `CaptionsFormat.getLayoutById`, original now returns a list
+- Changed `CaptionsFormat.getStyle` to `CaptionsFormat.getStyleById`, original now returns a list
+- Changed `CaptionsFormat.getMetadata` to `CaptionsFormat.getMetadataById`, original now returns a list
+- Added `CaptionsFormat.removeComments`, `CaptionsFormat.removeOptionsComments`, `CaptionsFormat.removeAllComments` for removing comment blocks
+- Implemented `Block.getLines` that returns text in specified number of lines without style.
+
+Read past changes [here](https://github.com/adfreelife/PyCaptions/blob/main/CHANGELOG.md).

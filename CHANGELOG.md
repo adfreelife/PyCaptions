@@ -1,23 +1,29 @@
 Table of Contents
-- [v0.5.0](#v050)
-- [v0.4.1](#v041)
+- [v0.4.1 [stable]](#v041)
 - [v0.4.0](#v040)
 - [v0.3.1](#v031)
 - [v0.3.0](#v030)
 - [v0.2.2](#v022)
-- [v0.2.1](#v021)
+- [v0.2.1 [broken]](#v021)
 
-* * *
 ### v0.5.0
-Release date: TBA
-<br>Commit: [TBA]()
+Release date: 2024-01-21
+<br>Commit:
 
 Changes:
 - SRT writer optimization
 - Keyword `with` now supports string/iostream with parameter `isFile = False`
 - budoux version upgrade for Thai formating support
+- `languages`` is now not required parameter for readers
+- Added basic ttml writer
+- `detectTTML` now detects valid xml with empty lines
+- Changed `CaptionsFormat.getLayout` to `CaptionsFormat.getLayoutById`, original now returns a list
+- Changed `CaptionsFormat.getStyle` to `CaptionsFormat.getStyleById`, original now returns a list
+- Changed `CaptionsFormat.getMetadata` to `CaptionsFormat.getMetadataById`, original now returns a list
+- Added `CaptionsFormat.removeComments`, `CaptionsFormat.removeOptionsComments`, `CaptionsFormat.removeAllComments` for removing comment blocks
+- Implemented `Block.getLines` that returns text in specified number of lines without style.
 
-### v0.4.1 
+### v0.4.1
 Release date: 2024-01-14
 <br>Commit: [1c05f58](https://github.com/adfreelife/PyCaptions/commit/1c05f58bacccb1ef147461a6f0a644168ff71db1)
 
@@ -70,7 +76,7 @@ Fixes:
 
 ### v0.2.1
 Release date: 2024-01-07
-<br>Commit: [1f35853](https://github.com/adfreelife/PyCaptions/commit/1f35853f4cb74d19b057abf671356d8e4f2bbbeb)
+<br>Commit: [3dc02be](https://github.com/adfreelife/PyCaptions/commit/1f35853f4cb74d19b057abf671356d8e4f2bbbeb)
 
 Initial release
 - Supported readers: SubRip, WebVTT, MicroDVD, TTML

@@ -4,8 +4,6 @@ import os
 from langcodes import standardize_tag, tag_is_valid
 from .block import Block, BlockType
 from .microTime import MicroTime as MT
-import budoux
-
 
 
 class FileExtensions:
@@ -143,72 +141,29 @@ class CaptionsFormat:
     def __len__(self):
         return len(self._block_list)
     
-    def getLines(self, lang: str = "und", lines: int = 0, split_block: bool = False, character_limit: int = 47, split_ratios: list[float] = [0.7, 1]) -> list[str]:
-        """
-        Format text of specific language into multiple lines.
+    def sort(self):
+        self.removeComments()
+        self.sort(key=lambda x: x.start_time)
 
-        Args:
-            lang (str, optional): Language code (default is "und" for undefined).
-            lines (int, optional): The number of lines to format to. (default is 0 - autoformat). Ignores character limit and split ratios if it cannot fit in the desired amount.
-            split_block (bool, optional): If the text cannot fit in desired lines (or 2 if autoformat), it will split the block (default is False).
-            character_limit (int, optional) How many characters should be in a line. (default is 47)
-            split_ratios (list[float], optional): Affects character_limit for n-th line. (default [0.7, 1])
-        Returns:
-            list[str]: A list of text lines.
-            list[Block]: A list of extra blocks
-        """
-        text = self.get(lang)
-        
-        if lines == 1:
-            return [text]
-
-        if lang == "ja":
-            parser = budoux.load_default_japanese_parser()
-            phrases = parser.parse(text)
-        elif lang in ["zh", "zh-CN", "zh-SG", "zh-Hans"]:
-            parser = budoux.load_default_simplified_chinese_parser()
-            phrases = parser.parse(text)
-        elif lang in ["zh-HK", "zh-MO", "zh-TW", "zh-Hant"]:
-            parser = budoux.load_default_simplified_chinese_parser()
-            phrases = parser.parse(text)
-        elif lang == "th":
-            parser = budoux.load_default_thai_parser()
-            phrases = parser.parse(text)
-        else:
-            phrases = text.split(" ")
-
-        if lines != 0:
-            total_characters = len(text)
-            target_characters = total_characters - lines + 1
-            current_limit = sum(character_limit * ratio for ratio in split_ratios)
-            if current_limit < target_characters:
-                remaining = (target_characters - current_limit) / total_characters
-                for index, _ in enumerate(split_ratios):
-                    split_ratios[index] += remaining  
-
-        formatted_lines = []
-        current_line = ""
-        current_character_count = 0
-
-        for phrase in phrases:
-            current_ratio_index = min(len(formatted_lines), len(split_ratios) - 1)
-            effective_limit = int(character_limit * split_ratios[current_ratio_index])
-            print(effective_limit)
-
-            if current_character_count + len(phrase) <= effective_limit:
-                current_line += phrase + " "
-                current_character_count += len(phrase) + 1  # +1 for the space
+    def removeOptionsComments(self):
+        index = 0
+        while index < len(self.options["blocks"]):
+            if self.options["blocks"].block_type == BlockType.COMMENT:
+                del self[index]
             else:
-                formatted_lines.append(current_line.strip())
-                current_line = phrase + " "
-                current_character_count = len(phrase) + 1
+                index+=1
 
-        if current_line:
-            formatted_lines.append(current_line.strip())
-
-        return formatted_lines
-
-     
+    def removeComments(self):
+        index = 0
+        while index < len(self):
+            if self[index].block_type == BlockType.COMMENT:
+                del self[index]
+            else:
+                index+=1
+        
+    def removeAllComments(self):
+        self.removeComments()
+        self.removeOptionsComments()
     
     def setOptionsBlockId(self, index1, index2):
         block = self.options["blocks"][index1]
@@ -242,7 +197,10 @@ class CaptionsFormat:
         self.options["blocks"].append(layout)
         self.options["layout"][id] = len(self.options["blocks"])
 
-    def getLayout(self, id: str):
+    def getLayout(self):
+        return (self.options["blocks"][i] for i in self.options["layout"])
+
+    def getLayoutById(self, id: str):
         if id in self.options["layout"]:
             return self.options["blocks"][self.options["layout"][id]]
         return None
@@ -252,8 +210,11 @@ class CaptionsFormat:
             raise ValueError(f"Expected BlockType {BlockType.METADATA} got {style.block_type}")
         self.options["blocks"].append(style)
         self.options["style"][id] = len(self.options["blocks"])
+
+    def getStyle(self):
+        return (self.options["style"][i] for i in self.options["style"])
     
-    def getStyle(self, id: str):
+    def getStyleById(self, id: str):
         if id in self.options["style"]:
             return self.options["blocks"][self.options["style"][id]]
         return None
@@ -263,8 +224,11 @@ class CaptionsFormat:
             raise ValueError(f"Expected BlockType {BlockType.METADATA} got {metadata.block_type}")
         self.options["blocks"].append(metadata)
         self.options["metadata"][id] = len(self.options["blocks"])
+
+    def getMetadata(self):
+        return (self.options["metadata"][i] for i in self.options["metadata"])
     
-    def getMetadata(self, id: str):
+    def getMetadataById(self, id: str):
         if id in self.options["metadata"]:
             return self.options["blocks"][self.options["metadata"][id]]
         return None

@@ -30,6 +30,8 @@ class Captions(CaptionsFormat):
         "srt": readSRT,
         "sub": readSUB,
         "ttml": readTTML,
+        "dfxp": readTTML,
+        "xml": readTTML,
         "usf": readUSF,
         "vtt": readVTT
     }
@@ -40,6 +42,8 @@ class Captions(CaptionsFormat):
         "srt": saveSRT,
         "sub": saveSUB,
         "ttml": saveTTML,
+        "dfxp": saveTTML,
+        "xml": saveTTML,
         "usf": saveUSF,
         "vtt": saveVTT
     }
@@ -79,5 +83,5 @@ class Captions(CaptionsFormat):
         else:
             output_format = self.fileFormat
         if output_format not in self.savers:
-            raise ValueError("Incorect output format")
+            raise ValueError(f"Incorect output format {output_format}")
         self.savers[output_format](self, filename=filename, languages=languages, **kwargs)

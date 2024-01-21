@@ -1,6 +1,9 @@
+import budoux
 from collections import defaultdict
+from langcodes import standardize_tag, tag_is_valid
 from .microTime import MicroTime as MT
 from .styling import Styling
+
 
 class BlockType:
     CAPTION = 1
@@ -124,10 +127,76 @@ class Block:
     
     def get_style(self, lang: str) -> str:
         return Styling(self.languages.get(lang), "html.parser")
+    
+    def getLines(self, lang:str = None, lines: int = 0, character_limit: int = 47, split_ratios: list[float] = [0.7, 1], **kwargs) -> list[str]:
+        """
+        Format text of specific language into multiple lines.
 
-    def append(self, text: str, lang: str = "und"):
-        if not self.default_language:
-            self.default_language = lang
+        Args:
+            lang (str, optional): Language code (default is None - uses default_language).
+            lines (int, optional): The number of lines to format to. (default is 0 - autoformat). Ignores character limit and split ratios if it cannot fit in the desired amount.
+            character_limit (int, optional) How many characters should be in a line. (default is 47)
+            split_ratios (list[float], optional): Affects character_limit for n-th line. (default [0.7, 1])
+            parser_language (str, optional): Parser language code, if None it uses lang.
+        Returns:
+            list[str]: A list of text lines.
+        """
+        lang = lang or self.default_language
+        text = self.get(lang)
+
+        standardized = standardize_tag(kwargs.get("parser_language") or lang, macro=True)
+        standardized = standardized if tag_is_valid(standardized) else "und"
+        
+        if lines == 1:
+            return [text]
+
+        if standardized == "ja":
+            parser = budoux.load_default_japanese_parser()
+            phrases = parser.parse(text)
+        elif standardized in ["zh", "zh-CN", "zh-SG", "zh-Hans"]:
+            parser = budoux.load_default_simplified_chinese_parser()
+            phrases = parser.parse(text)
+        elif standardized in ["zh-HK", "zh-MO", "zh-TW", "zh-Hant"]:
+            parser = budoux.load_default_simplified_chinese_parser()
+            phrases = parser.parse(text)
+        elif standardized == "th":
+            parser = budoux.load_default_thai_parser()
+            phrases = parser.parse(text)
+        else:
+            phrases = text.split(" ")
+
+        if lines != 0:
+            total_characters = len(text)
+            target_characters = total_characters - lines + 1
+            current_limit = sum(character_limit * ratio for ratio in split_ratios)
+            if current_limit < target_characters:
+                remaining = (target_characters - current_limit) / total_characters
+                for index, _ in enumerate(split_ratios):
+                    split_ratios[index] += remaining  
+
+        formatted_lines = []
+        current_line = ""
+        current_character_count = 0
+
+        for phrase in phrases:
+            current_ratio_index = min(len(formatted_lines), len(split_ratios) - 1)
+            effective_limit = int(character_limit * split_ratios[current_ratio_index])
+
+            if current_character_count + len(phrase) <= effective_limit:
+                current_line += phrase + " "
+                current_character_count += len(phrase) + 1  # +1 for the space
+            else:
+                formatted_lines.append(current_line.strip())
+                current_line = phrase + " "
+                current_character_count = len(phrase) + 1
+
+        if current_line:
+            formatted_lines.append(current_line.strip())
+
+        return formatted_lines
+
+    def append(self, text: str, lang: str = None):
+        lang = lang or self.default_language
         if lang not in ["ja", "zh", "zh-CN", "zh-SG", "zh-Hans",
                         "zh-HK", "zh-MO", "zh-TW", "zh-Hant"]:
             if self.languages[lang]:
@@ -137,7 +206,8 @@ class Block:
         else:
             self.languages[lang] += text
 
-    def append_without_common_part(self, text: str, lang: str):
+    def append_without_common_part(self, text: str, lang: str = None):
+        lang = lang or self.default_language
         common_lenght = 0
         current = self.get(lang)
         min_length = min(len(current), len(text))

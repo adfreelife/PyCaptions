@@ -1,4 +1,4 @@
-__version__ = "0.4.1"
+__version__ = "0.5.0"
 
 import pycaptions.srt as srt
 import pycaptions.sub as sub
@@ -13,4 +13,4 @@ from pycaptions.ttml import detectTTML, TTML
 from pycaptions.vtt import detectVTT, WebVTT
 
 supported_readers = srt.EXTENSIONS + sub.EXTENSIONS + ttml.EXTENSIONS + vtt.EXTENSIONS 
-supported_extensions = srt.EXTENSIONS + sub.EXTENSIONS + vtt.EXTENSIONS
+supported_extensions = srt.EXTENSIONS + sub.EXTENSIONS + ttml.EXTENSIONS + vtt.EXTENSIONS

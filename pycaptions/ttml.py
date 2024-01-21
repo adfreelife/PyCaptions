@@ -15,9 +15,9 @@ def detectTTML(content: str | io.IOBase) -> bool:
     Used to detect Timed Text Markup Language caption format.
 
     It returns True if:
-     - the first line starts with `<?xml` and contains `<tt xml` OR
-     - the first line starts with `<tt xml` OR
-     - the second line starts with `<tt xml`
+     - the first non empty line starts with `<?xml` and contains `<tt xml` OR
+     - the first non empty line starts with `<tt xml` OR
+     - the second non empty line starts with `<tt xml`
     """
     if not isinstance(content, io.IOBase):
         if not isinstance(content, str):
@@ -25,11 +25,16 @@ def detectTTML(content: str | io.IOBase) -> bool:
         content = io.StringIO(content)
 
     offset = content.tell()
-    first = content.readline().lstrip()
-    if (first.startswith("<tt xml") or first.startswith("<?xml") and "<tt xml" in first
-        or content.readline().lstrip().startswith("<tt xml")
-    ):
+    line = content.readline().lstrip()
+    while not line:
+        line = content.readline().lstrip()
+    if line.startswith("<tt xml") or line.startswith("<?xml") and "<tt xml" in line:
         content.seek(offset)
+        return True
+    line = content.readline().lstrip()
+    while not line:
+        line = content.readline().lstrip()
+    if line.startswith("<tt xml"):
         return True
     content.seek(offset)
     return False
@@ -75,14 +80,39 @@ def saveTTML(self, filename: str, languages: list[str] = None, **kwargs):
                                  languages=languages, **kwargs)
     encoding = kwargs.get("file_encoding") or "UTF-8"
     languages = languages or [self.default_language]
+    if kwargs.get("no_styling"):
+        generator = (((data.get(i) for i in languages), data) for data in self)
+    else:
+        generator = (((data.get_style(i).getTTML() for i in languages), data) for data in self)
+
     try:
+        content = BeautifulSoup("""<?xml version="1.0" encoding="utf-8"?>
+                                <tt xmlns="http://www.w3.org/ns/ttml">
+                                <body></body>
+                                </tt>""", "xml")
+        body = content.select_one("body")
+        lang = []
+        for i in languages:
+            lang.append(content.new_tag('div'))
+            lang[-1]["xml:lang"] = i
+            body.append(lang[-1])
+        for text, data in generator:
+            if data.block_type != BlockType.CAPTION:
+                continue
+            begin = data.start_time.toTTMLTime()
+            end = data.end_time.toTTMLTime()
+            for index, t in enumerate(text):
+                p = content.new_tag("p", begin=begin, end=end)
+                p.string = t
+                lang[index].append(p)
+        
         with open(filename, "w", encoding=encoding) as file:
-            pass
+            file.write(content.prettify())
+
     except IOError as e:
         print(f"I/O error({e.errno}): {e.strerror}")
     except Exception as e:
         print(f"Error {e}")
-    raise ValueError("Not Implemented")
 
 
 class TTML(CaptionsFormat):

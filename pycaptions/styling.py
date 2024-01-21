@@ -3,6 +3,10 @@ from cssutils import CSSParser
 
 class Styling(BS):
 
+    def parseStyle(self, string):
+        parser = CSSParser(validate=False)
+        return parser.parseStyle(string, encoding="UTF-8")
+
     @staticmethod
     def fromSRT(text):
         bs = BS(text, "html.parser")
@@ -19,10 +23,6 @@ class Styling(BS):
                     tag["style"] = tag.get("style", "")+f'font-family: {tag["face"]};'
                     del tag["face"]
         return str(bs)
-    
-    def parseStyle(self, string):
-        parser = CSSParser(validate=False)
-        return parser.parseStyle(string, encoding="UTF-8")
     
     def getSRT(self, css = None, add_metadata = True):
         for tag in self.find_all():
@@ -78,6 +78,7 @@ class Styling(BS):
                 else:
                     tag.unwrap()
 
-                    
         return str(self)
-                
+
+    def getTTML(self, css = None, add_metadata = True):
+        return self.get_text()    
