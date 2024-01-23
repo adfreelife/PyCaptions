@@ -8,7 +8,7 @@ IGNORE_JSON_FIELDS = ["filename"]
 JSON_FIELDS = ["identifier", "json_version", "default_language", "time_length", "filename", "file_extensions", "options", "block_list"]
 TEST_FILES_PATH = "test/captions/"
 TEST_FILES = ["test.en.srt", "test.en.sub", "test.en.vtt", "test.ttml"]
-TEST_MULTILINGUAL = ["test.ttml", "test.en.es.sub"]
+TEST_MULTILINGUAL = ["test.ttml", "test.en.es.sub", "test.en.es.srt"]
 EXTENSIONS = save_extensions.getvars().values()
 
 

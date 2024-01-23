@@ -112,7 +112,6 @@ def readSUB(self, content: str | io.IOBase, languages: list[str] = None, **kwarg
             caption = Block(BlockType.CAPTION, start_time=start, end_time=end,
                             style=[p.strip("{}") for p in params[2:]])
             for counter, line in enumerate(lines):
-                print(counter, line)
                 start, end = formatLine(self, re.findall(PATTERN, line))
                 line = start+re.sub(PATTERN, "", line)+end
                 if len(languages) > 1:

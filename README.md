@@ -121,20 +121,19 @@ with Captions("tests/test.en.srt") as captions:
 ```
 
 ## Changelog
-### v0.5.1
-Release date: 2024-01-23
+### v0.5.2
+Release date: 2024-01-24
 
 Changes:
-- Added `fromLegacyJson` to parse json saved before version v0.5.0
-- Added `identifier: pycaptions` and `version` to json if something changes in the future.
-- `Block` of type `BlockType.STYLE` now parses `options.style` if it's a string by default when initialized, otherwise use `styling.cssParser` or `cssutils.CSSParser` to parse css beforehand.
-- You can now change save extensions globaly by `save_extensions.{format} = {str}`
+- Added `save_as` arguments to `toJson` function, can be of value `caption_array`, `dict`, `string`.
+- Added `FileExtensions.getvars` that returns key-value pairs of variable names and extensions
+- Added `BlockType.getvars` that returns key-value pairs of variable names and numbers
+- `MicroDVD.read` now converts control code `H` value to language code
+- `MicroDVD.read` now stores unimplemented/unknown control codes (json)
+- Added `charset-normalizer` package so that `with` keyword and `fromJson`, `fromLegacyJson` can have `encoding="auto"`
+- `with` keyword now supports loading legacy json with argument `legacyJson=True`
 
 Fixes:
-- Fixed `toJson` not saving correctly due to atribute rename
-- Fixed `cssutils.css.CSSStyleSheet` causing error when using `toJson`
-- Fixed `CaptionsFormat.getLayout` not returning `Block`
-- Fixed `CaptionsFormat.getStyle` not returning `Block` 
-- Fixed `CaptionsFormat.getMetadata` not returning `Block` 
+- Fixed an issue where `detectTTML` causes infinit loop.
 
 Read past changes [here](https://github.com/adfreelife/PyCaptions/blob/main/CHANGELOG.md).

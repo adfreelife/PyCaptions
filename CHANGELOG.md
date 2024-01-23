@@ -1,5 +1,5 @@
 Table of Contents
-- [TBA [stable]](#tba)
+- [v0.5.2 [stable]](#v052)
 - [v0.5.1](#v051)
 - [v0.5.0](#v050)
 - [v0.4.1 [stable]](#v041)
@@ -9,8 +9,8 @@ Table of Contents
 - [v0.2.2](#v022)
 - [v0.2.1 [broken]](#v021)
 
-### TBA
-Release date: TBA
+### v0.5.2
+Release date: 2024-01-24
 <br>Commit: TBA
 
 Changes:
