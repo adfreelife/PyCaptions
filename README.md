@@ -119,20 +119,21 @@ with Captions("tests/test.en.srt") as captions:
 ```
 
 ## Changelog
-### v0.5.0
-Release date: 2024-01-21
+### v0.5.1
+Release date: 2024-01-23
+<br>Commit: TBA
 
 Changes:
-- SRT writer optimization
-- Keyword `with` now supports string/iostream with parameter `isFile = False`
-- budoux version upgrade for Thai formating support
-- `languages`` is now not required parameter for readers
-- Added basic ttml writer
-- `detectTTML` now detects valid xml with empty lines
-- Changed `CaptionsFormat.getLayout` to `CaptionsFormat.getLayoutById`, original now returns a list
-- Changed `CaptionsFormat.getStyle` to `CaptionsFormat.getStyleById`, original now returns a list
-- Changed `CaptionsFormat.getMetadata` to `CaptionsFormat.getMetadataById`, original now returns a list
-- Added `CaptionsFormat.removeComments`, `CaptionsFormat.removeOptionsComments`, `CaptionsFormat.removeAllComments` for removing comment blocks
-- Implemented `Block.getLines` that returns text in specified number of lines without style.
+- Added `fromLegacyJson` to parse json saved before version v0.5.0
+- Added `identifier: pycaptions` and `version` to json if something changes in the future.
+- `Block` of type `BlockType.STYLE` now parses `options.style` if it's a string by default when initialized, otherwise use `styling.cssParser` or `cssutils.CSSParser` to parse css beforehand.
+- You can now change save extensions globaly by `save_extensions.{format} = {str}`
+
+Fixes:
+- Fixed `toJson` not saving correctly due to atribute rename
+- Fixed `cssutils.css.CSSStyleSheet` causing error when using `toJson`
+- Fixed `CaptionsFormat.getLayout` not returning `Block`
+- Fixed `CaptionsFormat.getStyle` not returning `Block` 
+- Fixed `CaptionsFormat.getMetadata` not returning `Block` 
 
 Read past changes [here](https://github.com/adfreelife/PyCaptions/blob/main/CHANGELOG.md).

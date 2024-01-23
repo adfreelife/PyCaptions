@@ -1,4 +1,6 @@
 Table of Contents
+- [v0.5.1 [stable]](#v051)
+- [v0.5.0](#v050)
 - [v0.4.1 [stable]](#v041)
 - [v0.4.0](#v040)
 - [v0.3.1](#v031)
@@ -6,9 +8,26 @@ Table of Contents
 - [v0.2.2](#v022)
 - [v0.2.1 [broken]](#v021)
 
+### v0.5.1
+Release date: 2024-01-23
+<br>Commit: TBA
+
+Changes:
+- Added `fromLegacyJson` to parse json saved before version v0.5.0
+- Added `identifier: pycaptions` and `version` to json if something changes in the future.
+- `Block` of type `BlockType.STYLE` now parses `options.style` if it's a string by default when initialized, otherwise use `styling.cssParser` or `cssutils.CSSParser` to parse css beforehand.
+- You can now change save extensions globaly by `save_extensions.{format} = {str}`
+
+Fixes:
+- Fixed `toJson` not saving correctly due to atribute rename
+- Fixed `cssutils.css.CSSStyleSheet` causing error when using `toJson`
+- Fixed `CaptionsFormat.getLayout` not returning `Block`
+- Fixed `CaptionsFormat.getStyle` not returning `Block` 
+- Fixed `CaptionsFormat.getMetadata` not returning `Block` 
+
 ### v0.5.0
 Release date: 2024-01-21
-<br>Commit:
+<br>Commit: [0cef8bd](https://github.com/adfreelife/PyCaptions/commit/0cef8bd36805dde5a58323f309754fc745f50f51)
 
 Changes:
 - SRT writer optimization

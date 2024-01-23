@@ -4,7 +4,6 @@ import re
 from .block import Block, BlockType
 from .captionsFormat import CaptionsFormat
 from .microTime import MicroTime as MT
-from cssutils import CSSParser
 
 
 EXTENSIONS = [".vtt"]
@@ -77,12 +76,7 @@ def readVTT(self, content: str | io.IOBase, languages: list[str] = None, **kwarg
                     self.options["style_metadata"]["identifier_to_new"][match.group(1)] = style_name
                     return style_name
                 return match.group(1)
-            parser = CSSParser(validate=False)
-            style = parser.parseString(
-                        cssText=re.sub(STYLE_PATERN, replace_style, style),
-                        encoding="UTF-8"
-                    )
-            self.addStyle(str(style_block_count), Block(BlockType.STYLE, id=str(style_block_count), style=style))
+            self.addStyle(str(style_block_count), Block(BlockType.STYLE, id=str(style_block_count), style=re.sub(STYLE_PATERN, replace_style, style)))
         elif line == "REGION":
             line = content.readline().strip()
             temp = dict()

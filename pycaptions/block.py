@@ -1,8 +1,9 @@
 import budoux
+import cssutils
 from collections import defaultdict
 from langcodes import standardize_tag, tag_is_valid
 from .microTime import MicroTime as MT
-from .styling import Styling
+from .styling import Styling, cssParser
 
 
 class BlockType:
@@ -38,7 +39,7 @@ class Block:
         __iter__: Iterator for iterating through the block languages.
         __next__: Iterator method returning a tuple of language and text.
     """
-    def __init__(self, block_type: int, lang: str = "und", start_time: MT = None,
+    def __init__(self, block_type: int, default_language: str = "und", start_time: MT = None,
                  end_time: MT = None, text: str = "", **options):
         """
         Initialize a new instance of the Block class.
@@ -57,12 +58,18 @@ class Block:
             for i, j in options.get("languages").items():
                 self.languages[i] = j
             del options["languages"]
-        self.default_language = lang
+        self.default_language = default_language
         if text:
-            self.languages[lang] = text.strip()
+            self.languages[default_language] = text.strip()
         self.start_time = start_time
         self.end_time = end_time
-        self.options = options or {}
+        if "options" in options:
+            self.options = options["options"]
+        else:
+            self.options = options or {}
+
+        if block_type == BlockType.STYLE and isinstance(self.options["style"], str):
+            self.options["style"] = cssParser.parseString(cssText=self.options["style"],encoding="UTF-8")
 
     def __getitem__(self, index: str):
         return self.languages[index]

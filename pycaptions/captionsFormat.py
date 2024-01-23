@@ -6,12 +6,18 @@ from .block import Block, BlockType
 from .microTime import MicroTime as MT
 
 
+JSON_VERSION = 1
+
+
 class FileExtensions:
     SAMI = ".sami"
     SRT = ".srt"
     SUB = ".sub"
     TTML = ".ttml"
     VTT = ".vtt"
+
+
+save_extensions = FileExtensions()
 
 
 class CaptionsFormat:
@@ -60,6 +66,7 @@ class CaptionsFormat:
         - default_language (str, optional): The default language for captions (default is "und" for undefined).
         - **options: Additional keyword arguments for customization (e.g. metadata, style, ...).
         """
+        self.json_version = options.get("json_version") or JSON_VERSION
         self.time_length = MT() or time_length
         self.file_name_or_content = file_name_or_content
         self.isFile = isFile
@@ -84,7 +91,7 @@ class CaptionsFormat:
             self.options["style_metadata"]["style_id_counter"] = 0
         self._block_list: list[Block] = []
         self.setDefaultLanguage(default_language)
-        self.extensions = file_extensions or FileExtensions()
+        self.extensions = file_extensions or save_extensions
 
     def __getitem__(self, index: int):
         return self._block_list[index]
@@ -195,10 +202,10 @@ class CaptionsFormat:
         if layout.block_type != BlockType.LAYOUT:
             raise ValueError(f"Expected BlockType {BlockType.METADATA} got {layout.block_type}")
         self.options["blocks"].append(layout)
-        self.options["layout"][id] = len(self.options["blocks"])
+        self.options["layout"][id] = len(self.options["blocks"])-1
 
     def getLayout(self):
-        return (self.options["blocks"][i] for i in self.options["layout"])
+        return (self.options["blocks"][i] for i in self.options["layout"].values())
 
     def getLayoutById(self, id: str):
         if id in self.options["layout"]:
@@ -209,10 +216,10 @@ class CaptionsFormat:
         if style.block_type != BlockType.STYLE:
             raise ValueError(f"Expected BlockType {BlockType.METADATA} got {style.block_type}")
         self.options["blocks"].append(style)
-        self.options["style"][id] = len(self.options["blocks"])
+        self.options["style"][id] = len(self.options["blocks"])-1
 
     def getStyle(self):
-        return (self.options["style"][i] for i in self.options["style"])
+        return (self.options["blocks"][i] for i in self.options["style"].values())
     
     def getStyleById(self, id: str):
         if id in self.options["style"]:
@@ -223,10 +230,10 @@ class CaptionsFormat:
         if metadata.block_type != BlockType.METADATA:
             raise ValueError(f"Expected BlockType {BlockType.METADATA} got {metadata.block_type}")
         self.options["blocks"].append(metadata)
-        self.options["metadata"][id] = len(self.options["blocks"])
+        self.options["metadata"][id] = len(self.options["blocks"])-1
 
     def getMetadata(self):
-        return (self.options["metadata"][i] for i in self.options["metadata"])
+        return (self.options["blocks"][i] for i in self.options["metadata"].values())
     
     def getMetadataById(self, id: str):
         if id in self.options["metadata"]:
@@ -302,20 +309,43 @@ class CaptionsFormat:
         for i in self:
             i.shift_end_us(time)
 
-    def fromJson(self, file: str, **kwargs):
+    def loadJson(self, data, **kwargs):
+        self.time_length = data["time_length"]
+        self.default_language = data["default_language"]
+        self.filename = data["filename"]
+        for key, value in data[kwargs.get("file_extensions") or "file_extensions"].items():
+            setattr(save_extensions, key, value)
+        self.options = data["options"]
+        self._block_list = [Block(**caption) for caption in data["block_list"]]
+
+    def fromLegacyJson(self, file: str, **kwargs):
         encoding = kwargs.get("encoding") or "UTF-8"
-        if not file.endswith(".json"):
+        _, ext = os.path.splitext(file)
+        if not ext:
             file += ".json"
         try:
             with open(file, "r", encoding=encoding) as f:
                 data = json.load(f)
-                self.time_length = data["time_length"]
-                self.default_language = data["default_language"]
-                self.filename = data["filename"]
-                for key, value in data["extensions"].items():
-                    setattr(FileExtensions, key, value)
-                self.options = data["options"]
-                self._block_list = [Block(**caption) for caption in data["block_list"]]
+            self.loadJson(data, file_extensions="extensions")  
+        except IOError as e:
+            print(f"I/O error({e.errno}): {e.strerror}")
+        except Exception as e:
+            print(f"Error {e}")
+
+    def fromJson(self, file: str, **kwargs):
+        encoding = kwargs.get("encoding") or "UTF-8"
+        _, ext = os.path.splitext(file)
+        if not ext:
+            file += ".json"
+        try:
+            with open(file, "r", encoding=encoding) as f:
+                data = json.load(f)
+                if not data.get("identifier") or not data["identifier"] == "pycaptions":
+                    raise ValueError(f"Incorect json format: File data does not contain 'identifier' with value of 'pycaptions'\nIf you have saves before 0.5.1 run your arguments with 'fromLegacyJson' function.")
+                compatibility = dict()
+                if not data.get("json_version") == JSON_VERSION:
+                    pass
+                self.loadJson(data, **compatibility)  
         except IOError as e:
             print(f"I/O error({e.errno}): {e.strerror}")
         except Exception as e:
@@ -323,18 +353,28 @@ class CaptionsFormat:
 
     def toJson(self, file: str, **kwargs):
         encoding = kwargs.get("encoding") or "UTF-8"
+        def serializer(obj):
+            if hasattr(obj, '__json__'):
+                return obj.__json__()
+            else:
+                return vars(obj)
         try:
             if not file.endswith(".json"):
                 file += ".json"
             with open(file, "w", encoding=encoding) as f:
+                filename = ""
+                if self.isFile:
+                    filename = self.file_name_or_content
                 json.dump({
+                    "identifier": "pycaptions",
+                    "json_version": self.json_version,
                     "default_language": self.default_language,
                     "time_length": self.time_length,
-                    "filename": self.filename,
-                    "extensions": vars(self.extensions),
+                    "filename": filename,
+                    "file_extensions": vars(self.extensions),
                     "options": self.options,
                     "block_list": self._block_list
-                           }, f, default=vars)
+                           }, f, default=serializer)
         except IOError as e:
             print(f"I/O error({e.errno}): {e.strerror}")
         except Exception as e:

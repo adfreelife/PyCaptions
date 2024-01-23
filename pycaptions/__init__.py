@@ -1,10 +1,11 @@
-__version__ = "0.5.0"
+__version__ = "0.5.1"
 
 import pycaptions.srt as srt
 import pycaptions.sub as sub
 import pycaptions.ttml as ttml
 import pycaptions.vtt as vtt
 
+from pycaptions.captionsFormat import save_extensions
 from pycaptions.microTime import MicroTime
 from pycaptions.captions import Captions
 from pycaptions.srt import detectSRT, SubRip

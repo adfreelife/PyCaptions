@@ -1,11 +1,22 @@
 from bs4 import BeautifulSoup as BS
 from cssutils import CSSParser
+from cssutils.css import CSSStyleSheet as originalCSSStyleSheet
+import cssutils
+
+
+class StyleSheet(originalCSSStyleSheet):
+    def __json__(self):
+        return str(self.cssText)
+
+
+cssutils.css.CSSStyleSheet = StyleSheet
+cssParser = CSSParser(validate=False)
+
 
 class Styling(BS):
 
     def parseStyle(self, string):
-        parser = CSSParser(validate=False)
-        return parser.parseStyle(string, encoding="UTF-8")
+        return cssParser.parseStyle(string, encoding="UTF-8")
 
     @staticmethod
     def fromSRT(text):
