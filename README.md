@@ -121,7 +121,6 @@ with Captions("tests/test.en.srt") as captions:
 ## Changelog
 ### v0.5.1
 Release date: 2024-01-23
-<br>Commit: TBA
 
 Changes:
 - Added `fromLegacyJson` to parse json saved before version v0.5.0

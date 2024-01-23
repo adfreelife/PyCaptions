@@ -10,7 +10,7 @@ Table of Contents
 
 ### v0.5.1
 Release date: 2024-01-23
-<br>Commit: TBA
+<br>Commit: 39aa066(https://github.com/adfreelife/PyCaptions/commit/39aa06659bff25367f6cefe5f5c1116047104119)
 
 Changes:
 - Added `fromLegacyJson` to parse json saved before version v0.5.0
