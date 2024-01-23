@@ -1,6 +1,7 @@
 import json
 import io
 import os
+import copy
 from langcodes import standardize_tag, tag_is_valid
 from .block import Block, BlockType
 from .microTime import MicroTime as MT
@@ -10,14 +11,28 @@ JSON_VERSION = 1
 
 
 class FileExtensions:
-    SAMI = ".sami"
     SRT = ".srt"
     SUB = ".sub"
     TTML = ".ttml"
     VTT = ".vtt"
 
+    @classmethod
+    def getvars(cls) -> dict:
+        """
+        Used to retrive all extensions for specific format.
+        """
+        return {attr: getattr(cls, attr) for attr in dir(cls)
+                if not callable(getattr(cls, attr)) and not attr.startswith("__")}
+
 
 save_extensions = FileExtensions()
+"""
+Globaly stores file extensions of implemented formats.
+
+Example:
+- Changing ttml extansion from .ttml to .xml
+save_extensions.TTML = ".xml"
+"""
 
 
 class CaptionsFormat:
@@ -55,8 +70,8 @@ class CaptionsFormat:
     """
 
     def __init__(self, file_name_or_content: str = None, default_language: str = "und",
-                 time_length: MT = None, file_extensions = None,
-                 media_height: int = None, media_width: int = None, isFile = True, **options):
+                 time_length: MT = None, file_extensions: FileExtensions = None,
+                 media_height: int = None, media_width: int = None, isFile: bool = True, **options):
         """
         Initialize a new instance of CaptionsFormat class.
 
@@ -130,13 +145,12 @@ class CaptionsFormat:
             if ext == ".json":
                 self.fromJson(self.file_name_or_content)
             else:
-                
-                    with open(self.file_name_or_content, "r", encoding=encoding) as stream:
-                        if self.detect(stream):
-                            languages = self.getLanguagesFromFilename(self.file_name_or_content)
-                            if languages and self.default_language == "und":
-                                self.setDefaultLanguage(languages[0])
-                            self.read(stream, languages)
+                with open(self.file_name_or_content, "r", encoding=encoding) as stream:
+                    if self.detect(stream):
+                        languages = self.getLanguagesFromFilename(self.file_name_or_content)
+                        if languages and self.default_language == "und":
+                            self.setDefaultLanguage(languages[0])
+                        self.read(stream, languages)
         else:
             if self.detect(self.file_name_or_content):
                 self.read(self.file_name_or_content)
@@ -147,7 +161,7 @@ class CaptionsFormat:
 
     def __len__(self):
         return len(self._block_list)
-    
+
     def sort(self):
         self.removeComments()
         self.sort(key=lambda x: x.start_time)
@@ -158,7 +172,7 @@ class CaptionsFormat:
             if self.options["blocks"].block_type == BlockType.COMMENT:
                 del self[index]
             else:
-                index+=1
+                index += 1
 
     def removeComments(self):
         index = 0
@@ -166,12 +180,12 @@ class CaptionsFormat:
             if self[index].block_type == BlockType.COMMENT:
                 del self[index]
             else:
-                index+=1
-        
+                index += 1
+
     def removeAllComments(self):
         self.removeComments()
         self.removeOptionsComments()
-    
+
     def setOptionsBlockId(self, index1, index2):
         block = self.options["blocks"][index1]
         if block.type == BlockType.LAYOUT:
@@ -180,14 +194,14 @@ class CaptionsFormat:
             self.options["style"][block.options["id"]] = index2
         elif block.type == BlockType.METADATA:
             self.options["metadata"][block.options["id"]] = index2
-    
+
     def swapOptionsBlock(self, index1: int, index2: int):
         if index1 == index2 or index1 < 0 or index2 < 0:
             return
         self.setOptionsBlockId(index1, index2)
         self.setOptionsBlockId(index2, index1)
         self.options["blocks"][index1], self.options["blocks"][index2] = self.options["blocks"][index2], self.options["blocks"][index1]
-    
+
     def deleteOptionsBlock(self, index: int):
         block = self.options["blocks"][index]
         if block.type == BlockType.LAYOUT:
@@ -197,7 +211,7 @@ class CaptionsFormat:
         elif block.type == BlockType.METADATA:
             del self.options["metadata"][block.options["id"]]
         del self.options["blocks"][index]
-    
+
     def addLayout(self, id: str, layout: Block):
         if layout.block_type != BlockType.LAYOUT:
             raise ValueError(f"Expected BlockType {BlockType.METADATA} got {layout.block_type}")
@@ -211,7 +225,7 @@ class CaptionsFormat:
         if id in self.options["layout"]:
             return self.options["blocks"][self.options["layout"][id]]
         return None
-    
+
     def addStyle(self, id: str, style: Block):
         if style.block_type != BlockType.STYLE:
             raise ValueError(f"Expected BlockType {BlockType.METADATA} got {style.block_type}")
@@ -220,7 +234,7 @@ class CaptionsFormat:
 
     def getStyle(self):
         return (self.options["blocks"][i] for i in self.options["style"].values())
-    
+
     def getStyleById(self, id: str):
         if id in self.options["style"]:
             return self.options["blocks"][self.options["style"][id]]
@@ -234,7 +248,7 @@ class CaptionsFormat:
 
     def getMetadata(self):
         return (self.options["blocks"][i] for i in self.options["metadata"].values())
-    
+
     def getMetadataById(self, id: str):
         if id in self.options["metadata"]:
             return self.options["blocks"][self.options["metadata"][id]]
@@ -326,7 +340,7 @@ class CaptionsFormat:
         try:
             with open(file, "r", encoding=encoding) as f:
                 data = json.load(f)
-            self.loadJson(data, file_extensions="extensions")  
+            self.loadJson(data, file_extensions="extensions")
         except IOError as e:
             print(f"I/O error({e.errno}): {e.strerror}")
         except Exception as e:
@@ -341,11 +355,12 @@ class CaptionsFormat:
             with open(file, "r", encoding=encoding) as f:
                 data = json.load(f)
                 if not data.get("identifier") or not data["identifier"] == "pycaptions":
-                    raise ValueError(f"Incorect json format: File data does not contain 'identifier' with value of 'pycaptions'\nIf you have saves before 0.5.1 run your arguments with 'fromLegacyJson' function.")
+                    raise ValueError("Incorect json format: File data does not contain 'identifier' with value of 'pycaptions'" +
+                                     "\nIf you have saves before 0.5.1 run your arguments with 'fromLegacyJson' function.")
                 compatibility = dict()
                 if not data.get("json_version") == JSON_VERSION:
                     pass
-                self.loadJson(data, **compatibility)  
+                self.loadJson(data, **compatibility)
         except IOError as e:
             print(f"I/O error({e.errno}): {e.strerror}")
         except Exception as e:
@@ -353,19 +368,18 @@ class CaptionsFormat:
 
     def toJson(self, file: str, **kwargs):
         encoding = kwargs.get("encoding") or "UTF-8"
+
         def serializer(obj):
             if hasattr(obj, '__json__'):
                 return obj.__json__()
             else:
                 return vars(obj)
         try:
-            if not file.endswith(".json"):
-                file += ".json"
-            with open(file, "w", encoding=encoding) as f:
-                filename = ""
-                if self.isFile:
-                    filename = self.file_name_or_content
-                json.dump({
+            filename = ""
+            if self.isFile:
+                filename = self.file_name_or_content
+
+            data = {
                     "identifier": "pycaptions",
                     "json_version": self.json_version,
                     "default_language": self.default_language,
@@ -374,7 +388,23 @@ class CaptionsFormat:
                     "file_extensions": vars(self.extensions),
                     "options": self.options,
                     "block_list": self._block_list
-                           }, f, default=serializer)
+                           }
+            if kwargs.get("save_as"):
+                if kwargs.get("save_as") == "string":
+                    return json.dumps(data, default=serializer)
+                elif kwargs.get("save_as") == "dict":
+                    return copy.deepcopy(data)
+                elif kwargs.get("save_as") == "caption_array":
+                    return [{"start": i.start_time, "end": i.end_time, "text": i.get()}
+                            for i in self if i.block_type == BlockType.CAPTION]
+                else:
+                    raise ValueError(f"Invalid save_as value, got {kwargs.get('save_as')}" +
+                                     ", expected string, dict, caption_array")
+            else:
+                if not file.endswith(".json"):
+                    file += ".json"
+                with open(file, "w", encoding=encoding) as f:
+                    json.dump(data, f, default=serializer)
         except IOError as e:
             print(f"I/O error({e.errno}): {e.strerror}")
         except Exception as e:
@@ -399,7 +429,7 @@ class CaptionsFormat:
 
         time_offset = time or MT()
         if add_end_time:
-            time_offset += self.time_length 
+            time_offset += self.time_length
 
         for caption in captionsFormat:
             self.append(caption.copy())
@@ -423,7 +453,7 @@ class CaptionsFormat:
 
         time_offset = time or MT()
         if add_end_time:
-            time_offset += self.time_length 
+            time_offset += self.time_length
 
         with open(filename, "r", encoding=encoding) as stream:
             if self.detect(stream):

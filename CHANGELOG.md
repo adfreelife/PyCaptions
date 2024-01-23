@@ -1,4 +1,5 @@
 Table of Contents
+- [TBA](#tba)
 - [v0.5.1 [stable]](#v051)
 - [v0.5.0](#v050)
 - [v0.4.1 [stable]](#v041)
@@ -8,9 +9,19 @@ Table of Contents
 - [v0.2.2](#v022)
 - [v0.2.1 [broken]](#v021)
 
+### TBA
+Release date: TBA
+<br>Commit: TBA
+
+Changes:
+- Added `save_as` arguments to `toJson` function, can be of value `caption_array`, `dict`, `string`.
+- Added `FileExtensions.getvars` that returns key-value pairs of variable names and extensions
+- Added `BlockType.getvars` that returns key-value pairs of variable names and numbers
+
+
 ### v0.5.1
 Release date: 2024-01-23
-<br>Commit: 39aa066(https://github.com/adfreelife/PyCaptions/commit/39aa06659bff25367f6cefe5f5c1116047104119)
+<br>Commit: [39aa066](https://github.com/adfreelife/PyCaptions/commit/39aa06659bff25367f6cefe5f5c1116047104119)
 
 Changes:
 - Added `fromLegacyJson` to parse json saved before version v0.5.0

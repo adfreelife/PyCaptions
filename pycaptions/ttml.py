@@ -39,6 +39,7 @@ def detectTTML(content: str | io.IOBase) -> bool:
     content.seek(offset)
     return False
 
+
 # ttp:frameRate, ttp:frameRateMultiplier, ttp:subFrameRate, ttp:tickRate, ttp:timeBase
 def readTTML(self, content: str | io.IOBase, languages: list[str] = None, **kwargs):
     content = self.checkContent(content=content, **kwargs)
@@ -65,9 +66,9 @@ def readTTML(self, content: str | io.IOBase, languages: list[str] = None, **kwar
                 caption = Block(BlockType.CAPTION, start_time=start, end_time=end)
             else:
                 caption = self[block]
-            for l, text in enumerate(line.get_text().strip().split("\n")):
+            for index, text in enumerate(line.get_text().strip().split("\n")):
                 if len(languages) > 1:
-                    caption.append(text, lang or languages[l])
+                    caption.append(text, lang or languages[index])
                 else:
                     caption.append(text, lang or languages[0])
             caption.shift_time(time_offset)
@@ -105,7 +106,7 @@ def saveTTML(self, filename: str, languages: list[str] = None, **kwargs):
                 p = content.new_tag("p", begin=begin, end=end)
                 p.string = t
                 lang[index].append(p)
-        
+
         with open(filename, "w", encoding=encoding) as file:
             file.write(content.prettify())
 

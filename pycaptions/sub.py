@@ -68,10 +68,10 @@ def formatLine(self, pattern):
         elif control_code == "H":
             pass
     if font_vars:
-        start += "<p style='"+";".join(font_vars)+";'>" 
-        end += "</p>" 
+        start += "<p style='"+";".join(font_vars)+";'>"
+        end += "</p>"
     return start, end
-    
+
 
 def readSUB(self, content: str | io.IOBase, languages: list[str] = None, **kwargs):
     content = self.checkContent(content=content, **kwargs)
@@ -83,7 +83,7 @@ def readSUB(self, content: str | io.IOBase, languages: list[str] = None, **kwarg
 
     if not self.options.get("blocks"):
         self.options["blocks"] = []
-    
+
     line = content.readline().strip()
     while line:
         if line.startswith(r"{DEFAULT}"):
@@ -113,7 +113,7 @@ def saveSUB(self, filename: str, languages: list[str] = None, **kwargs):
     encoding = kwargs.get("file_encoding") or "UTF-8"
     languages = languages or [self.default_language]
     frame_rate = kwargs.get("frame_rate") or self.options.get("frame_rate") or 25
-    
+
     with open(filename, "w", encoding=encoding) as file:
         index = 1
         for data in self:
@@ -124,7 +124,6 @@ def saveSUB(self, filename: str, languages: list[str] = None, **kwargs):
             file.write("{"+data.start_time.toSUBTime(frame_rate)+"}{"+data.end_time.toSUBTime(frame_rate)+"}")
             file.write("|".join(data.get(i) for i in languages))
             index += 1
-    
 
 
 class MicroDVD(CaptionsFormat):

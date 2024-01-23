@@ -34,15 +34,15 @@ class Styling(BS):
                     tag["style"] = tag.get("style", "")+f'font-family: {tag["face"]};'
                     del tag["face"]
         return str(bs)
-    
-    def getSRT(self, css = None, add_metadata = True):
+
+    def getSRT(self, css: cssutils.css.CSSStyleSheet = None, add_metadata: bool = True):
         for tag in self.find_all():
             if tag.name:
                 if tag.get("style"):
-                    css = self.parseStyle(tag.get("style"))
+                    inline_css = self.parseStyle(tag.get("style"))
                     font_tag = self.new_tag("font")
                     wrap_in_font = False
-                    for prop in css:
+                    for prop in inline_css:
                         prop_name = prop.name.lower()
                         prop_value = str(prop.value)
                         if prop_name == "color":
@@ -91,5 +91,5 @@ class Styling(BS):
 
         return str(self)
 
-    def getTTML(self, css = None, add_metadata = True):
-        return self.get_text()    
+    def getTTML(self, css: cssutils.css.CSSStyleSheet = None, add_metadata: bool = True):
+        return self.get_text()

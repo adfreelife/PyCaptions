@@ -76,7 +76,8 @@ def readVTT(self, content: str | io.IOBase, languages: list[str] = None, **kwarg
                     self.options["style_metadata"]["identifier_to_new"][match.group(1)] = style_name
                     return style_name
                 return match.group(1)
-            self.addStyle(str(style_block_count), Block(BlockType.STYLE, id=str(style_block_count), style=re.sub(STYLE_PATERN, replace_style, style)))
+            self.addStyle(str(style_block_count), Block(BlockType.STYLE, id=str(style_block_count),
+                                                        style=re.sub(STYLE_PATERN, replace_style, style)))
         elif line == "REGION":
             line = content.readline().strip()
             temp = dict()

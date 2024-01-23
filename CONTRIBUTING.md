@@ -25,6 +25,8 @@ if (variable1 > variable2 or variable3
 
 You can test this using flake8 or any other tool.
 
+While styling rules are not mandatory, it is highly appreciated if they are followed before submitting a pull request.
+
 ## Pull Requests
 - Clearly state what you've tried to accomplish, try to be short as possible
 - If it's a new feature, include examples

@@ -13,5 +13,5 @@ from pycaptions.sub import detectSUB, MicroDVD
 from pycaptions.ttml import detectTTML, TTML
 from pycaptions.vtt import detectVTT, WebVTT
 
-supported_readers = srt.EXTENSIONS + sub.EXTENSIONS + ttml.EXTENSIONS + vtt.EXTENSIONS 
+supported_readers = srt.EXTENSIONS + sub.EXTENSIONS + ttml.EXTENSIONS + vtt.EXTENSIONS
 supported_extensions = srt.EXTENSIONS + sub.EXTENSIONS + ttml.EXTENSIONS + vtt.EXTENSIONS

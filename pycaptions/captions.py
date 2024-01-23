@@ -63,7 +63,6 @@ class Captions(CaptionsFormat):
             self.fileFormat = "usf"
         elif self.detectLRC(file):
             self.fileFormat = "lrc"
-        
         return self.fileFormat
 
     def detect(self, content: str | io.IOBase) -> bool:

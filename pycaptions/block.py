@@ -1,5 +1,4 @@
 import budoux
-import cssutils
 from collections import defaultdict
 from langcodes import standardize_tag, tag_is_valid
 from .microTime import MicroTime as MT
@@ -7,11 +6,22 @@ from .styling import Styling, cssParser
 
 
 class BlockType:
+    """
+    Enum for BlockType
+    """
     CAPTION = 1
     COMMENT = 2
     STYLE = 3
     LAYOUT = 4
     METADATA = 5
+
+    @classmethod
+    def getvars(cls) -> dict:
+        """
+        Used to retrive all indexes for specific block type.
+        """
+        return {attr: getattr(cls, attr) for attr in dir(cls)
+                if not callable(getattr(cls, attr)) and not attr.startswith("__")}
 
 
 class Block:
@@ -69,7 +79,7 @@ class Block:
             self.options = options or {}
 
         if block_type == BlockType.STYLE and isinstance(self.options["style"], str):
-            self.options["style"] = cssParser.parseString(cssText=self.options["style"],encoding="UTF-8")
+            self.options["style"] = cssParser.parseString(cssText=self.options["style"], encoding="UTF-8")
 
     def __getitem__(self, index: str):
         return self.languages[index]
@@ -127,15 +137,16 @@ class Block:
 
     def copy(self):
         return Block(self.block_type, self.default_language, self.start_time,
-                     self.end_time, languages=self.languages, **self.options)   
+                     self.end_time, languages=self.languages, **self.options)
 
     def get(self, lang: str) -> str:
         return Styling(self.languages.get(lang), "html.parser").get_text()
-    
+
     def get_style(self, lang: str) -> str:
         return Styling(self.languages.get(lang), "html.parser")
-    
-    def getLines(self, lang:str = None, lines: int = 0, character_limit: int = 47, split_ratios: list[float] = [0.7, 1], **kwargs) -> list[str]:
+
+    def getLines(self, lang: str = None, lines: int = 0, character_limit: int = 47,
+                 split_ratios: list[float] = [0.7, 1], **kwargs) -> list[str]:
         """
         Format text of specific language into multiple lines.
 
@@ -153,7 +164,7 @@ class Block:
 
         standardized = standardize_tag(kwargs.get("parser_language") or lang, macro=True)
         standardized = standardized if tag_is_valid(standardized) else "und"
-        
+
         if lines == 1:
             return [text]
 
@@ -179,7 +190,7 @@ class Block:
             if current_limit < target_characters:
                 remaining = (target_characters - current_limit) / total_characters
                 for index, _ in enumerate(split_ratios):
-                    split_ratios[index] += remaining  
+                    split_ratios[index] += remaining
 
         formatted_lines = []
         current_line = ""
@@ -222,7 +233,7 @@ class Block:
         for i in range(min_length):
             if current[-i:] == text[:i]:
                 common_lenght = i
-        
+
         self.languages[lang] = current + text[common_lenght:]
 
     def shift_time_us(self, microseconds: int):

@@ -36,7 +36,7 @@ def convertFromSRTLayout(self, id, layout, width, height):
     if len(layout) != 4:
         print(f"Error converting layout: Excpected 4 arguments got {len(layout)}")
         return
-    for i, v in enumerate(["X1","X2","Y1","Y2"]):
+    for i, v in enumerate(["X1", "X2", "Y1", "Y2"]):
         if layout[i][2:] != v:
             print(f"Error converting layout: Invalid field at position {i} expected {v} got {layout[0][2:]}")
             return
@@ -47,15 +47,16 @@ def convertFromSRTLayout(self, id, layout, width, height):
         y2 = int(layout[3][3:])
         self.addLayout(id,
             Block(BlockType.LAYOUT, id=id, layout={
-            "width": (x2-x1) / width,
-            "height": (y2-y1) / height,
-            "viewportanchor": [x1 / width, y1 / height],
-            "regionanchor": [0, 0],
+                "width": (x2-x1) / width,
+                "height": (y2-y1) / height,
+                "viewportanchor": [x1 / width, y1 / height],
+                "regionanchor": [0, 0],
         }))
     except Exception as e:
         print(f"Error converting layout: {e}")
         return
-    
+
+
 def getSRTLayout(self, id, width, height):
     layout = self.getLayout(id)
     if not layout:
@@ -65,6 +66,7 @@ def getSRTLayout(self, id, width, height):
     y1 = layout.options["layout"]["viewportanchor"][1] * height
     y2 = layout.options["layout"]["height"] * height + y1
     return f" X1:{x1} X2:{x2} Y1:{y1} Y2:{y2}"
+
 
 def readSRT(self, content: str | io.IOBase, languages: list[str] = None, **kwargs):
     """
@@ -84,7 +86,7 @@ def readSRT(self, content: str | io.IOBase, languages: list[str] = None, **kwarg
     while id:
         start, end = content.readline().split(" --> ")
         end = end.strip().split(" ", 1)
-        
+
         caption = Block(BlockType.CAPTION, languages[0], MT.fromSRTTime(start),
                         MT.fromSRTTime(end[0]))
         if len(end) == 2:
@@ -104,7 +106,7 @@ def readSRT(self, content: str | io.IOBase, languages: list[str] = None, **kwarg
 
 def saveSRT(self, filename: str, languages: list[str] = None, **kwargs):
     """
-    kwargs: 
+    kwargs:
      - file_encoding (str, optional): Used for opening files (default is UTF-8)
      - srt_extended (bool, optional): Used to make extended version of SRT (default is False)
      - media_width (int, optional): Used for extended SRT coordinates conversion
