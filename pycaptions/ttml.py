@@ -1,9 +1,9 @@
 import io
 
+from bs4 import BeautifulSoup
 from .block import Block, BlockType
 from .captionsFormat import CaptionsFormat
 from .microTime import MicroTime as MT
-from bs4 import BeautifulSoup
 
 
 EXTENSIONS = [".ttml", ".dfxp", ".xml"]
@@ -25,15 +25,19 @@ def detectTTML(content: str | io.IOBase) -> bool:
         content = io.StringIO(content)
 
     offset = content.tell()
-    line = content.readline().lstrip()
-    while not line:
-        line = content.readline().lstrip()
+    line = content.readline()
+    while line:
+        if line.lstrip():
+            break
+        line = content.readline()
     if line.startswith("<tt xml") or line.startswith("<?xml") and "<tt xml" in line:
         content.seek(offset)
         return True
-    line = content.readline().lstrip()
-    while not line:
-        line = content.readline().lstrip()
+    line = content.readline()
+    while line:
+        if line.lstrip():
+            break
+        line = content.readline()
     if line.startswith("<tt xml"):
         return True
     content.seek(offset)
@@ -66,9 +70,9 @@ def readTTML(self, content: str | io.IOBase, languages: list[str] = None, **kwar
                 caption = Block(BlockType.CAPTION, start_time=start, end_time=end)
             else:
                 caption = self[block]
-            for index, text in enumerate(line.get_text().strip().split("\n")):
+            for lang_index, text in enumerate(line.get_text().strip().split("\n")):
                 if len(languages) > 1:
-                    caption.append(text, lang or languages[index])
+                    caption.append(text, lang or languages[lang_index])
                 else:
                     caption.append(text, lang or languages[0])
             caption.shift_time(time_offset)

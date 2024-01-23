@@ -1,7 +1,8 @@
+import cssutils
+
 from bs4 import BeautifulSoup as BS
 from cssutils import CSSParser
 from cssutils.css import CSSStyleSheet as originalCSSStyleSheet
-import cssutils
 
 
 class StyleSheet(originalCSSStyleSheet):
@@ -92,4 +93,10 @@ class Styling(BS):
         return str(self)
 
     def getTTML(self, css: cssutils.css.CSSStyleSheet = None, add_metadata: bool = True):
+        return self.get_text()
+    
+    def getSUB(self, css: cssutils.css.CSSStyleSheet = None, add_metadata: bool = True):
+        return self.get_text()
+    
+    def getVTT(self, css: cssutils.css.CSSStyleSheet = None, add_metadata: bool = True):
         return self.get_text()

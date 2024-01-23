@@ -1,6 +1,6 @@
 Table of Contents
-- [TBA](#tba)
-- [v0.5.1 [stable]](#v051)
+- [TBA [stable]](#tba)
+- [v0.5.1](#v051)
 - [v0.5.0](#v050)
 - [v0.4.1 [stable]](#v041)
 - [v0.4.0](#v040)
@@ -17,7 +17,13 @@ Changes:
 - Added `save_as` arguments to `toJson` function, can be of value `caption_array`, `dict`, `string`.
 - Added `FileExtensions.getvars` that returns key-value pairs of variable names and extensions
 - Added `BlockType.getvars` that returns key-value pairs of variable names and numbers
+- `MicroDVD.read` now converts control code `H` value to language code
+- `MicroDVD.read` now stores unimplemented/unknown control codes (json)
+- Added `charset-normalizer` package so that `with` keyword and `fromJson`, `fromLegacyJson` can have `encoding="auto"`
+- `with` keyword now supports loading legacy json with argument `legacyJson=True`
 
+Fixes:
+- Fixed an issue where `detectTTML` causes infinit loop.
 
 ### v0.5.1
 Release date: 2024-01-23

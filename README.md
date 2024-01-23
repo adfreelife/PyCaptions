@@ -54,6 +54,8 @@ Table of Contents
 
 ## Examples
 
+Read the [wiki](https://github.com/adfreelife/PyCaptions/wiki).
+
 ### Generic from file name
 ```python
 from pycaptions import Captions

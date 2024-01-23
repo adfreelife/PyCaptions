@@ -1,5 +1,6 @@
 import io
 import re
+import langcodes 
 
 from .block import Block, BlockType
 from .captionsFormat import CaptionsFormat
@@ -36,6 +37,7 @@ def formatLine(self, pattern):
     start = ""
     end = ""
     font_vars = []
+    _class = ""
     for control_code in pattern:
         control_code = control_code.strip("{} ").split(":")
         if len(control_code) != 2:
@@ -63,12 +65,26 @@ def formatLine(self, pattern):
             font_vars.append("font-size:"+value)
         elif control_code == "C":
             font_vars.append("color:#"+value[-2:]+value[-4:-2]+value[-6:-4])
-        elif control_code == "P":
-            pass
         elif control_code == "H":
-            pass
+            self.add_metadata("default", Block(BlockType.METADATA, id="default",
+                                               Language=langcodes.find(value).language))
+        else:
+            # control code 'P' has mixed info of how it works, ommited for now
+            # there appears to also be 'o' 
+            if "micro_dvd" not in self.options:
+                self.options["micro_dvd"] = {
+                    "control_codes": dict(),
+                    "counter": 0
+                }
+            if not _class:
+                _class = f"micro_dvd_{self.options['micro_dvd']['counter']}"
+                self.options["micro_dvd"]["counter"] += 1
+                self.options["micro_dvd"]["control_codes"][_class] = dict()
+            self.options["micro_dvd"]["control_codes"][_class][control_code] = value
     if font_vars:
-        start += "<p style='"+";".join(font_vars)+";'>"
+        if _class:
+            _class = f"class='{_class}'"
+        start += f"<p {_class}style='"+";".join(font_vars)+";'>"
         end += "</p>"
     return start, end
 
@@ -96,6 +112,7 @@ def readSUB(self, content: str | io.IOBase, languages: list[str] = None, **kwarg
             caption = Block(BlockType.CAPTION, start_time=start, end_time=end,
                             style=[p.strip("{}") for p in params[2:]])
             for counter, line in enumerate(lines):
+                print(counter, line)
                 start, end = formatLine(self, re.findall(PATTERN, line))
                 line = start+re.sub(PATTERN, "", line)+end
                 if len(languages) > 1:
@@ -113,16 +130,20 @@ def saveSUB(self, filename: str, languages: list[str] = None, **kwargs):
     encoding = kwargs.get("file_encoding") or "UTF-8"
     languages = languages or [self.default_language]
     frame_rate = kwargs.get("frame_rate") or self.options.get("frame_rate") or 25
+    if kwargs.get("no_styling"):
+        generator = (((data.get(i) for i in languages), data) for data in self)
+    else:
+        generator = (((data.get_style(i).getSUB() for i in languages), data) for data in self)
 
     with open(filename, "w", encoding=encoding) as file:
         index = 1
-        for data in self:
+        for text, data in generator:
             if data.block_type != BlockType.CAPTION:
                 continue
             elif index != 1:
                 file.write("\n")
             file.write("{"+data.start_time.toSUBTime(frame_rate)+"}{"+data.end_time.toSUBTime(frame_rate)+"}")
-            file.write("|".join(data.get(i) for i in languages))
+            file.write("|".join(i for i in text))
             index += 1
 
 

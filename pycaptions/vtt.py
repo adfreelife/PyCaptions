@@ -143,17 +143,21 @@ def saveVTT(self, filename: str, languages: list[str] = None, **kwargs):
                                  languages=languages, **kwargs)
     encoding = kwargs.get("file_encoding") or "UTF-8"
     languages = languages or [self.default_language]
+    if kwargs.get("no_styling"):
+        generator = (((data.get(i) for i in languages), data) for data in self)
+    else:
+        generator = (((data.get_style(i).getVTT() for i in languages), data) for data in self)
     try:
         with open(filename, "w", encoding=encoding) as file:
             file.write("WEBVTT\n\n")
             index = 1
-            for data in self:
+            for text, data in generator:
                 if data.block_type != BlockType.CAPTION:
                     continue
                 elif index != 1:
                     file.write("\n\n")
                 file.write(f"{data.start_time.toVTTTime()} --> {data.end_time.toVTTTime()}\n")
-                file.write("\n".join(data.get(i) for i in languages))
+                file.write("\n".join(i for i in text))
                 index += 1
     except IOError as e:
         print(f"I/O error({e.errno}): {e.strerror}")

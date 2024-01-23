@@ -8,6 +8,7 @@ IGNORE_JSON_FIELDS = ["filename"]
 JSON_FIELDS = ["identifier", "json_version", "default_language", "time_length", "filename", "file_extensions", "options", "block_list"]
 TEST_FILES_PATH = "test/captions/"
 TEST_FILES = ["test.en.srt", "test.en.sub", "test.en.vtt", "test.ttml"]
+TEST_MULTILINGUAL = ["test.ttml", "test.en.es.sub"]
 EXTENSIONS = save_extensions.getvars().values()
 
 
@@ -39,15 +40,13 @@ class TestCaptions(unittest.TestCase):
 
     def test_all(self):
         for filename in TEST_FILES:
-            with Captions(TEST_FILES_PATH+filename) as c:
+            with Captions(TEST_FILES_PATH+filename, encoding="auto") as c:
                 for ext in EXTENSIONS:
                     _out = f"tmp/from_{filename.split('.')[-1]}"
                     c.save(_out, output_format=ext)
                     self.assertFalse(self.check_file_size(c.makeFilename(_out,ext)), ext)
                 c.toJson(f"tmp/from_{filename.split('.')[-1]}")
                 self.check_json_fields(f"tmp/from_{filename.split('.')[-1]}.json")
-
-    
 
     def test_json_to_json(self):
         for filename in TEST_FILES:
@@ -56,6 +55,14 @@ class TestCaptions(unittest.TestCase):
             with Captions(_in) as c:
                 c.toJson(_out)
                 self.compare_json_ignore_field(_in, _out, IGNORE_JSON_FIELDS)
+
+    def test_multilingual(self):
+        for filename in TEST_MULTILINGUAL:
+            with Captions(TEST_FILES_PATH+filename, encoding="auto") as c:
+                for ext in EXTENSIONS:
+                    _out = f"tmp/from_{filename.split('.')[-1]}"
+                    c.save(_out, ["en", "es"], output_format=ext)
+                    self.assertFalse(self.check_file_size(c.makeFilename(_out,ext)), ext)
 
 if __name__ == '__main__':
     unittest.main()

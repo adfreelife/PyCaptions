@@ -1,4 +1,5 @@
 import budoux
+
 from collections import defaultdict
 from langcodes import standardize_tag, tag_is_valid
 from .microTime import MicroTime as MT

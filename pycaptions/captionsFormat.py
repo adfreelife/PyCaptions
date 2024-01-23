@@ -2,7 +2,9 @@ import json
 import io
 import os
 import copy
+
 from langcodes import standardize_tag, tag_is_valid
+from charset_normalizer import detect as detect_encoding
 from .block import Block, BlockType
 from .microTime import MicroTime as MT
 
@@ -71,7 +73,8 @@ class CaptionsFormat:
 
     def __init__(self, file_name_or_content: str = None, default_language: str = "und",
                  time_length: MT = None, file_extensions: FileExtensions = None,
-                 media_height: int = None, media_width: int = None, isFile: bool = True, **options):
+                 media_height: int = None, media_width: int = None, isFile: bool = True,
+                 legacyJson: bool = False, **options):
         """
         Initialize a new instance of CaptionsFormat class.
 
@@ -85,6 +88,7 @@ class CaptionsFormat:
         self.time_length = MT() or time_length
         self.file_name_or_content = file_name_or_content
         self.isFile = isFile
+        self.legacyJson = legacyJson
         self.media_height = media_height or 1080
         self.media_width = media_width or 1920
         self.options = options or {}
@@ -143,8 +147,13 @@ class CaptionsFormat:
         if self.isFile:
             _, ext = os.path.splitext(self.file_name_or_content)
             if ext == ".json":
-                self.fromJson(self.file_name_or_content)
+                if self.legacyJson:
+                    self.fromLegacyJson(self.file_name_or_content, encoding=encoding)
+                else:
+                    self.fromJson(self.file_name_or_content, encoding=encoding)
             else:
+                if encoding == "auto":
+                    encoding = self.getEncoding(self.file_name_or_content)
                 with open(self.file_name_or_content, "r", encoding=encoding) as stream:
                     if self.detect(stream):
                         languages = self.getLanguagesFromFilename(self.file_name_or_content)
@@ -323,7 +332,7 @@ class CaptionsFormat:
         for i in self:
             i.shift_end_us(time)
 
-    def loadJson(self, data, **kwargs):
+    def _loadJson(self, data, **kwargs):
         self.time_length = data["time_length"]
         self.default_language = data["default_language"]
         self.filename = data["filename"]
@@ -334,13 +343,15 @@ class CaptionsFormat:
 
     def fromLegacyJson(self, file: str, **kwargs):
         encoding = kwargs.get("encoding") or "UTF-8"
+        if encoding == "auto":
+            encoding = self.getEncoding(file)
         _, ext = os.path.splitext(file)
         if not ext:
             file += ".json"
         try:
             with open(file, "r", encoding=encoding) as f:
                 data = json.load(f)
-            self.loadJson(data, file_extensions="extensions")
+            self._loadJson(data, file_extensions="extensions")
         except IOError as e:
             print(f"I/O error({e.errno}): {e.strerror}")
         except Exception as e:
@@ -348,6 +359,8 @@ class CaptionsFormat:
 
     def fromJson(self, file: str, **kwargs):
         encoding = kwargs.get("encoding") or "UTF-8"
+        if encoding == "auto":
+            encoding = self.getEncoding(file)
         _, ext = os.path.splitext(file)
         if not ext:
             file += ".json"
@@ -360,7 +373,7 @@ class CaptionsFormat:
                 compatibility = dict()
                 if not data.get("json_version") == JSON_VERSION:
                     pass
-                self.loadJson(data, **compatibility)
+                self._loadJson(data, **compatibility)
         except IOError as e:
             print(f"I/O error({e.errno}): {e.strerror}")
         except Exception as e:
@@ -368,7 +381,6 @@ class CaptionsFormat:
 
     def toJson(self, file: str, **kwargs):
         encoding = kwargs.get("encoding") or "UTF-8"
-
         def serializer(obj):
             if hasattr(obj, '__json__'):
                 return obj.__json__()
@@ -458,3 +470,7 @@ class CaptionsFormat:
         with open(filename, "r", encoding=encoding) as stream:
             if self.detect(stream):
                 self.read(stream, self.getLanguagesFromFilename(filename), time_offset=time_offset)
+
+    def getEncoding(self, file: str):
+        with open(file, "rb") as f:
+            return detect_encoding(f.read()).get("encoding")

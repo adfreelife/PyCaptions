@@ -124,7 +124,6 @@ def saveSRT(self, filename: str, languages: list[str] = None, **kwargs):
         generator = (((data.get(i) for i in languages), data) for data in self)
     else:
         generator = (((data.get_style(i).getSRT() for i in languages), data) for data in self)
-
     try:
         with open(filename, "w", encoding=encoding) as file:
             index = 1
