@@ -127,16 +127,10 @@ def saveSUB(self, filename: str, languages: list[str] = None, **kwargs):
     filename = self.makeFilename(filename=filename, extension=self.extensions.SUB,
                                  languages=languages, **kwargs)
     encoding = kwargs.get("file_encoding") or "UTF-8"
-    languages = languages or [self.default_language]
     frame_rate = kwargs.get("frame_rate") or self.options.get("frame_rate") or 25
-    if kwargs.get("no_styling"):
-        generator = (((data.get(i) for i in languages), data) for data in self)
-    else:
-        generator = (((data.get_style(i).getSUB() for i in languages), data) for data in self)
-
     with open(filename, "w", encoding=encoding) as file:
         index = 1
-        for text, data in generator:
+        for text, data in self.getGenerator("getSUB", languages, new_line="|", **kwargs):
             if data.block_type != BlockType.CAPTION:
                 continue
             elif index != 1:

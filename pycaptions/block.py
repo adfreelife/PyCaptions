@@ -1,4 +1,5 @@
 import budoux
+import copy
 
 from collections import defaultdict
 from langcodes import standardize_tag, tag_is_valid
@@ -105,9 +106,7 @@ class Block:
     def __add__(self, value):
         if not isinstance(value, Block):
             raise ValueError("Unsupported type. Must be an instance of `Block`")
-        out = Block(block_type=self.block_type, start_time=self.start_time,
-                    end_time=self.end_time, lang=self.default_language, options=self.options)
-        out.languages = self.languages.copy()
+        out = self.copy()
         for key, language, comment in value:
             out.languages[key] = language
         return out
@@ -118,9 +117,7 @@ class Block:
         return self
 
     def __sub__(self, language: str):
-        out = Block(block_type=self.block_type, start_time=self.start_time,
-                    end_time=self.end_time, lang=self.default_language, options=self.options)
-        out.languages = self.languages.copy()
+        out = self.copy()
         if language in out.languages:
             del out.languages[language]
         return out
@@ -138,15 +135,19 @@ class Block:
 
     def copy(self):
         return Block(self.block_type, self.default_language, self.start_time,
-                     self.end_time, languages=self.languages, **self.options)
+                     self.end_time, languages=copy.deepcopy(self.languages), 
+                     options=copy.deepcopy(self.options))
 
-    def get(self, lang: str) -> str:
-        return Styling(self.languages.get(lang), "html.parser").get_text()
+    def get(self, lang: str, lines: int = -1, **kwargs) -> str:
+        if lines == -1:
+            return Styling(self.languages.get(lang), "html.parser").get_lines()
+        else:
+            return self.get_lines(lang, lines, **kwargs)
 
     def get_style(self, lang: str) -> str:
         return Styling(self.languages.get(lang), "html.parser")
 
-    def getLines(self, lang: str = None, lines: int = 0, character_limit: int = 47,
+    def get_lines(self, lang: str = None, lines: int = 0, character_limit: int = 47,
                  split_ratios: list[float] = [0.7, 1], **kwargs) -> list[str]:
         """
         Format text of specific language into multiple lines.
@@ -160,14 +161,18 @@ class Block:
         Returns:
             list[str]: A list of text lines.
         """
+        
         lang = lang or self.default_language
-        text = self.get(lang)
-
-        standardized = standardize_tag(kwargs.get("parser_language") or lang, macro=True)
-        standardized = standardized if tag_is_valid(standardized) else "und"
+        separator = " "
+        if "separator" in kwargs:
+            separator = kwargs["separator"]
+        text = separator.join(Styling(self.languages.get(lang), "html.parser").get_lines())
 
         if lines == 1:
             return [text]
+        
+        standardized = standardize_tag(kwargs.get("parser_language") or lang, macro=True)
+        standardized = standardized if tag_is_valid(standardized) else "und"
 
         if standardized == "ja":
             parser = budoux.load_default_japanese_parser()
@@ -184,7 +189,7 @@ class Block:
         else:
             phrases = text.split(" ")
 
-        if lines != 0:
+        if lines > 0:
             total_characters = len(text)
             target_characters = total_characters - lines + 1
             current_limit = sum(character_limit * ratio for ratio in split_ratios)
@@ -197,13 +202,15 @@ class Block:
         current_line = ""
         current_character_count = 0
 
-        for phrase in phrases:
+        for index, phrase in enumerate(phrases):
             current_ratio_index = min(len(formatted_lines), len(split_ratios) - 1)
             effective_limit = int(character_limit * split_ratios[current_ratio_index])
 
             if current_character_count + len(phrase) <= effective_limit:
                 current_line += phrase + " "
                 current_character_count += len(phrase) + 1  # +1 for the space
+            elif index+1 == len(phrases):
+                current_line += phrase
             else:
                 formatted_lines.append(current_line.strip())
                 current_line = phrase + " "
@@ -214,16 +221,13 @@ class Block:
 
         return formatted_lines
 
-    def append(self, text: str, lang: str = None):
+    def append(self, text: str, lang: str = None, separator: str = "<br>"):
         lang = lang or self.default_language
-        if lang not in ["ja", "zh", "zh-CN", "zh-SG", "zh-Hans",
-                        "zh-HK", "zh-MO", "zh-TW", "zh-Hant"]:
-            if self.languages[lang]:
-                self.languages[lang] += " " + text.strip()
-            else:
-                self.languages[lang] = text.strip()
+        if self.languages[lang]:
+            self.languages[lang] += separator + text.strip()
         else:
-            self.languages[lang] += text
+            self.languages[lang] = text.strip()
+        
 
     def append_without_common_part(self, text: str, lang: str = None):
         lang = lang or self.default_language

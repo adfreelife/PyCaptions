@@ -8,7 +8,3 @@ if os.path.exists("dist/"):
 if os.path.exists("pycaptions.egg-info/"):
     shutil.rmtree("pycaptions.egg-info/")
 
-if os.path.exists("tmp/"): 
-    shutil.rmtree("tmp/")
-
-os.makedirs("tmp/") 

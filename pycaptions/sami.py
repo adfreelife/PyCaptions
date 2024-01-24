@@ -41,14 +41,10 @@ def saveSAMI(self, filename: str, languages: list[str] = None, **kwargs):
     filename = self.makeFilename(filename=filename, extension=self.extensions.SAMI,
                                  languages=languages, **kwargs)
     encoding = kwargs.get("file_encoding") or "UTF-8"
-    languages = languages or [self.default_language]
-    if kwargs.get("no_styling"):
-        generator = (((data.get(i) for i in languages), data) for data in self)
-    else:
-        generator = (((data.get_style(i).getUSF() for i in languages), data) for data in self)
     try:
         with open(filename, "w", encoding=encoding) as file:
-            pass
+            for text, data in self.getGenerator("getSAMI", languages, **kwargs):
+                pass
     except IOError as e:
         print(f"I/O error({e.errno}): {e.strerror}")
     except Exception as e:

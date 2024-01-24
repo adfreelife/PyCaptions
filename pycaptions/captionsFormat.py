@@ -474,3 +474,22 @@ class CaptionsFormat:
     def getEncoding(self, file: str):
         with open(file, "rb") as f:
             return detect_encoding(f.read()).get("encoding")
+        
+    def getGenerator(self, function: str, languages: list[str], **kwargs):
+        languages = languages or [self.default_language]
+        if "lines" in kwargs:
+            lines = kwargs["lines"]
+            del kwargs["lines"]
+        else:
+            lines = -1
+        new_line = "\n"
+        if "new_line" in kwargs:
+            new_line = kwargs["new_line"]
+        
+        if "style" in kwargs and kwargs["style"] != "full":
+            if kwargs["style"] == None:
+                return (((new_line.join(data.get(lang=i, lines=lines, **kwargs)) for i in languages), data) for data in self)
+            else:
+                raise ValueError(f"Incorect argument value of style, expected 'full' or None, got {kwargs['style']}")
+        else:
+            return (((getattr(data.get_style(i), function)(lines=lines, **kwargs) for i in languages), data) for data in self)

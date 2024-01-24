@@ -1,4 +1,5 @@
 Table of Contents
+- [v0.6.0 [stable]](#v060)
 - [v0.5.2 [stable]](#v052)
 - [v0.5.1](#v051)
 - [v0.5.0](#v050)
@@ -9,9 +10,25 @@ Table of Contents
 - [v0.2.2](#v022)
 - [v0.2.1 [broken]](#v021)
 
+### v0.6.0
+Release date: TBA
+<br>Commit: TBA
+
+Changes:
+- Added `style` argument to readers, possible values `None` (no styling), default `full` (converts inline styles only for now)
+- Added `lines` argument to readers, possible values default `-1` (preserves original), `0` (automatically determins number of lines, works only with `style=None` for now), `1` (fits everything in one line), `n` (positive integer bigger than 1, fits text into `n` lines, works only with `style=None` for now)
+- Removed `no_styling` argument, replaced by `style=None`
+- Added support for inline style conversion for MicroDVD
+- Added support for inline style conversion for TTML
+- Renamed `Block.getLines` to `Block.get_lines`
+
+Fixes:
+- Fixed `Block.copy` not returning a deepcopy of itself
+- Fixed `Block` substraction and addition not using `Block.copy`
+
 ### v0.5.2
 Release date: 2024-01-24
-<br>Commit: TBA
+<br>Commit: [cf59a36](https://github.com/adfreelife/PyCaptions/commit/cf59a3645df0ee1f888e5d6e79d38e2eb1604b86)
 
 Changes:
 - Added `save_as` arguments to `toJson` function, can be of value `caption_array`, `dict`, `string`.
@@ -23,7 +40,7 @@ Changes:
 - `with` keyword now supports loading legacy json with argument `legacyJson=True`
 
 Fixes:
-- Fixed an issue where `detectTTML` causes infinit loop.
+- Fixed an issue where `detectTTML` can cause an infinit loop if there is one or less lines in a file.
 
 ### v0.5.1
 Release date: 2024-01-23

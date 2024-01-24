@@ -1,6 +1,7 @@
 import unittest
 import json
 import os
+import shutil
 from pycaptions import Captions, save_extensions
 
 
@@ -10,6 +11,12 @@ TEST_FILES_PATH = "test/captions/"
 TEST_FILES = ["test.en.srt", "test.en.sub", "test.en.vtt", "test.ttml"]
 TEST_MULTILINGUAL = ["test.ttml", "test.en.es.sub", "test.en.es.srt"]
 EXTENSIONS = save_extensions.getvars().values()
+STYLE = [None, "full"]
+
+if os.path.exists("tmp/"): 
+    shutil.rmtree("tmp/")
+
+os.makedirs("tmp/") 
 
 
 class TestCaptions(unittest.TestCase):
@@ -48,6 +55,30 @@ class TestCaptions(unittest.TestCase):
                 c.toJson(f"tmp/from_{filename.split('.')[-1]}")
                 self.check_json_fields(f"tmp/from_{filename.split('.')[-1]}.json")
 
+    def test_style(self):
+        for s in STYLE:
+            with Captions(TEST_FILES_PATH+TEST_FILES[-1], encoding="auto") as c:
+                for ext in EXTENSIONS:
+                    _out = f"tmp/style_{str(s)}"
+                    c.save(_out, output_format=ext, style=s)
+                    self.assertFalse(self.check_file_size(c.makeFilename(_out,ext)), ext)
+    
+    def test_style_auto_lines(self):
+        with Captions(TEST_FILES_PATH+TEST_FILES[-1], encoding="auto") as c:
+            for ext in EXTENSIONS:
+                _out = "tmp/line_auto"
+                c.save(_out, output_format=ext, style=None, lines=0)
+                self.assertFalse(self.check_file_size(c.makeFilename(_out,ext)), ext)
+
+    def test_style_one_line(self):
+        for s in STYLE:
+            with Captions(TEST_FILES_PATH+TEST_FILES[-1], encoding="auto") as c:
+                for ext in EXTENSIONS:
+                    _out = f"tmp/line_one_{str(s)}"
+                    c.save(_out, output_format=ext, style=s, lines=1)
+                    self.assertFalse(self.check_file_size(c.makeFilename(_out,ext)), ext)
+
+
     def test_json_to_json(self):
         for filename in TEST_FILES:
             _in = f"tmp/from_{filename.split('.')[-1]}.json"
@@ -60,9 +91,9 @@ class TestCaptions(unittest.TestCase):
         for filename in TEST_MULTILINGUAL:
             with Captions(TEST_FILES_PATH+filename, encoding="auto") as c:
                 for ext in EXTENSIONS:
-                    _out = f"tmp/from_{filename.split('.')[-1]}"
-                    c.save(_out, ["en", "es"], output_format=ext)
-                    self.assertFalse(self.check_file_size(c.makeFilename(_out,ext)), ext)
+                    _out = f"tmp/multilingual_from_{filename.split('.')[-1]}"
+                    c.save(_out, ["en", "es"], output_format=ext, lines=1)
+                    self.assertFalse(self.check_file_size(c.makeFilename(_out,ext, ["en","es"])), ext)
 
 if __name__ == '__main__':
     unittest.main()

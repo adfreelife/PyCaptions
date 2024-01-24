@@ -85,11 +85,6 @@ def saveTTML(self, filename: str, languages: list[str] = None, **kwargs):
                                  languages=languages, **kwargs)
     encoding = kwargs.get("file_encoding") or "UTF-8"
     languages = languages or [self.default_language]
-    if kwargs.get("no_styling"):
-        generator = (((data.get(i) for i in languages), data) for data in self)
-    else:
-        generator = (((data.get_style(i).getTTML() for i in languages), data) for data in self)
-
     try:
         content = BeautifulSoup("""<?xml version="1.0" encoding="utf-8"?>
                                 <tt xmlns="http://www.w3.org/ns/ttml">
@@ -98,17 +93,17 @@ def saveTTML(self, filename: str, languages: list[str] = None, **kwargs):
         body = content.select_one("body")
         lang = []
         for i in languages:
-            lang.append(content.new_tag('div'))
+            lang.append(content.new_tag("div"))
             lang[-1]["xml:lang"] = i
             body.append(lang[-1])
-        for text, data in generator:
+        for text, data in self.getGenerator("getTTML", languages, new_line="<br/>", **kwargs):
             if data.block_type != BlockType.CAPTION:
                 continue
             begin = data.start_time.toTTMLTime()
             end = data.end_time.toTTMLTime()
             for index, t in enumerate(text):
                 p = content.new_tag("p", begin=begin, end=end)
-                p.string = t
+                p.append(BeautifulSoup(t,"html.parser"))
                 lang[index].append(p)
 
         with open(filename, "w", encoding=encoding) as file:
