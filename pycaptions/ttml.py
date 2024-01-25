@@ -2,7 +2,7 @@ import io
 
 from bs4 import BeautifulSoup
 from .block import Block, BlockType
-from .captionsFormat import CaptionsFormat
+from .captionsFormat import CaptionsFormat, captionsDetector, captionsReader, captionsWriter
 from .microTime import MicroTime as MT
 
 
@@ -10,6 +10,7 @@ EXTENSIONS = [".ttml", ".dfxp", ".xml"]
 
 
 @staticmethod
+@captionsDetector
 def detectTTML(content: str | io.IOBase) -> bool:
     """
     Used to detect Timed Text Markup Language caption format.
@@ -19,19 +20,12 @@ def detectTTML(content: str | io.IOBase) -> bool:
      - the first non empty line starts with `<tt xml` OR
      - the second non empty line starts with `<tt xml`
     """
-    if not isinstance(content, io.IOBase):
-        if not isinstance(content, str):
-            raise ValueError("The content is not a unicode string or I/O stream.")
-        content = io.StringIO(content)
-
-    offset = content.tell()
     line = content.readline()
     while line:
         if line.lstrip():
             break
         line = content.readline()
     if line.startswith("<tt xml") or line.startswith("<?xml") and "<tt xml" in line:
-        content.seek(offset)
         return True
     line = content.readline()
     while line:
@@ -40,14 +34,12 @@ def detectTTML(content: str | io.IOBase) -> bool:
         line = content.readline()
     if line.startswith("<tt xml"):
         return True
-    content.seek(offset)
     return False
 
 
 # ttp:frameRate, ttp:frameRateMultiplier, ttp:subFrameRate, ttp:tickRate, ttp:timeBase
+@captionsReader
 def readTTML(self, content: str | io.IOBase, languages: list[str] = None, **kwargs):
-    content = self.checkContent(content=content, **kwargs)
-    time_offset = kwargs.get("time_offset") or MT()
     content = BeautifulSoup(content, "xml")
     if not languages:
         if not content.tt.get("xml:lang"):
@@ -75,44 +67,52 @@ def readTTML(self, content: str | io.IOBase, languages: list[str] = None, **kwar
                     caption.append(text, lang or languages[lang_index])
                 else:
                     caption.append(text, lang or languages[0])
-            caption.shift_time(time_offset)
             if index == 0:
                 self.append(caption)
 
 
-def saveTTML(self, filename: str, languages: list[str] = None, **kwargs):
-    filename = self.makeFilename(filename=filename, extension=self.extensions.TTML,
-                                 languages=languages, **kwargs)
-    encoding = kwargs.get("file_encoding") or "UTF-8"
-    languages = languages or [self.default_language]
-    try:
-        content = BeautifulSoup("""<?xml version="1.0" encoding="utf-8"?>
-                                <tt xmlns="http://www.w3.org/ns/ttml">
-                                <body></body>
-                                </tt>""", "xml")
-        body = content.select_one("body")
-        lang = []
+@captionsWriter("TTML", "getTTML", "<br/>")
+def saveTTML(self, filename: str, languages: list[str] = None, generator: list = None, 
+             file: io.FileIO = None, **kwargs):
+    mark_language_type = kwargs.get("mark_language_type") or False
+
+    def createMarkedLine():
+        for index, t in enumerate(text):
+            p = content.new_tag("p", begin=begin, end=end)
+            p.append(BeautifulSoup(t,"html.parser"))
+            lang[index].append(p)
+
+    def createLine():
+        p = content.new_tag("p", begin=begin, end=end)
+        p.append(BeautifulSoup("<br/>".join(i for i in text),"html.parser"))
+        lang[0].append(p)
+
+    content = BeautifulSoup("""<?xml version="1.0" encoding="utf-8"?>
+                            <tt xmlns="http://www.w3.org/ns/ttml">
+                            <body></body>
+                            </tt>""", "xml")
+    body = content.select_one("body")
+    lang = []
+    
+    if mark_language_type:
         for i in languages:
             lang.append(content.new_tag("div"))
             lang[-1]["xml:lang"] = i
             body.append(lang[-1])
-        for text, data in self.getGenerator("getTTML", languages, new_line="<br/>", **kwargs):
-            if data.block_type != BlockType.CAPTION:
-                continue
-            begin = data.start_time.toTTMLTime()
-            end = data.end_time.toTTMLTime()
-            for index, t in enumerate(text):
-                p = content.new_tag("p", begin=begin, end=end)
-                p.append(BeautifulSoup(t,"html.parser"))
-                lang[index].append(p)
+        line = createMarkedLine
+    else:
+        lang.append(content.new_tag("div"))
+        body.append(lang[-1])
+        line = createLine
 
-        with open(filename, "w", encoding=encoding) as file:
-            file.write(content.prettify())
+    for text, data in generator:
+        if data.block_type != BlockType.CAPTION:
+            continue
+        begin = data.start_time.toTTMLTime()
+        end = data.end_time.toTTMLTime()
+        line()
 
-    except IOError as e:
-        print(f"I/O error({e.errno}): {e.strerror}")
-    except Exception as e:
-        print(f"Error {e}")
+    file.write(content.prettify())
 
 
 class TTML(CaptionsFormat):

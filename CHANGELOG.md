@@ -21,6 +21,9 @@ Changes:
 - Added support for inline style conversion for MicroDVD
 - Added support for inline style conversion for TTML
 - Renamed `Block.getLines` to `Block.get_lines`
+- TTML writer now writes multilingual files the same way as other writers by default, add `mark_language_type=True` to make it write the same as before
+- Added dependency for `webcolors` to transform web color names to hex colors
+- Added decorators `@captionsDetector`, `@captionsReader`, `@captionsWriter` for better code structure
 
 Fixes:
 - Fixed `Block.copy` not returning a deepcopy of itself

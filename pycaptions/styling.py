@@ -69,7 +69,8 @@ class Styling(BS):
                     del tag["face"]
         return str(bs)
 
-    def getSRT(self, lines:int = -1, css: cssutils.css.CSSStyleSheet = None, add_metadata: bool = True, **kwargs):
+    def getSRT(self, lines:int = -1, css: cssutils.css.CSSStyleSheet = None, 
+               add_metadata: bool = True, **kwargs):
         for tag in self.find_all():
             if tag.name:
                 if tag.get("style"):
@@ -131,9 +132,10 @@ class Styling(BS):
 
         return str(self)
 
-    def getTTML(self, lines:int = -1, css: cssutils.css.CSSStyleSheet = None, add_metadata: bool = True, **kwargs):
+    def getTTML(self, lines:int = -1, css: cssutils.css.CSSStyleSheet = None, 
+                add_metadata: bool = True, **kwargs):
         for tag in self.find_all():
-           if tag.name:
+            if tag.name:
                 if tag.get("style"):
                     inline_css = self.parseStyle(tag.get("style"))
                     for prop in inline_css:
@@ -144,16 +146,18 @@ class Styling(BS):
                         else:
                             tag[prop_name] = str(prop.value)
                     del tag["style"]
+                if tag.name == "br" and lines == 1:
+                    tag.insert_before(" ")
+                    tag.unwrap()
         return str(self)
     
     def get_lines(self):
-        lines = str(self).split("<br/>")
-        for index, line in enumerate(lines):
-            lines[index] = BS(line, 'html.parser').get_text()
-        return lines
+        return (BS(line, 'html.parser').get_text() for index, line in enumerate(str(self).split("<br/>")))
+            
     
-    def getSUB(self, lines:int = -1, css: cssutils.css.CSSStyleSheet = None, add_metadata: bool = True, **kwargs):
-        text_lines = self.get_lines()
+    def getSUB(self, lines:int = -1, css: cssutils.css.CSSStyleSheet = None, 
+               add_metadata: bool = True, **kwargs):
+        text_lines = list(self.get_lines())
         index = 0
         y = {"bold":False, "italic": False, "underline":False}
         props = {"color":False, "size":False, "font":False}
@@ -198,11 +202,15 @@ class Styling(BS):
             return " ".join(text_lines)
         return "|".join(text_lines)
     
-    def getVTT(self, lines:int = -1, css: cssutils.css.CSSStyleSheet = None, add_metadata: bool = True, **kwargs):
+    def getVTT(self, lines:int = -1, css: cssutils.css.CSSStyleSheet = None,
+               add_metadata: bool = True, **kwargs):
         for tag in self.find_all():
             if tag.name:
                 if tag.name == "br":
-                    tag.insert_before("\n")
+                    if lines == 1:
+                        tag.insert_before(" ")
+                    else:
+                        tag.insert_before("\n")
                     tag.unwrap()
         return self.get_text()
 

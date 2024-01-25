@@ -16,7 +16,7 @@ STYLE = [None, "full"]
 if os.path.exists("tmp/"): 
     shutil.rmtree("tmp/")
 
-os.makedirs("tmp/") 
+os.makedirs("tmp/")
 
 
 class TestCaptions(unittest.TestCase):
@@ -31,7 +31,7 @@ class TestCaptions(unittest.TestCase):
         for i in JSON_FIELDS:
             self.assertIn(i, data)
 
-        self.assertGreater(len(data["block_list"]),0)
+        self.assertGreater(len(data["block_list"]), 0)
 
     def compare_json_ignore_field(self, file1_path, file2_path, ignored_fields):
         with open(file1_path, 'r') as file1, open(file2_path, 'r') as file2:
@@ -52,6 +52,10 @@ class TestCaptions(unittest.TestCase):
                     _out = f"tmp/from_{filename.split('.')[-1]}"
                     c.save(_out, output_format=ext)
                     self.assertFalse(self.check_file_size(c.makeFilename(_out,ext)), ext)
+
+    def test_json(self):
+        for filename in TEST_FILES:
+            with Captions(TEST_FILES_PATH+filename, encoding="auto") as c:
                 c.toJson(f"tmp/from_{filename.split('.')[-1]}")
                 self.check_json_fields(f"tmp/from_{filename.split('.')[-1]}.json")
 
@@ -63,14 +67,14 @@ class TestCaptions(unittest.TestCase):
                     c.save(_out, output_format=ext, style=s)
                     self.assertFalse(self.check_file_size(c.makeFilename(_out,ext)), ext)
     
-    def test_style_auto_lines(self):
+    def test_auto_lines(self):
         with Captions(TEST_FILES_PATH+TEST_FILES[-1], encoding="auto") as c:
             for ext in EXTENSIONS:
                 _out = "tmp/line_auto"
                 c.save(_out, output_format=ext, style=None, lines=0)
                 self.assertFalse(self.check_file_size(c.makeFilename(_out,ext)), ext)
 
-    def test_style_one_line(self):
+    def test_one_line(self):
         for s in STYLE:
             with Captions(TEST_FILES_PATH+TEST_FILES[-1], encoding="auto") as c:
                 for ext in EXTENSIONS:
@@ -82,10 +86,12 @@ class TestCaptions(unittest.TestCase):
     def test_json_to_json(self):
         for filename in TEST_FILES:
             _in = f"tmp/from_{filename.split('.')[-1]}.json"
+            with Captions(TEST_FILES_PATH+filename, encoding="auto") as c:
+                c.toJson(_in)
             _out = f"tmp/from_{filename.split('.')[-1]}_json.json"
             with Captions(_in) as c:
                 c.toJson(_out)
-                self.compare_json_ignore_field(_in, _out, IGNORE_JSON_FIELDS)
+            self.compare_json_ignore_field(_in, _out, IGNORE_JSON_FIELDS)
 
     def test_multilingual(self):
         for filename in TEST_MULTILINGUAL:

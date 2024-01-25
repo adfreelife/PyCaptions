@@ -102,7 +102,7 @@ from pycaptions import Captions
 # if the format supports multiple languages
 with Captions("tests/test.ttml") as captions:
     # first line will be in english, second one in spanish
-    captions.saveSRT("test", ["en","es"]) 
+    captions.saveSRT("test", ["en","es"] lines=1) # recomended to specify lines=1
     
 # if you have multiple files and you want to make multilingual one
 with Captions("tests/test.en.srt") as captions:
@@ -110,7 +110,7 @@ with Captions("tests/test.en.srt") as captions:
         # only subtitle text and comments (if format supports them) are added
         captions+=captions2 
     # first line will be in english, second one in spanish
-    captions.save("test", ["en","es"]) 
+    captions.save("test", ["en","es"], lines=1) # recomended to specify lines=1
 ```
 
 ### Combine files

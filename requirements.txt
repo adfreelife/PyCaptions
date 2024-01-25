@@ -1,5 +1,6 @@
 beautifulsoup4>==4.12.2
+cssutils>=2.9.0
 budoux>=0.6.2
 langcodes>=3.2.0
-cssutils>=2.9.0
 charset-normalizer>=3.0.0
+webcolors

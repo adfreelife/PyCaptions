@@ -2,7 +2,7 @@ import io
 import re
 
 from .block import Block, BlockType
-from .captionsFormat import CaptionsFormat
+from .captionsFormat import CaptionsFormat, captionsDetector, captionsReader, captionsWriter
 from .microTime import MicroTime as MT
 
 
@@ -11,6 +11,7 @@ STYLE_PATERN = re.compile(r"::cue\((#[^)]+)\)")
 
 
 @staticmethod
+@captionsDetector
 def detectVTT(content: str | io.IOBase) -> bool:
     """
     Used to detect WebVTT caption format.
@@ -18,23 +19,13 @@ def detectVTT(content: str | io.IOBase) -> bool:
     It returns True if:
      - the first line starts with `WebVTT`
     """
-    if not isinstance(content, io.IOBase):
-        if not isinstance(content, str):
-            raise ValueError("The content is not a unicode string or I/O stream.")
-        content = io.StringIO(content)
-
-    offset = content.tell()
     if content.readline().rstrip().startswith("WEBVTT"):
-        content.seek(offset)
         return True
-    content.seek(offset)
     return False
 
 
+@captionsReader
 def readVTT(self, content: str | io.IOBase, languages: list[str] = None, **kwargs):
-    content = self.checkContent(content=content, **kwargs)
-    languages = languages or [self.default_language]
-    time_offset = kwargs.get("time_offset") or MT()
     metadata = Block(BlockType.METADATA, id="default")
     content.readline()
     line = content.readline().strip()
@@ -133,32 +124,23 @@ def readVTT(self, content: str | io.IOBase, languages: list[str] = None, **kwarg
                 else:
                     caption.append(line, languages[0])
                 line = content.readline().strip()
-            caption.shift_time(time_offset)
             self.append(caption)
         line = content.readline()
 
 
-def saveVTT(self, filename: str, languages: list[str] = None, **kwargs):
-    filename = self.makeFilename(filename=filename, extension=self.extensions.VTT,
-                                 languages=languages, **kwargs)
-    encoding = kwargs.get("file_encoding") or "UTF-8"
-    try:
-        with open(filename, "w", encoding=encoding) as file:
-            file.write("WEBVTT\n\n")
-            index = 1
-            for text, data in self.getGenerator("getVTT", languages, **kwargs):
-                if data.block_type != BlockType.CAPTION:
-                    continue
-                elif index != 1:
-                    file.write("\n\n")
-                file.write(f"{data.start_time.toVTTTime()} --> {data.end_time.toVTTTime()}\n")
-                file.write("\n".join(i for i in text))
-                index += 1
-    except IOError as e:
-        print(f"I/O error({e.errno}): {e.strerror}")
-    except Exception as e:
-        print(f"Error {e}")
-
+@captionsWriter("VTT", "getVTT")
+def saveVTT(self, filename: str, languages: list[str] = None, generator: list = None, 
+            file: io.FileIO = None, **kwargs):
+    file.write("WEBVTT\n\n")
+    index = 1
+    for text, data in generator:
+        if data.block_type != BlockType.CAPTION:
+            continue
+        elif index != 1:
+            file.write("\n\n")
+        file.write(f"{data.start_time.toVTTTime()} --> {data.end_time.toVTTTime()}\n")
+        file.write("\n".join(i for i in text))
+        index += 1
 
 class WebVTT(CaptionsFormat):
     """

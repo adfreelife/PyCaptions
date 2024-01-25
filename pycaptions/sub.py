@@ -3,7 +3,7 @@ import re
 import langcodes 
 
 from .block import Block, BlockType
-from .captionsFormat import CaptionsFormat
+from .captionsFormat import CaptionsFormat, captionsDetector, captionsReader, captionsWriter
 from .microTime import MicroTime as MT
 
 
@@ -12,6 +12,7 @@ PATTERN = r"\{.*?\}"
 
 
 @staticmethod
+@captionsDetector
 def detectSUB(content: str | io.IOBase) -> bool:
     r"""
     Used to detect MicroDVD caption format.
@@ -19,17 +20,9 @@ def detectSUB(content: str | io.IOBase) -> bool:
     It returns True if:
      - the start of a first line in a file matches regex `^{\d+}{\d+}`
     """
-    if not isinstance(content, io.IOBase):
-        if not isinstance(content, str):
-            raise ValueError("The content is not a unicode string or I/O stream.")
-        content = io.StringIO(content)
-
-    offset = content.tell()
     line = content.readline()
     if re.match(r"^{\d+}{\d+}", line) or line.startswith(r"{DEFAULT}"):
-        content.seek(offset)
         return True
-    content.seek(offset)
     return False
 
 
@@ -89,10 +82,8 @@ def formatLine(self, pattern):
     return start, end
 
 
+@captionsReader
 def readSUB(self, content: str | io.IOBase, languages: list[str] = None, **kwargs):
-    content = self.checkContent(content=content, **kwargs)
-    languages = languages or [self.default_language]
-    time_offset = kwargs.get("time_offset") or MT()
     if not self.options.get("frame_rate"):
         self.options["frame_rate"] = kwargs.get("frame_rate") or 25
     frame_rate = kwargs.get("frame_rate") or self.options.get("frame_rate")
@@ -118,26 +109,23 @@ def readSUB(self, content: str | io.IOBase, languages: list[str] = None, **kwarg
                     caption.append(line, languages[counter])
                 else:
                     caption.append(line, languages[0])
-            caption.shift_time(time_offset)
             self.append(caption)
         line = content.readline().strip()
 
 
-def saveSUB(self, filename: str, languages: list[str] = None, **kwargs):
-    filename = self.makeFilename(filename=filename, extension=self.extensions.SUB,
-                                 languages=languages, **kwargs)
-    encoding = kwargs.get("file_encoding") or "UTF-8"
+@captionsWriter("SUB", "getSUB", "|")
+def saveSUB(self, filename: str, languages: list[str] = None, generator: list = None, 
+            file: io.FileIO = None, **kwargs):
     frame_rate = kwargs.get("frame_rate") or self.options.get("frame_rate") or 25
-    with open(filename, "w", encoding=encoding) as file:
-        index = 1
-        for text, data in self.getGenerator("getSUB", languages, new_line="|", **kwargs):
-            if data.block_type != BlockType.CAPTION:
-                continue
-            elif index != 1:
-                file.write("\n")
-            file.write("{"+data.start_time.toSUBTime(frame_rate)+"}{"+data.end_time.toSUBTime(frame_rate)+"}")
-            file.write("|".join(i for i in text))
-            index += 1
+    index = 1
+    for text, data in generator:
+        if data.block_type != BlockType.CAPTION:
+            continue
+        elif index != 1:
+            file.write("\n")
+        file.write("{"+data.start_time.toSUBTime(frame_rate)+"}{"+data.end_time.toSUBTime(frame_rate)+"}")
+        file.write("|".join(i for i in text))
+        index += 1
 
 
 class MicroDVD(CaptionsFormat):

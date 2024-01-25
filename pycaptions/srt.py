@@ -1,7 +1,7 @@
 import io
 
 from .block import Block, BlockType
-from .captionsFormat import CaptionsFormat
+from .captionsFormat import CaptionsFormat, captionsDetector, captionsReader, captionsWriter
 from .microTime import MicroTime as MT
 from .styling import Styling
 
@@ -10,6 +10,7 @@ EXTENSIONS = [".srt"]
 
 
 @staticmethod
+@captionsDetector
 def detectSRT(content: str | io.IOBase) -> bool:
     """
     Used to detect SubRip caption format.
@@ -18,16 +19,8 @@ def detectSRT(content: str | io.IOBase) -> bool:
      - the first line is a number 1
      - the second line contains a `-->`
     """
-    if not isinstance(content, io.IOBase):
-        if not isinstance(content, str):
-            raise ValueError("The content is not a unicode string or I/O stream.")
-        content = io.StringIO(content)
-
-    offset = content.tell()
     if content.readline().rstrip() == "1" and '-->' in content.readline():
-        content.seek(offset)
         return True
-    content.seek(offset)
     return False
 
 
@@ -68,16 +61,13 @@ def getSRTLayout(self, id, width, height):
     return f" X1:{x1} X2:{x2} Y1:{y1} Y2:{y2}"
 
 
+@captionsReader
 def readSRT(self, content: str | io.IOBase, languages: list[str] = None, **kwargs):
     """
     kwargs: 
-     - time_offset (MicroTime, optional): Used for shifting time on read (default is 0)
      - media_width (int, optional): Used for extended SRT coordinates conversion
      - media_height (int, optional): Used for extended SRT coordinates conversion
     """
-    content = self.checkContent(content=content, **kwargs)
-    languages = languages or [self.default_language]
-    time_offset = kwargs.get("time_offset") or MT()
     width = kwargs.get("media_width") or self.media_width
     height = kwargs.get("media_height") or self.media_height
 
@@ -99,44 +89,35 @@ def readSRT(self, content: str | io.IOBase, languages: list[str] = None, **kwarg
             else:
                 caption.append(Styling.fromSRT(line), languages[0])
             line = content.readline().strip()
-        caption.shift_time(time_offset)
         self.append(caption)
         id = content.readline()
 
 
-def saveSRT(self, filename: str, languages: list[str] = None, **kwargs):
+@captionsWriter("SRT", "getSRT")
+def saveSRT(self, filename: str, languages: list[str] = None, generator: list = None, 
+            file: io.FileIO = None, **kwargs):
     """
     kwargs:
-     - file_encoding (str, optional): Used for opening files (default is UTF-8)
      - srt_extended (bool, optional): Used to make extended version of SRT (default is False)
      - media_width (int, optional): Used for extended SRT coordinates conversion
      - media_height (int, optional): Used for extended SRT coordinates conversion
     """
-    filename = self.makeFilename(filename=filename, extension=self.extensions.SRT,
-                                 languages=languages, **kwargs)
-    encoding = kwargs.get("file_encoding") or "UTF-8"
     width = kwargs.get("media_width") or self.media_width
     height = kwargs.get("media_height") or self.media_height
     isExtended = kwargs.get("srt_extended") or False
     extended = ""
-    try:
-        with open(filename, "w", encoding=encoding) as file:
-            index = 1
-            for text, data in self.getGenerator("getSRT", languages, **kwargs):
-                if data.block_type != BlockType.CAPTION:
-                    continue
-                elif index != 1:
-                    file.write("\n\n")
-                if isExtended:
-                    extended = getSRTLayout(self, index, width, height)
-                file.write(f"{index}\n")
-                file.write(f"{data.start_time.toSRTTime()} --> {data.end_time.toSRTTime()}{extended}\n")
-                file.write("\n".join(i for i in text))
-                index += 1
-    except IOError as e:
-        print(f"I/O error({e.errno}): {e.strerror}")
-    except Exception as e:
-        print(f"Error {e}")
+    index = 1
+    for text, data in generator:
+        if data.block_type != BlockType.CAPTION:
+            continue
+        elif index != 1:
+            file.write("\n\n")
+        if isExtended:
+            extended = getSRTLayout(self, index, width, height)
+        file.write(f"{index}\n")
+        file.write(f"{data.start_time.toSRTTime()} --> {data.end_time.toSRTTime()}{extended}\n")
+        file.write("\n".join(i for i in text))
+        index += 1
 
 
 class SubRip(CaptionsFormat):

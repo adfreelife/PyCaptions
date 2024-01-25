@@ -49,21 +49,21 @@ class Captions(CaptionsFormat):
         "vtt": saveVTT
     }
 
+    detectors = {
+        "srt": detectSRT,
+        "vtt": detectVTT,
+        "ttml": detectTTML,
+        "sub": detectSUB,
+        "sami": detectSAMI,
+        "usf": detectUSF,
+        "lrc": detectLRC
+    }
+
     def get_format(self, file: str | io.IOBase) -> str | None:
-        if self.detectSRT(file):
-            self.fileFormat = "srt"
-        elif self.detectVTT(file):
-            self.fileFormat = "vtt"
-        elif self.detectTTML(file):
-            self.fileFormat = "ttml"
-        elif self.detectSUB(file):
-            self.fileFormat = "sub"
-        elif self.detectSAMI(file):
-            self.fileFormat = "sami"
-        elif self.detectUSF(file):
-            self.fileFormat = "usf"
-        elif self.detectLRC(file):
-            self.fileFormat = "lrc"
+        for format, detector in self.detectors.items():
+            if detector(file):
+                self.fileFormat = format
+                return format
         return self.fileFormat
 
     def detect(self, content: str | io.IOBase) -> bool:

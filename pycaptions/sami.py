@@ -1,7 +1,7 @@
 import io
 
 from .block import Block, BlockType
-from .captionsFormat import CaptionsFormat
+from .captionsFormat import CaptionsFormat, captionsDetector, captionsReader, captionsWriter
 from .microTime import MicroTime as MT
 from bs4 import BeautifulSoup
 
@@ -10,6 +10,7 @@ EXTENSIONS = [".sami"]
 
 
 @staticmethod
+@captionsDetector
 def detectSAMI(content: str | io.IOBase) -> bool:
     """
     Used to detect Synchronized Accessible Media Interchange caption format.
@@ -17,38 +18,19 @@ def detectSAMI(content: str | io.IOBase) -> bool:
     It returns True if:
      - the first line starts with <SAMI>
     """
-    if not isinstance(content, io.IOBase):
-        if not isinstance(content, str):
-            raise ValueError("The content is not a unicode string or I/O stream.")
-        content = io.StringIO(content)
-
-    offset = content.tell()
     if content.readline().lstrip().startswith("<SAMI>"):
-        content.seek(offset)
         return True
-    content.seek(offset)
     return False
 
 
+@captionsReader
 def readSAMI(self, content: str | io.IOBase, languages: list[str] = None, **kwargs):
-    content = self.checkContent(content=content, **kwargs)
-    languages = languages or [self.default_language]
-    time_offset = kwargs.get("time_offset") or MT()
     raise ValueError("Not Implemented")
 
 
-def saveSAMI(self, filename: str, languages: list[str] = None, **kwargs):
-    filename = self.makeFilename(filename=filename, extension=self.extensions.SAMI,
-                                 languages=languages, **kwargs)
-    encoding = kwargs.get("file_encoding") or "UTF-8"
-    try:
-        with open(filename, "w", encoding=encoding) as file:
-            for text, data in self.getGenerator("getSAMI", languages, **kwargs):
-                pass
-    except IOError as e:
-        print(f"I/O error({e.errno}): {e.strerror}")
-    except Exception as e:
-        print(f"Error {e}")
+@captionsWriter("SAMI", "getSAMI")
+def saveSAMI(self, filename: str, languages: list[str] = None, generator: list = None, 
+             file: io.FileIO = None, **kwargs):
     raise ValueError("Not Implemented")
 
 
