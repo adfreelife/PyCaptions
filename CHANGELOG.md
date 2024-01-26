@@ -11,21 +11,24 @@ Table of Contents
 - [v0.2.1 [broken]](#v021)
 
 ### v0.6.0
-Release date: TBA
+Release date: 2024-01-26
 <br>Commit: TBA
 
 Changes:
+- Added support for inline style conversion for MicroDVD
 - Added `style` argument to readers, possible values `None` (no styling), default `full` (converts inline styles only for now)
 - Added `lines` argument to readers, possible values default `-1` (preserves original), `0` (automatically determins number of lines, works only with `style=None` for now), `1` (fits everything in one line), `n` (positive integer bigger than 1, fits text into `n` lines, works only with `style=None` for now)
 - Removed `no_styling` argument, replaced by `style=None`
-- Added support for inline style conversion for MicroDVD
-- Added support for inline style conversion for TTML
 - Renamed `Block.getLines` to `Block.get_lines`
 - TTML writer now writes multilingual files the same way as other writers by default, add `mark_language_type=True` to make it write the same as before
 - Added dependency for `webcolors` to transform web color names to hex colors
 - Added decorators `@captionsDetector`, `@captionsReader`, `@captionsWriter` for better code structure
+- Added `MicroTime.recalculate` to recalculate time into the right values (e.g. 99min -> 1h 39min)
 
 Fixes:
+- Fixed `detectTTML` not seeking file to the original offset
+- Fixed `MicroTime.fromTTMLTime` returning 0 instead of infinity if no valid values are provided
+- Fixed `TTML.reader` not adding section time to end block time
 - Fixed `Block.copy` not returning a deepcopy of itself
 - Fixed `Block` substraction and addition not using `Block.copy`
 

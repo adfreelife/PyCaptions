@@ -18,6 +18,13 @@ class MicroTime:
         self.minutes = minutes
         self.hours = hours
 
+    def recalculate(self):
+        milli, self.micro = divmod(self.micro, 1_000)
+        seconds, self.milli = divmod(self.milli+milli, 1_000)
+        minutes, self.seconds = divmod(self.seconds+seconds, 60)
+        hours, self.minutes = divmod(self.minutes+minutes, 60)
+        self.hours += hours
+        
     @property
     def milli(self):
         return self.milliseconds
@@ -240,17 +247,22 @@ class MicroTime:
 
     @staticmethod
     def fromTTMLTime(begin: str, dur: str, end: str, **kwargs):
-        if begin:
-            begin = MicroTime.parseTTMLTime(begin)
-        else:
-            begin = MicroTime()
+        INFINITY = float("inf")
         if dur:
+            if begin:
+                begin = MicroTime.parseTTMLTime(begin)
+            else:
+                begin = MicroTime()
             end = begin + MicroTime.parseTTMLTime(dur)
         else:
+            if begin:
+                begin = MicroTime.parseTTMLTime(begin)
+            else:
+                begin = MicroTime(hours=INFINITY)
             if end:
                 end = MicroTime.parseTTMLTime(end)
             else:
-                end = MicroTime()
+                end = MicroTime(hours=INFINITY)
         return begin, end
 
     def toTTMLTime(self):

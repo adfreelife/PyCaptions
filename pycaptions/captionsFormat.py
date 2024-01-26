@@ -65,14 +65,16 @@ def captionsWriter(extension: str, generator_type: str = None, new_line: str = "
                 lines = -1
 
             if "new_line" in kwargs:
-                new_line = kwargs["new_line"]
+                line_separator = kwargs["new_line"]
+            else:
+                line_separator = new_line
             
             if kwargs.get("generator"):
                 generator = kwargs.get("generator")
             else:
                 if "style" in kwargs and kwargs["style"] != "full":
                     if kwargs["style"] == None:
-                        generator = (((new_line.join(data.get(lang=i, lines=lines, **kwargs)) for i in languages), data) for data in self)
+                        generator = (((line_separator.join(data.get(lang=i, lines=lines, **kwargs)) for i in languages), data) for data in self)
                     else:
                         raise ValueError(f"Incorect argument value of style, expected 'full' or None, got {kwargs['style']}")
                 else:

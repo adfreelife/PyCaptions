@@ -41,23 +41,23 @@ def detectTTML(content: str | io.IOBase) -> bool:
 @captionsReader
 def readTTML(self, content: str | io.IOBase, languages: list[str] = None, **kwargs):
     content = BeautifulSoup(content, "xml")
-    if not languages:
-        if not content.tt.get("xml:lang"):
-            languages = [self.default_language]
-        else:
+    if len(languages) == 1 and languages[0] == "und":
+        if content.tt.get("xml:lang"):
             languages = [content.tt.get("xml:lang")]
-    self.setDefaultLanguage(languages[0])
+            self.setDefaultLanguage(languages[0])
     for index, langs in enumerate(content.body.find_all("div")):
         lang = langs.get("xml:lang")
         p_start, p_end = MT.fromTTMLTime(langs.get("begin"), langs.get("dur"), langs.get("end"))
         for block, line in enumerate(langs.find_all("p")):
             start, end = MT.fromTTMLTime(line.get("begin"), line.get("dur"), line.get("end"))
             start += p_start
+            end += p_start
             if start > p_end:
                 start = p_end
                 end = p_end
             elif end > p_end:
                 end = p_end
+            
             if index == 0:
                 caption = Block(BlockType.CAPTION, start_time=start, end_time=end)
             else:

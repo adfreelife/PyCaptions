@@ -121,19 +121,27 @@ with Captions("tests/test.en.srt") as captions:
 ```
 
 ## Changelog
-### v0.5.2
-Release date: 2024-01-24
+## v0.6.0
+Release date: 2024-01-26
 
 Changes:
-- Added `save_as` arguments to `toJson` function, can be of value `caption_array`, `dict`, `string`.
-- Added `FileExtensions.getvars` that returns key-value pairs of variable names and extensions
-- Added `BlockType.getvars` that returns key-value pairs of variable names and numbers
-- `MicroDVD.read` now converts control code `H` value to language code
-- `MicroDVD.read` now stores unimplemented/unknown control codes (json)
-- Added `charset-normalizer` package so that `with` keyword and `fromJson`, `fromLegacyJson` can have `encoding="auto"`
-- `with` keyword now supports loading legacy json with argument `legacyJson=True`
+- Added support for inline style conversion for MicroDVD
+- Added `style` argument to readers, possible values `None` (no styling), default `full` (converts inline styles only for now)
+- Added `lines` argument to readers, possible values default `-1` (preserves original), `0` (automatically determins number of lines, works only with `style=None` for now), `1` (fits everything in one line), `n` (positive integer bigger than 1, fits text into `n` lines, works only with `style=None` for now)
+- Removed `no_styling` argument, replaced by `style=None`
+- Renamed `Block.getLines` to `Block.get_lines`
+- TTML writer now writes multilingual files the same way as other writers by default, add `mark_language_type=True` to make it write the same as before
+- Added dependency for `webcolors` to transform web color names to hex colors
+- Added decorators `@captionsDetector`, `@captionsReader`, `@captionsWriter` for better code structure
+- Added `MicroTime.recalculate` to recalculate time into the right values (e.g. 99min -> 1h 39min)
+- Moved `CaptionsFormat.checkContent` and `CaptionsFormat.getGenerator` to decorators that used them
+- Added `Captions.detectors` and improved `Captions.get_format` function
 
 Fixes:
-- Fixed an issue where `detectTTML` causes infinit loop.
+- Fixed `detectTTML` not seeking file to the original offset
+- Fixed `MicroTime.fromTTMLTime` returning 0 instead of infinity if no valid values are provided
+- Fixed `TTML.reader` not adding section time to end block time
+- Fixed `Block.copy` not returning a deepcopy of itself
+- Fixed `Block` substraction and addition not using `Block.copy`
 
 Read past changes [here](https://github.com/adfreelife/PyCaptions/blob/main/CHANGELOG.md).

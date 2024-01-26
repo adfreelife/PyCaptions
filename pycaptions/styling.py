@@ -51,6 +51,9 @@ class Styling(BS):
 
     def parseStyle(self, string):
         return cssParser.parseStyle(string, encoding="UTF-8")
+    
+    def get_lines(self):
+        return (BS(line, 'html.parser').get_text() for index, line in enumerate(str(self).split("<br/>")))
 
     @staticmethod
     def fromSRT(text):
@@ -149,11 +152,7 @@ class Styling(BS):
                 if tag.name == "br" and lines == 1:
                     tag.insert_before(" ")
                     tag.unwrap()
-        return str(self)
-    
-    def get_lines(self):
-        return (BS(line, 'html.parser').get_text() for index, line in enumerate(str(self).split("<br/>")))
-            
+        return str(self)         
     
     def getSUB(self, lines:int = -1, css: cssutils.css.CSSStyleSheet = None, 
                add_metadata: bool = True, **kwargs):
