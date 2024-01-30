@@ -10,9 +10,21 @@ Table of Contents
 - [v0.2.2](#v022)
 - [v0.2.1 [broken]](#v021)
 
+### v0.7.0
+Release date: TBA
+<br>Commit: TBA
+
+Changes:
+- Added cli support
+- Added `MicroTime.fromMicrotime` creates a MicroTime from a list
+- Added `MicroTime.toMicrotime` returns a MicroTime as a list
+- `MicroTime.fromSUBTime` and `MicroTime.toSUBTime` now supports framerate as string
+
+Fixes:
+
 ### v0.6.0
 Release date: 2024-01-26
-<br>Commit: TBA
+<br>Commit: [0fb361f](https://github.com/adfreelife/PyCaptions/commit/0fb361f69b71c4854ab72623d00d0002bdce3076)
 
 Changes:
 - Added support for inline style conversion for MicroDVD
@@ -24,6 +36,8 @@ Changes:
 - Added dependency for `webcolors` to transform web color names to hex colors
 - Added decorators `@captionsDetector`, `@captionsReader`, `@captionsWriter` for better code structure
 - Added `MicroTime.recalculate` to recalculate time into the right values (e.g. 99min -> 1h 39min)
+- Moved `CaptionsFormat.checkContent` and `CaptionsFormat.getGenerator` to decorators that used them
+- Added `Captions.detectors` and improved `Captions.get_format` function
 
 Fixes:
 - Fixed `detectTTML` not seeking file to the original offset

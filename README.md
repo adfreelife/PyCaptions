@@ -1,9 +1,9 @@
 <h1 align="center">PyCaptions</h1>
 <p align="center">
   <a href="https://pypi.org/project/pycaptions"><img alt="PyPI - Version" src="https://img.shields.io/pypi/v/pycaptions.svg?color=blue"></a>
-  <a href="https://pypi.org/project/pycaptions"><img alt="PyPI - License" src="https://img.shields.io/pypi/l/pycaptions.svg"></a>
-  <a href="https://pypi.org/project/pycaptions"><img alt="PyPI - Python" src="https://img.shields.io/pypi/pyversions/pycaptions.svg?color=blue"></a>
-  <a href="https://pypi.org/project/pycaptions"><img alt="PyPI - Wheel" src="https://img.shields.io/pypi/wheel/pycaptions.svg"></a>
+  <a href="https://choosealicense.com/licenses/lgpl-3.0/"><img alt="PyPI - License" src="https://img.shields.io/pypi/l/pycaptions.svg"></a>
+  <a href="https://www.python.org/downloads/"><img alt="PyPI - Python" src="https://img.shields.io/pypi/pyversions/pycaptions.svg?color=blue"></a>
+  <a href="https://github.com/pypa/wheel"><img alt="PyPI - Wheel" src="https://img.shields.io/pypi/wheel/pycaptions.svg"></a>
   <a href="https://pypi.org/project/pycaptions"><img alt="PyPI - Status" src="https://img.shields.io/pypi/status/pycaptions.svg"></a>
   <a href="https://pypi.org/project/pycaptions"><img alt="PyPI - Downloads" src="https://static.pepy.tech/personalized-badge/pycaptions?period=total&units=international_system&left_text=downloads&left_color=grey&right_color=blue"></a>
 </p>
@@ -36,7 +36,7 @@ Table of Contents
 
 ## Supported Formats
 - [SubRip (SRT)](https://en.wikipedia.org/wiki/SubRip) (reader + writer)
-- [MicroDVD (SUB)](https://en.wikipedia.org/wiki/MicroDVD) (reader + writer*)
+- [MicroDVD (SUB)](https://en.wikipedia.org/wiki/MicroDVD) (reader + writer)
 - [Timed Text Markup Language (TTML, DFXP, XML)](https://www.w3.org/TR/ttml/) (reader* + writer*)
 - [Web Video Text Tracks Format (VTT)](https://www.w3.org/TR/webvtt/) (reader + writer*)
 

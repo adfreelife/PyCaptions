@@ -17,13 +17,6 @@ class MicroTime:
         self.seconds = seconds
         self.minutes = minutes
         self.hours = hours
-
-    def recalculate(self):
-        milli, self.micro = divmod(self.micro, 1_000)
-        seconds, self.milli = divmod(self.milli+milli, 1_000)
-        minutes, self.seconds = divmod(self.seconds+seconds, 60)
-        hours, self.minutes = divmod(self.minutes+minutes, 60)
-        self.hours += hours
         
     @property
     def milli(self):
@@ -169,15 +162,18 @@ class MicroTime:
         self.milli = 0
         self.micro = 0
 
-    def toTime(self) -> int:
-        return (self.micro + self.milli*1_000 + self.seconds*1_000_000
-                + self.minutes*60_000_000 + self.hours*3_600_000_000)
-
     def _fromTime(self, time: int):
         self.hours, reminder = divmod(time, 3_600_000_000)
         self.minutes, reminder = divmod(reminder, 60_000_000)
         self.seconds, reminder = divmod(reminder, 1_000_000)
         self.milliseconds, self.microseconds = divmod(reminder, 1_000)
+
+    def recalculate(self):
+        milli, self.micro = divmod(self.micro, 1_000)
+        seconds, self.milli = divmod(self.milli+milli, 1_000)
+        minutes, self.seconds = divmod(self.seconds+seconds, 60)
+        hours, self.minutes = divmod(self.minutes+minutes, 60)
+        self.hours += hours
 
     @staticmethod
     def fromTime(time: int):
@@ -187,7 +183,24 @@ class MicroTime:
         milliseconds, microseconds = divmod(reminder, 1_000)
         return MicroTime(microseconds=microseconds, milliseconds=milliseconds,
                          seconds=seconds, minutes=minutes, hours=hours)
+    
+    def toTime(self) -> int:
+        return (self.micro + self.milli*1_000 + self.seconds*1_000_000
+                + self.minutes*60_000_000 + self.hours*3_600_000_000)
+        
+    @staticmethod
+    def fromMicrotime(args: list, input_order="reverse"):
+        if input_order == "reverse":
+            order = ["hours", "minutes", "seconds", "milliseconds", "microseconds"]
+        else: 
+            order = ["microseconds", "milliseconds", "seconds", "minutes", "hours"]
+        return MicroTime(**{t: int(i) if t != "microseconds" else float(i) for i, t in zip(args, order)})
 
+    def toMicrotime(self, input_order="reverse") -> list[int | float]:
+        if input_order == "reverse":
+            return [self.hours, self.minutes, self.seconds, self.milliseconds, self.microseconds]
+        return [self.microseconds, self.milliseconds, self.seconds, self.minutes, self.hours]
+    
     @staticmethod
     def fromSRTTime(time: str):
         return MicroTime(hours=int(time[0:2]), minutes=int(time[3:5]),
@@ -215,11 +228,11 @@ class MicroTime:
         return f"{int(self.hours):02}:{int(self.minutes):02}:{int(self.seconds):02}.{int(self.milli):03}"
 
     @staticmethod
-    def fromSUBTime(time: str, frame_rate: int):
-        return MicroTime.fromTime(int(time) * 1_000_000 / frame_rate)
+    def fromSUBTime(time: str, frame_rate: int | str):
+        return MicroTime.fromTime(int(time) * 1_000_000 / int(frame_rate))
 
-    def toSUBTime(self, frame_rate: int):
-        return str(int(self.toTime() * frame_rate / 1_000_000))
+    def toSUBTime(self, frame_rate: int | str):
+        return str(int(self.toTime() * int(frame_rate) / 1_000_000))
 
     @staticmethod
     def parseTTMLTime(time: str, **kwargs):
@@ -267,3 +280,4 @@ class MicroTime:
 
     def toTTMLTime(self):
         return self.toVTTTime()
+    

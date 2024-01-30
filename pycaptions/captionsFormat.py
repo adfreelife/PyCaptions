@@ -368,8 +368,9 @@ class CaptionsFormat:
 
         return file+extension
 
-    def getLanguagesFromFilename(self, filename):
-        filename, ext = os.path.splitext(filename)
+    @staticmethod
+    def getLanguagesFromFilename(filename):
+        filename, _ = os.path.splitext(filename)
         filename = filename.split(".")
         if len(filename) > 1:
             languages = []
