@@ -367,10 +367,30 @@ class CaptionsFormat:
             file = ".".join((val for val in file.split('.') if val not in languages))+"."+".".join(languages)
 
         return file+extension
+    
+    @staticmethod
+    def getFilename(filename: str, directory: str = None):
+        if not directory:
+            directory = os.path.dirname(filename)
+        filename, _ = os.path.splitext(os.path.basename(filename))
+        filename = filename.split(".")
+        if len(filename) > 1:
+            clean_filename = []
+            for i in filename:
+                try:
+                    if tag_is_valid(standardize_tag(i, macro=True)):
+                        continue
+                    else:
+                        clean_filename.append(i)
+                except Exception:
+                    clean_filename.append(i)
+            if clean_filename:
+                return os.path.join(directory, ".".join(clean_filename))
+        return os.path.join(directory, ".".join(filename))
 
     @staticmethod
-    def getLanguagesFromFilename(filename):
-        filename, _ = os.path.splitext(filename)
+    def getLanguagesFromFilename(filename: str):
+        filename, _ = os.path.splitext(os.path.basename(filename))
         filename = filename.split(".")
         if len(filename) > 1:
             languages = []
@@ -385,6 +405,27 @@ class CaptionsFormat:
         else:
             return None
         return languages
+    
+    @staticmethod
+    def getLanguagesAndFilename(filename: str, directory: str = None):
+        if not directory:
+            directory = os.path.dirname(filename)
+        filename, _ = os.path.splitext(os.path.basename(filename))
+        filename = filename.split(".")
+        if len(filename) > 1:
+            languages = []
+            clean_filename = []
+            for i in filename:
+                try:
+                    if tag_is_valid(standardize_tag(i, macro=True)):
+                        languages.append(i)
+                except Exception:
+                    clean_filename.append(i)
+            if not languages:
+                languages = None
+            if clean_filename:
+                return languages, os.path.join(directory, ".".join(clean_filename))
+        return languages, os.path.join(directory, ".".join(filename))
 
     def append(self, item: Block):
         if item.end_time and item.end_time > self.time_length:

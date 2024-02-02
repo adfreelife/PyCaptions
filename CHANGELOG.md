@@ -1,4 +1,5 @@
 Table of Contents
+- [v0.7.0 [stable]](#v070)
 - [v0.6.0 [stable]](#v060)
 - [v0.5.2 [stable]](#v052)
 - [v0.5.1](#v051)
@@ -14,13 +15,19 @@ Table of Contents
 Release date: TBA
 <br>Commit: TBA
 
-Changes:
-- Added cli support
+Changes: 
+- **Added cli support** (e.g `pycaptions "path/to/file/file.srt" -f vtt`)
+- Added function `CaptionsFormat.getLanguagesAndFilename`
+- Added function `CaptionsFormat.getFilename`
 - Added `MicroTime.fromMicrotime` creates a MicroTime from a list
 - Added `MicroTime.toMicrotime` returns a MicroTime as a list
+- Added `MicroTime.fromAnyFormat` returns a MicroTime from provided format (case insensitive)
 - `MicroTime.fromSUBTime` and `MicroTime.toSUBTime` now supports framerate as string
+- `Captions.save` output_format is now case insensitive
 
 Fixes:
+- Fixed `Styling.getTTML` converting invalid css properties into ttml properties. To-do: add value checks for these properties.
+- Fixed `CaptionsFormat.getLanguagesFromFilename` getting languages from directory path (e.g. `\path.to.file\file.en.srt` -> `["to", "en"]`)
 
 ### v0.6.0
 Release date: 2024-01-26
@@ -37,7 +44,7 @@ Changes:
 - Added decorators `@captionsDetector`, `@captionsReader`, `@captionsWriter` for better code structure
 - Added `MicroTime.recalculate` to recalculate time into the right values (e.g. 99min -> 1h 39min)
 - Moved `CaptionsFormat.checkContent` and `CaptionsFormat.getGenerator` to decorators that used them
-- Added `Captions.detectors` and improved `Captions.get_format` function
+- Added `Captions.detectors` and improved `Captions.get_format` method
 
 Fixes:
 - Fixed `detectTTML` not seeking file to the original offset
@@ -51,7 +58,7 @@ Release date: 2024-01-24
 <br>Commit: [cf59a36](https://github.com/adfreelife/PyCaptions/commit/cf59a3645df0ee1f888e5d6e79d38e2eb1604b86)
 
 Changes:
-- Added `save_as` arguments to `toJson` function, can be of value `caption_array`, `dict`, `string`.
+- Added `save_as` arguments to `toJson` method, can be of value `caption_array`, `dict`, `string`.
 - Added `FileExtensions.getvars` that returns key-value pairs of variable names and extensions
 - Added `BlockType.getvars` that returns key-value pairs of variable names and numbers
 - `MicroDVD.read` now converts control code `H` value to language code

@@ -79,7 +79,7 @@ class Captions(CaptionsFormat):
 
     def save(self, filename: str, languages: list[str] = None, output_format: str = None, **kwargs):
         if output_format:
-            output_format = output_format.lstrip(".")
+            output_format = output_format.lstrip(".").lower()
         else:
             output_format = self.fileFormat
         if output_format not in self.savers:

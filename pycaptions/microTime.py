@@ -176,8 +176,8 @@ class MicroTime:
         self.hours += hours
 
     @staticmethod
-    def fromTime(time: int):
-        hours, reminder = divmod(time, 3_600_000_000)
+    def fromTime(time: int | str, *args, **kwargs):
+        hours, reminder = divmod(int(time), 3_600_000_000)
         minutes, reminder = divmod(reminder, 60_000_000)
         seconds, reminder = divmod(reminder, 1_000_000)
         milliseconds, microseconds = divmod(reminder, 1_000)
@@ -189,7 +189,15 @@ class MicroTime:
                 + self.minutes*60_000_000 + self.hours*3_600_000_000)
         
     @staticmethod
-    def fromMicrotime(args: list, input_order="reverse"):
+    def fromMicrotime(time: list | str, input_order="reverse", *args, **kwargs):
+        if isinstance(time, str):
+            if len(args) > 0:
+                sep = args[0]
+            elif "separator" in kwargs:
+                sep = kwargs["separator"]
+            else:
+                sep = " "
+            time = time.split(sep)
         if input_order == "reverse":
             order = ["hours", "minutes", "seconds", "milliseconds", "microseconds"]
         else: 
@@ -202,7 +210,7 @@ class MicroTime:
         return [self.microseconds, self.milliseconds, self.seconds, self.minutes, self.hours]
     
     @staticmethod
-    def fromSRTTime(time: str):
+    def fromSRTTime(time: str, *args, **kwargs):
         return MicroTime(hours=int(time[0:2]), minutes=int(time[3:5]),
                          seconds=int(time[6:8]), milliseconds=int(time[9:]))
 
@@ -210,7 +218,7 @@ class MicroTime:
         return f"{int(self.hours):02}:{int(self.minutes):02}:{int(self.seconds):02},{int(self.milli):03}"
 
     @staticmethod
-    def fromVTTTime(time: str):
+    def fromVTTTime(time: str, *args, **kwargs):
         seconds = 0
         minutes = 0
         hours = 0
@@ -228,15 +236,29 @@ class MicroTime:
         return f"{int(self.hours):02}:{int(self.minutes):02}:{int(self.seconds):02}.{int(self.milli):03}"
 
     @staticmethod
-    def fromSUBTime(time: str, frame_rate: int | str):
+    def fromSUBTime(time: str, frame_rate: int | str, *args, **kwargs):
         return MicroTime.fromTime(int(time) * 1_000_000 / int(frame_rate))
 
     def toSUBTime(self, frame_rate: int | str):
         return str(int(self.toTime() * int(frame_rate) / 1_000_000))
 
     @staticmethod
-    def parseTTMLTime(time: str, **kwargs):
-        multiplier = metric.get(time[-1]) or kwargs.get(time[-1])
+    def parseTTMLTime(time: str, *args, **kwargs):
+        frameRate = kwargs.get("frameRate")
+        subFrameRate = kwargs.get("subFrameRate")
+        if len(args) > 0:
+            try:
+                multiplier = int(args[0])
+            except Exception:
+                multiplier = None
+            if len(args) > 2:
+                frameRate = args[1]
+                subFrameRate = args[2]
+            elif len(args) > 1:
+                frameRate = args[1]
+        else:
+            multiplier = kwargs.get(time[-1]) or metric.get(time[-1])
+
         if multiplier:
             return MicroTime.fromTime(float(time[:-1])*multiplier)
         else:
@@ -249,17 +271,17 @@ class MicroTime:
                                  seconds=int(seconds), milliseconds=int(milli))
             else:
                 seconds = int(time[2])
-                if kwargs.get("subFrameRate"):
+                if subFrameRate:
                     frames = time[3].split(".")
-                    milli = frames[0] * 1_000_000 / kwargs.get("frameRate")
-                    milli += frames[1] * 1_000 / kwargs.get("subFrameRate")
+                    milli = frames[0] * 1_000_000 / frameRate
+                    milli += frames[1] * 1_000 / subFrameRate
                 else:
-                    milli = float(time[3]) * 1_000_000 / kwargs.get("frameRate")
+                    milli = float(time[3]) * 1_000_000 / frameRate
                 return MicroTime(hours=hours, minutes=minutes, seconds=seconds,
                                  milliseconds=int(milli), microseconds=(milli % 1)*1_000)
 
     @staticmethod
-    def fromTTMLTime(begin: str, dur: str, end: str, **kwargs):
+    def fromTTMLTime(begin: str, dur: str, end: str, *args, **kwargs):
         INFINITY = float("inf")
         if dur:
             if begin:
@@ -281,3 +303,19 @@ class MicroTime:
     def toTTMLTime(self):
         return self.toVTTTime()
     
+    
+    time_formats = {
+        "time": fromTime,
+        "microtime": fromMicrotime,
+        "vtt": fromVTTTime,
+        "srt": fromSRTTime,
+        "ttml": parseTTMLTime,
+        "sub": fromSUBTime
+    }
+
+    @staticmethod
+    def fromAnyFormat(desired_format: str, *args, **kwargs):
+        desired_format = desired_format.lower()
+        if desired_format not in MicroTime.time_formats:
+            raise ValueError(f"'{desired_format}' is not valid, expected {','.join(list(MicroTime.time_formats))}")
+        MicroTime.time_formats[desired_format](*args, **kwargs)

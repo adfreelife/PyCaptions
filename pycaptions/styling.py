@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup as BS
 from cssutils import CSSParser
 from cssutils.css import CSSStyleSheet as originalCSSStyleSheet
 
+from .ttml_extras import TTML_FROM_CSS, TTML_PROPERTIES
 
 class StyleSheet(originalCSSStyleSheet):
     def __json__(self):
@@ -142,12 +143,13 @@ class Styling(BS):
                 if tag.get("style"):
                     inline_css = self.parseStyle(tag.get("style"))
                     for prop in inline_css:
-                        prop_name = prop.name.lower().split("-")
-                        prop_name = "tts:"+prop_name[0]+"".join(i.capitalize() for i in prop_name[1:])
-                        if prop.name.lower() in ["color", "background-color"]:
-                            tag[prop_name] = "#"+"".join(get_hexrgb(prop.value))
-                        else:
-                            tag[prop_name] = str(prop.value)
+                        prop_name = prop.name.lower()
+                        if prop_name in TTML_FROM_CSS:
+                            ttml_property = TTML_FROM_CSS[prop_name]
+                            if prop_name in ["color", "background-color"]:
+                                tag["tts:"+ttml_property] = "#"+"".join(get_hexrgb(prop.value))
+                            else:
+                                tag["tts:"+ttml_property] = str(prop.value)
                     del tag["style"]
                 if tag.name == "br" and lines == 1:
                     tag.insert_before(" ")

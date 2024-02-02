@@ -20,6 +20,8 @@ Table of Contents
 - [Plans](#future-plans)
 - [Examples](#examples)
 - [Changelog](#changelog)
+
+Read the [Wiki](https://github.com/adfreelife/PyCaptions/wiki)
 * * *
 
 ## Installation
@@ -53,8 +55,6 @@ Table of Contents
     - open an issue with "enhancement" label for more
 
 ## Examples
-
-Read the [wiki](https://github.com/adfreelife/PyCaptions/wiki).
 
 ### Generic from file name
 ```python
