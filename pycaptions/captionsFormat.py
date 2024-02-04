@@ -7,34 +7,10 @@ from langcodes import standardize_tag, tag_is_valid
 from charset_normalizer import detect as detect_encoding
 from .block import Block, BlockType
 from .microTime import MicroTime as MT
+from .options import FileExtensions, save_extensions
 
 
 JSON_VERSION = 1
-
-
-class FileExtensions:
-    SRT = ".srt"
-    SUB = ".sub"
-    TTML = ".ttml"
-    VTT = ".vtt"
-
-    @classmethod
-    def getvars(cls) -> dict:
-        """
-        Used to retrive all extensions for specific format.
-        """
-        return {attr: getattr(cls, attr) for attr in dir(cls)
-                if not callable(getattr(cls, attr)) and not attr.startswith("__")}
-
-
-save_extensions = FileExtensions()
-"""
-Globaly stores file extensions of implemented formats.
-
-Example:
-- Changing ttml extansion from .ttml to .xml
-save_extensions.TTML = ".xml"
-"""
 
 
 def captionsDetector(func):
@@ -78,7 +54,7 @@ def captionsWriter(extension: str, generator_type: str = None, new_line: str = "
                     else:
                         raise ValueError(f"Incorect argument value of style, expected 'full' or None, got {kwargs['style']}")
                 else:
-                    generator = (((getattr(data.get_style(i), generator_type)(lines=lines, **kwargs) for i in languages), data) for data in self)
+                    generator = (((getattr(data.get_style(i), generator_type)(lines=lines, options=self.options, **kwargs) for i in languages), data) for data in self)
 
             try:
                 with open(filename, "w", encoding=encoding) as file:

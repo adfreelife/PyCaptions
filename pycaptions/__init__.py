@@ -5,7 +5,7 @@ import pycaptions.sub as sub
 import pycaptions.ttml as ttml
 import pycaptions.vtt as vtt
 
-from pycaptions.captionsFormat import save_extensions
+from pycaptions.options import save_extensions
 from pycaptions.microTime import MicroTime
 from pycaptions.captions import Captions
 from pycaptions.srt import detectSRT, SubRip

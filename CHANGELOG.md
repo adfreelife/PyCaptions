@@ -24,6 +24,8 @@ Changes:
 - Added `MicroTime.fromAnyFormat` returns a MicroTime from provided format (case insensitive)
 - `MicroTime.fromSUBTime` and `MicroTime.toSUBTime` now supports framerate as string
 - `Captions.save` output_format is now case insensitive
+- Improved MicroDVD style conversion
+- Internal restructure for faster development
 
 Fixes:
 - Fixed `Styling.getTTML` converting invalid css properties into ttml properties. To-do: add value checks for these properties.

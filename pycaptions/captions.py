@@ -17,13 +17,13 @@ class Captions(CaptionsFormat):
     def __init__(self, filename: str = None, default_language: str = "und", **options):
         super().__init__(filename, default_language, **options)
 
-    from .lrc import detectLRC, saveLRC, readLRC
-    from .sami import detectSAMI, saveSAMI, readSAMI
-    from .srt import detectSRT, saveSRT, readSRT
-    from .sub import detectSUB, saveSUB, readSUB
-    from .ttml import detectTTML, saveTTML, readTTML
-    from .usf import detectUSF, saveUSF, readUSF
-    from .vtt import detectVTT, saveVTT, readVTT
+    from .lrc.functions import detectLRC, saveLRC, readLRC
+    from .sami.functions import detectSAMI, saveSAMI, readSAMI
+    from .srt.functions import detectSRT, saveSRT, readSRT
+    from .sub.functions import detectSUB, saveSUB, readSUB
+    from .ttml.functions import detectTTML, saveTTML, readTTML
+    from .usf.functions import detectUSF, saveUSF, readUSF
+    from .vtt.functions import detectVTT, saveVTT, readVTT
 
     readers = {
         "lrc": readLRC,

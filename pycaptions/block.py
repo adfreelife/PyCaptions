@@ -4,7 +4,8 @@ import copy
 from collections import defaultdict
 from langcodes import standardize_tag, tag_is_valid
 from .microTime import MicroTime as MT
-from .styling import Styling, cssParser
+from .styleFormat import cssParser
+from .style import Styling
 
 
 class BlockType:

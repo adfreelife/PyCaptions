@@ -1,12 +1,9 @@
 import io
 
 from bs4 import BeautifulSoup
-from .block import Block, BlockType
-from .captionsFormat import CaptionsFormat, captionsDetector, captionsReader, captionsWriter
-from .microTime import MicroTime as MT
-
-
-EXTENSIONS = [".ttml", ".dfxp", ".xml"]
+from ..block import Block, BlockType
+from ..captionsFormat import captionsDetector, captionsReader, captionsWriter
+from ..microTime import MicroTime as MT
 
 
 @staticmethod
@@ -113,27 +110,3 @@ def saveTTML(self, filename: str, languages: list[str] = None, generator: list =
         line()
 
     file.write(content.prettify())
-
-
-class TTML(CaptionsFormat):
-    """
-    Timed Text Markup Language
-
-    Read more about it: https://www.speechpad.com/captions/ttml
-    Full specification: https://www.w3.org/TR/ttml/
-
-    Example:
-
-    with TTML("path/to/file.ttml") as ttml:
-        ttml.saveSRT("file")
-    """
-    detect = staticmethod(detectTTML)
-    _read = readTTML
-    _save = saveTTML
-
-    from .lrc import saveLRC
-    from .sami import saveSAMI
-    from .srt import saveSRT
-    from .sub import saveSUB
-    from .usf import saveUSF
-    from .vtt import saveVTT

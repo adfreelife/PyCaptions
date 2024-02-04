@@ -1,12 +1,10 @@
 import io
 
-from .block import Block, BlockType
-from .captionsFormat import CaptionsFormat, captionsDetector, captionsReader, captionsWriter
-from .microTime import MicroTime as MT
-from .styling import Styling
+from ..block import Block, BlockType
+from ..captionsFormat import captionsDetector, captionsReader, captionsWriter
+from ..microTime import MicroTime as MT
 
-
-EXTENSIONS = [".srt"]
+from .style import fromSRT
 
 
 @staticmethod
@@ -84,10 +82,10 @@ def readSRT(self, content: str | io.IOBase, languages: list[str] = None, **kwarg
         line = content.readline().strip()
         while line:
             if len(languages) > 1:
-                caption.append(Styling.fromSRT(line), languages[counter])
+                caption.append(fromSRT(line), languages[counter])
                 counter += 1
             else:
-                caption.append(Styling.fromSRT(line), languages[0])
+                caption.append(fromSRT(line), languages[0])
             line = content.readline().strip()
         self.append(caption)
         id = content.readline()
@@ -120,24 +118,3 @@ def saveSRT(self, filename: str, languages: list[str] = None, generator: list = 
         index += 1
 
 
-class SubRip(CaptionsFormat):
-    """
-    SubRip
-
-    Read more about it https://en.wikipedia.org/wiki/SubRip
-
-    Example:
-
-    with SubRip("path/to/file.srt") as srt:
-        srt.saveVTT("file")
-    """
-    detect = staticmethod(detectSRT)
-    read = readSRT
-    save = saveSRT
-
-    from .lrc import saveLRC
-    from .sami import saveSAMI
-    from .sub import saveSUB
-    from .ttml import saveTTML
-    from .usf import saveUSF
-    from .vtt import saveVTT

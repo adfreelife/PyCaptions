@@ -1,12 +1,9 @@
 import io
 import re
 
-from .block import Block, BlockType
-from .captionsFormat import CaptionsFormat, captionsDetector, captionsReader, captionsWriter
-from .microTime import MicroTime as MT
-
-
-EXTENSIONS = [".lrc"]
+from ..block import Block, BlockType
+from ..captionsFormat import CaptionsFormat, captionsDetector, captionsReader, captionsWriter
+from ..microTime import MicroTime as MT
 
 
 @staticmethod
@@ -33,26 +30,3 @@ def readLRC(self, content: str | io.IOBase, languages: list[str] = None, **kwarg
 def saveLRC(self, filename: str, languages: list[str] = None, generator: list = None, 
             file: io.FileIO = None, **kwargs):
     raise ValueError("Not Implemented")
-
-
-class LyRiCs(CaptionsFormat):
-    """
-    Synchronized Accessible Media Interchange
-
-    Read more about it https://learn.microsoft.com/en-us/previous-versions/windows/desktop/dnacc/understanding-sami-1.0
-
-    Example:
-
-    with SAMI("path/to/file.sami") as sami:
-        sami.saveSRT("file")
-    """
-    detect = staticmethod(detectLRC)
-    read = readLRC
-    save = saveLRC
-
-    from .sami import saveSAMI
-    from .srt import saveSRT
-    from .sub import saveSUB
-    from .ttml import saveTTML
-    from .usf import saveUSF
-    from .vtt import saveVTT

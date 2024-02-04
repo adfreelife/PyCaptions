@@ -1,12 +1,11 @@
 import io
 import re
 
-from .block import Block, BlockType
-from .captionsFormat import CaptionsFormat, captionsDetector, captionsReader, captionsWriter
-from .microTime import MicroTime as MT
+from ..block import Block, BlockType
+from ..captionsFormat import captionsDetector, captionsReader, captionsWriter
+from ..microTime import MicroTime as MT
 
 
-EXTENSIONS = [".vtt"]
 STYLE_PATERN = re.compile(r"::cue\((#[^)]+)\)")
 
 
@@ -141,26 +140,3 @@ def saveVTT(self, filename: str, languages: list[str] = None, generator: list = 
         file.write(f"{data.start_time.toVTTTime()} --> {data.end_time.toVTTTime()}\n")
         file.write("\n".join(i for i in text))
         index += 1
-
-class WebVTT(CaptionsFormat):
-    """
-    Web Video Text Tracks
-
-    Read more about it: https://www.speechpad.com/captions/webvtt
-    Full specification: https://www.w3.org/TR/webvtt/
-
-    Example:
-
-    with WebVTT("path/to/file.vtt") as vtt:
-        vtt.saveSRT("file")
-    """
-    detect = staticmethod(detectVTT)
-    _read = readVTT
-    _save = saveVTT
-
-    from .lrc import saveLRC
-    from .sami import saveSAMI
-    from .srt import saveSRT
-    from .sub import saveSUB
-    from .usf import saveUSF
-    from .ttml import saveTTML
