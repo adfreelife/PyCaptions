@@ -1,6 +1,6 @@
 import io
 
-from .captionsFormat import CaptionsFormat
+from .development import CaptionsFormat
 
 
 class Captions(CaptionsFormat):

@@ -1,4 +1,4 @@
-from .styleFormat import StyleFormat, cssParser
+from .development.styleFormat import StyleFormat, cssParser
 from .options import style_options
 
 class Styling(StyleFormat):

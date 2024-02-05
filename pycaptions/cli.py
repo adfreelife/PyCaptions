@@ -2,7 +2,7 @@ import argparse
 import os
 
 from .captions import Captions
-from .captionsFormat import save_extensions
+from .options import save_extensions
 from .microTime import MicroTime as MT
 from pycaptions import supported_extensions
 

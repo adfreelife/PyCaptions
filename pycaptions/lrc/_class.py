@@ -1,4 +1,4 @@
-from ..captionsFormat import CaptionsFormat
+from ..development import CaptionsFormat
 
 from .functions import detectLRC, readLRC, saveLRC
 

@@ -6,8 +6,8 @@ import copy
 from langcodes import standardize_tag, tag_is_valid
 from charset_normalizer import detect as detect_encoding
 from .block import Block, BlockType
-from .microTime import MicroTime as MT
-from .options import FileExtensions, save_extensions
+from ..microTime import MicroTime as MT
+from ..options import FileExtensions, save_extensions
 
 
 JSON_VERSION = 1

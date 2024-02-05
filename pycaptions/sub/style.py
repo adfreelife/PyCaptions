@@ -1,6 +1,6 @@
 import re
 
-from ..colors import get_hexrgb
+from ..development.colors import get_hexrgb
 
 @staticmethod
 def fromSUB(text, pattern, options):

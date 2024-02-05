@@ -1,8 +1,7 @@
 import io
 import re
 
-from ..block import Block, BlockType
-from ..captionsFormat import captionsDetector, captionsReader, captionsWriter
+from ..development import Block, BlockType, captionsDetector, captionsReader, captionsWriter
 from ..microTime import MicroTime as MT
 
 

@@ -1,2 +1,1 @@
-
 EXTENSIONS = [".sub"]

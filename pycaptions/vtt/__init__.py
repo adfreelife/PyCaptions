@@ -1,3 +1,2 @@
-
 EXTENSIONS = [".vtt"]
 

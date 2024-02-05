@@ -1,4 +1,4 @@
-from ..colors import get_hexrgb
+from ..development.colors import get_hexrgb
 
 from .extras import TTML_FROM_CSS
 
