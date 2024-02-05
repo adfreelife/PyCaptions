@@ -4,8 +4,7 @@ import langcodes
 
 from ..development import Block, BlockType, captionsDetector, captionsReader, captionsWriter
 from ..microTime import MicroTime as MT
-
-from .style import fromSUB
+from ..styling import Styling
 
 
 PATTERN = r"\{.*?\}"
@@ -52,7 +51,7 @@ def readSUB(self, content: str | io.IOBase, languages: list[str] = None, **kwarg
             end = MT.fromSUBTime(params[1].strip("{} "), frame_rate)
             caption = Block(BlockType.CAPTION, start_time=start, end_time=end)
             for counter, line in enumerate(lines):
-                line = fromSUB(line, PATTERN, self.options["micro_dvd"]) 
+                line = Styling.fromSUB(line, PATTERN, self.options["micro_dvd"]) 
                 if len(languages) > 1:
                     caption.append(line, languages[counter])
                 else:

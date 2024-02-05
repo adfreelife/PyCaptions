@@ -1,4 +1,3 @@
-import budoux
 import copy
 
 from collections import defaultdict
@@ -7,6 +6,7 @@ from ..microTime import MicroTime as MT
 from .styleFormat import cssParser
 from ..styling import Styling
 from .blockType import BlockType
+from .text import get_phrases, get_lines_ratio
 
 
 class Block:
@@ -122,16 +122,13 @@ class Block:
                      options=copy.deepcopy(self.options))
 
     def get(self, lang: str, lines: int = -1, **kwargs) -> str:
-        if lines == -1:
-            return Styling(self.languages.get(lang), "html.parser").get_lines()
-        else:
-            return self.get_lines(lang, lines, **kwargs)
+        return self.get_lines(lang, lines, **kwargs)
 
     def get_style(self, lang: str) -> str:
         return Styling(self.languages.get(lang), "html.parser")
 
     def get_lines(self, lang: str = None, lines: int = 0, character_limit: int = 47,
-                  split_ratios: list[float] = [0.7, 1], **kwargs) -> list[str]:
+                  split_ratios: list[float] = [0.7, 1], smaller_first_line: bool = True, **kwargs) -> list[str]:
         """
         Format text of specific language into multiple lines.
 
@@ -146,43 +143,45 @@ class Block:
         """
 
         lang = lang or self.default_language
+
+        if lines == -1:
+            return Styling(self.languages.get(lang), "html.parser").get_raw_lines()
+
         separator = " "
         if "separator" in kwargs:
             separator = kwargs["separator"]
-        text = separator.join(Styling(self.languages.get(lang), "html.parser").get_lines())
+
+        text_lines = Styling(self.languages.get(lang), "html.parser").get_raw_lines()
+        text = lines[0]
+        if text.endswith("-"):
+            add_separator = False
+        else:
+            add_separator = True
+
+        for i in text_lines[1:]:
+            if add_separator:
+                text += separator
+            if i.endswith("-"):
+                text += i[::-1]
+                add_separator = False
+            else:
+                text += i
+                add_separator = True
+
+        length = len(text)
 
         if lines == 1:
             return [text]
 
         standardized = standardize_tag(kwargs.get("parser_language") or lang, macro=True)
         standardized = standardized if tag_is_valid(standardized) else "und"
+        
+        phrases = get_phrases(text, standardized)
 
-        if standardized == "ja":
-            parser = budoux.load_default_japanese_parser()
-            phrases = parser.parse(text)
-        elif standardized in ["zh", "zh-CN", "zh-SG", "zh-Hans"]:
-            parser = budoux.load_default_simplified_chinese_parser()
-            phrases = parser.parse(text)
-        elif standardized in ["zh-HK", "zh-MO", "zh-TW", "zh-Hant"]:
-            parser = budoux.load_default_simplified_chinese_parser()
-            phrases = parser.parse(text)
-        elif standardized == "th":
-            parser = budoux.load_default_thai_parser()
-            phrases = parser.parse(text)
-        else:
-            phrases = text.split(" ")
-
-        if lines > 0:
-            total_characters = len(text)
-            target_characters = total_characters - lines + 1
-            current_limit = sum(character_limit * ratio for ratio in split_ratios)
-            if current_limit < target_characters:
-                remaining = (target_characters - current_limit) / total_characters
-                for index, _ in enumerate(split_ratios):
-                    split_ratios[index] += remaining
+        split_ratios = get_lines_ratio(lines, length, character_limit, split_ratios, smaller_first_line)
 
         formatted_lines = []
-        current_line = ""
+        current_line = []
         current_character_count = 0
 
         for index, phrase in enumerate(phrases):
@@ -190,17 +189,17 @@ class Block:
             effective_limit = int(character_limit * split_ratios[current_ratio_index])
 
             if current_character_count + len(phrase) <= effective_limit:
-                current_line += phrase + " "
+                current_line.append(phrase)
                 current_character_count += len(phrase) + 1  # +1 for the space
             elif index+1 == len(phrases):
-                current_line += phrase
+                current_line.append(phrase)
             else:
-                formatted_lines.append(current_line.strip())
-                current_line = phrase + " "
+                formatted_lines.append(separator.join(current_line))
+                current_line= [phrase]
                 current_character_count = len(phrase) + 1
 
         if current_line:
-            formatted_lines.append(current_line.strip())
+            formatted_lines.append(separator.join(current_line))
 
         return formatted_lines
 

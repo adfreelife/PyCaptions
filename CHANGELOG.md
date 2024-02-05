@@ -27,7 +27,10 @@ Changes:
 - Improved MicroDVD style conversion
 - Internal restructure for faster development
 - Invalid `style` argument will result in `style=None`
-- Added `style_options` for changing style globaly, default `style="full"` `lines=-1`
+- Added `style_options` for changing style globaly, default `style="full"` `lines=-1`, this affects how the style is parsed. (e.g. `style_options.style=None` and then using argument `style="full"` will not convert any style due to optimizations for faster conversion)
+- Hypens at the end of the lines (e.g "Some-<br/>thing") will be removed if `lines` is >-1
+- `Styling` is now split into `StyleFormat` and `Styling(StyleFormat)`
+- `StyleFormat.get_lines` is now `StyleFormat.get_raw_lines`, `StyleFormat.get_lines` now returns formated string
 
 Fixes:
 - Fixed `Styling.getTTML` converting invalid css properties into ttml properties. To-do: add value checks for these properties.

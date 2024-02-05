@@ -3,7 +3,7 @@ import io
 from ..development import Block, BlockType, captionsDetector, captionsReader, captionsWriter
 from ..microTime import MicroTime as MT
 
-from .style import fromSRT
+from ..styling import Styling
 
 
 @staticmethod
@@ -80,10 +80,10 @@ def readSRT(self, content: str | io.IOBase, languages: list[str] = None, **kwarg
         line = content.readline().strip()
         while line:
             if len(languages) > 1:
-                caption.append(fromSRT(line), languages[counter])
+                caption.append(Styling.fromSRT(line), languages[counter])
                 counter += 1
             else:
-                caption.append(fromSRT(line), languages[0])
+                caption.append(Styling.fromSRT(line), languages[0])
             line = content.readline().strip()
         self.append(caption)
         id = content.readline()
