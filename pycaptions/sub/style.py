@@ -2,6 +2,16 @@ import re
 
 from ..development.colors import get_hexrgb
 
+
+@staticmethod
+def fromSUBLine(text, pattern, options):
+    return re.sub(pattern, "", text)
+
+
+def getSUBLine(self, lines:int = -1, options: dict = None, 
+               add_metadata: bool = True, **kwargs):
+    return "|".join(self.get_lines())
+
 @staticmethod
 def fromSUB(text, pattern, options):
     start = ""
@@ -53,8 +63,8 @@ def fromSUB(text, pattern, options):
 
     return start+re.sub(pattern, "", text)+end
 
-def getSUB(self, lines:int = -1, options: dict = None, 
-            add_metadata: bool = True, **kwargs):
+def getSUB(self, lines:int = -1, options: dict = None,
+           add_metadata: bool = True, **kwargs):
     text_lines = list(self.get_lines())
     index = 0
     y = {"bold":False, "italic": False, "underline":False}

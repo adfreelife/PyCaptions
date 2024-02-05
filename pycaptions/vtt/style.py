@@ -1,4 +1,13 @@
 @staticmethod
+def fromVTTLine(text, pattern, options):
+    pass
+
+
+def getVTTLine(self, lines:int = -1, options: dict = None, 
+               add_metadata: bool = True, **kwargs):
+    return "\n".join(self.get_lines())
+
+@staticmethod
 def fromVTT(text, style):
     pass
 

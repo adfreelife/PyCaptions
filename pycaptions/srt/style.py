@@ -1,6 +1,15 @@
-from ..development.colors import get_hexrgb
 from bs4 import BeautifulSoup as BS
 
+from ..development.colors import get_hexrgb
+
+
+@staticmethod
+def fromSRTLine(text):
+    return BS(text, "html.parser").get_text()
+
+def getSRTLine(self, lines:int = -1, options: dict =  None, 
+               add_metadata: bool = True, **kwargs):
+    return "\n".join(self.get_lines())
 
 @staticmethod
 def fromSRT(text):

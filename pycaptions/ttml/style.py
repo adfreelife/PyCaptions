@@ -3,6 +3,16 @@ from ..development.colors import get_hexrgb
 from .extras import TTML_FROM_CSS
 
 @staticmethod
+def fromTTMLLine(text, pattern, options):
+    pass
+
+
+def getTTMLLine(self, lines:int = -1, options: dict = None, 
+               add_metadata: bool = True, **kwargs):
+    return "<br/>".join(self.get_lines())
+
+
+@staticmethod
 def fromTTML(text):
     pass
 

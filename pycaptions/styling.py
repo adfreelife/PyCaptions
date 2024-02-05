@@ -1,5 +1,4 @@
 from .development.styleFormat import StyleFormat, cssParser
-from .options import style_options
 
 
 class FullStyle(StyleFormat):
@@ -12,10 +11,10 @@ class FullStyle(StyleFormat):
 
 class NewLinesStyle(StyleFormat):
 
-    from .srt.style import fromSRT, getSRT
-    from .sub.style import fromSUB, getSUB
-    from .ttml.style import fromTTML, getTTML
-    from .vtt.style import fromVTT, getVTT
+    from .srt.style import fromSRTLine as fromSRT, getSRTLine as getSRT
+    from .sub.style import fromSUBLine as fromSUB, getSUBLine as getSUB
+    from .ttml.style import fromTTMLLine as fromTTML, getTTMLLine as getTTML
+    from .vtt.style import fromVTTLine as fromVTT, getVTTLine as getVTT
 
 
 class NoStyle(StyleFormat):
@@ -26,10 +25,10 @@ class NoStyle(StyleFormat):
     from .vtt.style import fromVTT, getVTT
 
 
-def changeStyleOption():
-    if style_options.convert_style:
+def changeStyleOption(style, lines):
+    if style == "full":
         Styling = FullStyle
-    elif style_options.lines == -1:
+    elif lines == -1:
         Styling = NewLinesStyle
     else:
         Styling = NoStyle

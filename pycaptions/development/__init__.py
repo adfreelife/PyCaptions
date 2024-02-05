@@ -4,4 +4,5 @@ from .captionsFormat import (
     captionsReader,
     captionsWriter
     )
-from .block import Block, BlockType
+from .block import Block
+from .blockType import BlockType

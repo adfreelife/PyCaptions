@@ -2,7 +2,7 @@ import unittest
 import json
 import os
 import shutil
-from pycaptions import Captions, save_extensions
+from pycaptions import Captions, save_extensions, style_options
 
 
 IGNORE_JSON_FIELDS = ["filename"]
@@ -61,10 +61,11 @@ class TestCaptions(unittest.TestCase):
 
     def test_style(self):
         for s in STYLE:
-            with Captions(TEST_FILES_PATH+TEST_FILES[-1], encoding="auto") as c:
+            style_options.style = s
+            with Captions(TEST_FILES_PATH+TEST_FILES[0], encoding="auto") as c:
                 for ext in EXTENSIONS:
                     _out = f"tmp/style_{str(s)}"
-                    c.save(_out, output_format=ext, style=s)
+                    c.save(_out, output_format=ext)
                     self.assertFalse(self.check_file_size(c.makeFilename(_out,ext)), ext)
     
     def test_auto_lines(self):

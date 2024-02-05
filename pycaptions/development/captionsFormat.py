@@ -7,7 +7,7 @@ from langcodes import standardize_tag, tag_is_valid
 from charset_normalizer import detect as detect_encoding
 from .block import Block, BlockType
 from ..microTime import MicroTime as MT
-from ..options import FileExtensions, save_extensions
+from ..options import FileExtensions, save_extensions, style_options
 
 
 JSON_VERSION = 1
@@ -38,24 +38,28 @@ def captionsWriter(extension: str, generator_type: str = None, new_line: str = "
                 lines = kwargs["lines"]
                 del kwargs["lines"]
             else:
-                lines = -1
+                lines = style_options.lines
 
             if "new_line" in kwargs:
                 line_separator = kwargs["new_line"]
             else:
                 line_separator = new_line
 
+            if "style" in kwargs:
+                style_name = kwargs["style"]
+            else:
+                style_name = style_options.style
+
             if kwargs.get("generator"):
                 generator = kwargs.get("generator")
             else:
-                if "style" in kwargs and kwargs["style"] != "full":
-                    if kwargs["style"] is None:
-                        generator = (((line_separator.join(data.get(lang=i, lines=lines, **kwargs)) for i in languages), data) for data in self)
-                    else:
-                        raise ValueError(f"Incorect argument value of style, expected 'full' or None, got {kwargs['style']}")
-                else:
+                if style_name == "full":
                     generator = (((getattr(data.get_style(i), generator_type)(lines=lines, options=self.options, **kwargs) for i in languages), data) for data in self)
-
+                else:
+                    if style_name != None:
+                        so = "', '".join(style_options.style_option)
+                        print(f"Invalid style option {style_name}. Expected: None '{so}'")
+                    generator = (((line_separator.join(data.get(lang=i, lines=lines, **kwargs)) for i in languages), data) for data in self)
             try:
                 with open(filename, "w", encoding=encoding) as file:
                     func(self=self, filename=filename, languages=languages, generator=generator, file=file, **kwargs)
