@@ -25,7 +25,7 @@ save_extensions.TTML = ".xml"
 
 class StyleOptions:
     convert_style = True
-    convert_lines = True
+    lines = -1
 
 
 style_options = StyleOptions()

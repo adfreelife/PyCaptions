@@ -2,7 +2,7 @@ import argparse
 import os
 
 from .captions import Captions
-from .options import save_extensions
+from .options import save_extensions, style_options
 from .microTime import MicroTime as MT
 from pycaptions import supported_extensions
 
@@ -29,7 +29,8 @@ def main():
     parser.add_argument("-l", "--languages", nargs="+", help="List of languages.")
     parser.add_argument("-o", "--output-filenames", nargs="+", help="List of output filenames.")
     parser.add_argument("-od", "--output-directory", help="Output directory path.\nCreates new directory in current working\ndirectory if it doesn't exist.")
-
+    parser.add_argument("-li", "--lines")
+    parser.add_argument("-s", "--style")
     args = parser.parse_args()
 
     formats = None
