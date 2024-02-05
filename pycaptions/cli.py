@@ -6,6 +6,7 @@ from .captionsFormat import save_extensions
 from .microTime import MicroTime as MT
 from pycaptions import supported_extensions
 
+
 def main():
     time_formats_help = {
         "time": "u (microseconds)",
@@ -22,7 +23,7 @@ def main():
 
     parser = argparse.ArgumentParser(prog='PyCaptions', description='Captions converter', formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument("filenames", nargs="+", help="List of input filenames.")
-    parser.add_argument("-f", "--format", nargs="+", default="all", help=f"Specify output format(s). \nOptions:\n - 'all' (default): exports to all formats specified in FileExtensions\n{extensions}") 
+    parser.add_argument("-f", "--format", nargs="+", default="all", help=f"Specify output format(s). \nOptions:\n - 'all' (default): exports to all formats specified in FileExtensions\n{extensions}")
     parser.add_argument("-j", "--join", nargs="+", default="end_time", help="Specify join criteria.\nOptions:\n - 'end_time' (default): Adds next file to the end of previous\n - 'add': Adds new language to existing file\n - 'offset [TIME_FORMAT_FORMAT ...]': Specify length of each file")
     parser.add_argument("-tf", "--time-format", nargs="+", default=default_time_format, help=f"Specify time format.\nOptions:\n - '{default_time_format}' (default): {MT.time_formats_help[default_time_format]}\n{time_formats}")
     parser.add_argument("-l", "--languages", nargs="+", help="List of languages.")
@@ -45,7 +46,7 @@ def main():
         if args.format == "all":
             formats = []
             for i in args.filenames:
-                _, ext = os.path.splitext(i)[0] 
+                _, ext = os.path.splitext(i)[0]
                 if ext not in supported_extensions:
                     print(f"Incorect file format {ext} for {i}")
                     print(f"Supported extensions {supported_extensions}")
@@ -54,7 +55,7 @@ def main():
 
         languages = [Captions.getLanguagesFromFilename(i) or args.languages
                      for i in args.out_filenames]
-            
+
     else:
         out_filenames = [Captions.getFilename(i, args.output_directory) for i in args.filenames]
 
@@ -78,7 +79,7 @@ def main():
     elif args.join == "end_time":
         with Captions(args.filenames[0]) as c:
             for next_file in args.filenames[1:]:
-                c.join(Captions(next_file),True)
+                c.join(Captions(next_file), True)
             for out_format in formats[0]:
                 c.save(out_filenames[0], languages[0], out_format)
     elif args.join == "add":
@@ -92,9 +93,10 @@ def main():
             time_offset = MT()
             for next_file, offset in zip(args.filenames[1:], args.join[1:]):
                 time_offset += MT.fromAnyFormat(args.time_format, *offset)
-                c.join(Captions(next_file),False, time_offset)
+                c.join(Captions(next_file), False, time_offset)
             for out_format in formats[0]:
                 c.save(out_filenames[0], languages[0], out_format)
+
 
 if __name__ == "__main__":
     main()

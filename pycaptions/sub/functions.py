@@ -3,7 +3,7 @@ import re
 import langcodes 
 
 from ..block import Block, BlockType
-from ..captionsFormat import CaptionsFormat, captionsDetector, captionsReader, captionsWriter
+from ..captionsFormat import captionsDetector, captionsReader, captionsWriter
 from ..microTime import MicroTime as MT
 
 from .style import fromSUB

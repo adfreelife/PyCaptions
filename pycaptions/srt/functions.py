@@ -36,13 +36,12 @@ def convertFromSRTLayout(self, id, layout, width, height):
         x2 = int(layout[1][3:])
         y1 = int(layout[2][3:])
         y2 = int(layout[3][3:])
-        self.addLayout(id,
-            Block(BlockType.LAYOUT, id=id, layout={
+        self.addLayout(id, Block(BlockType.LAYOUT, id=id, layout={
                 "width": (x2-x1) / width,
                 "height": (y2-y1) / height,
                 "viewportanchor": [x1 / width, y1 / height],
-                "regionanchor": [0, 0],
-        }))
+                "regionanchor": [0, 0]
+                }))
     except Exception as e:
         print(f"Error converting layout: {e}")
         return
@@ -62,7 +61,7 @@ def getSRTLayout(self, id, width, height):
 @captionsReader
 def readSRT(self, content: str | io.IOBase, languages: list[str] = None, **kwargs):
     """
-    kwargs: 
+    kwargs:
      - media_width (int, optional): Used for extended SRT coordinates conversion
      - media_height (int, optional): Used for extended SRT coordinates conversion
     """
@@ -92,7 +91,7 @@ def readSRT(self, content: str | io.IOBase, languages: list[str] = None, **kwarg
 
 
 @captionsWriter("SRT", "getSRT")
-def saveSRT(self, filename: str, languages: list[str] = None, generator: list = None, 
+def saveSRT(self, filename: str, languages: list[str] = None, generator: list = None,
             file: io.FileIO = None, **kwargs):
     """
     kwargs:
@@ -116,5 +115,3 @@ def saveSRT(self, filename: str, languages: list[str] = None, generator: list = 
         file.write(f"{data.start_time.toSRTTime()} --> {data.end_time.toSRTTime()}{extended}\n")
         file.write("\n".join(i for i in text))
         index += 1
-
-

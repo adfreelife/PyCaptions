@@ -1,8 +1,8 @@
 import re
 
-from ..styleFormat import get_hexrgb
+from ..colors import get_hexrgb
 
-
+@staticmethod
 def fromSUB(text, pattern, options):
     start = ""
     end = ""

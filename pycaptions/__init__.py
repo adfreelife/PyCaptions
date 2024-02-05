@@ -8,10 +8,13 @@ import pycaptions.vtt as vtt
 from pycaptions.options import save_extensions
 from pycaptions.microTime import MicroTime
 from pycaptions.captions import Captions
-from pycaptions.srt import detectSRT, SubRip
-from pycaptions.sub import detectSUB, MicroDVD
-from pycaptions.ttml import detectTTML, TTML
-from pycaptions.vtt import detectVTT, WebVTT
+from pycaptions.srt._class import detectSRT, SubRip
+from pycaptions.sub._class import detectSUB, MicroDVD
+from pycaptions.ttml._class import detectTTML, TTML
+from pycaptions.vtt._class import detectVTT, WebVTT
+#from pycaptions.lrc._class import detectLRC, LyRiCs
+#from pycaptions.sami._class import detectSAMI, SAMI
+#from pycaptions.usf._class import detectUSF, USF
 
 supported_readers = srt.EXTENSIONS + sub.EXTENSIONS + ttml.EXTENSIONS + vtt.EXTENSIONS
 supported_extensions = srt.EXTENSIONS + sub.EXTENSIONS + ttml.EXTENSIONS + vtt.EXTENSIONS

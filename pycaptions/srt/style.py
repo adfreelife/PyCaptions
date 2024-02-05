@@ -1,8 +1,10 @@
-from ..styleFormat import StyleFormat, get_hexrgb
+from ..colors import get_hexrgb
+from bs4 import BeautifulSoup as BS
 
 
+@staticmethod
 def fromSRT(text):
-    bs = StyleFormat(text, "html.parser")
+    bs = BS(text, "html.parser")
     if bs.font:
         for tag in bs.find_all("font"):
             tag.name = "span"

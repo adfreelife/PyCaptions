@@ -1,8 +1,8 @@
-from ..styleFormat import get_hexrgb
+from ..colors import get_hexrgb
 
 from .extras import TTML_FROM_CSS
 
-
+@staticmethod
 def fromTTML(text):
     pass
 

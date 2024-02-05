@@ -1,3 +1,4 @@
+@staticmethod
 def fromVTT(text, style):
     pass
 

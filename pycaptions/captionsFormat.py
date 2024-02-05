@@ -30,7 +30,7 @@ def captionsWriter(extension: str, generator_type: str = None, new_line: str = "
     def decorator(func):
         def wrapper(self, filename: str, languages: list[str] = None, **kwargs):
             filename = self.makeFilename(filename=filename, extension=getattr(self.extensions, extension),
-                                    languages=languages, **kwargs)
+                                         languages=languages, **kwargs)
             encoding = kwargs.get("file_encoding") or "UTF-8"
             languages = languages or [self.default_language]
 
@@ -44,12 +44,12 @@ def captionsWriter(extension: str, generator_type: str = None, new_line: str = "
                 line_separator = kwargs["new_line"]
             else:
                 line_separator = new_line
-            
+
             if kwargs.get("generator"):
                 generator = kwargs.get("generator")
             else:
                 if "style" in kwargs and kwargs["style"] != "full":
-                    if kwargs["style"] == None:
+                    if kwargs["style"] is None:
                         generator = (((line_separator.join(data.get(lang=i, lines=lines, **kwargs)) for i in languages), data) for data in self)
                     else:
                         raise ValueError(f"Incorect argument value of style, expected 'full' or None, got {kwargs['style']}")
@@ -63,9 +63,10 @@ def captionsWriter(extension: str, generator_type: str = None, new_line: str = "
                 print(f"I/O error({e.errno}): {e.strerror}")
             except Exception as e:
                 print(f"Error {e}")
-            
+
         return wrapper
     return decorator
+
 
 def captionsReader(func):
     """
@@ -76,7 +77,7 @@ def captionsReader(func):
     - languages (list[str], optional): list of languages (default self.default_language)
     - time_offset (MicroTime, optional): Used for shifting time on read (default is 0)
     """
-    def wrapper(self, content: str | io.IOBase, languages: list[str] = None, 
+    def wrapper(self, content: str | io.IOBase, languages: list[str] = None,
                 time_offset: MT = None, **kwargs):
         if not isinstance(content, io.IOBase):
             if not not isinstance(content, str):
@@ -138,7 +139,7 @@ class CaptionsFormat:
         - **options: Additional keyword arguments for customization (e.g. metadata, style, ...).
         """
         self.json_version = options.get("json_version") or JSON_VERSION
-        self.time_length =  time_length or MT()
+        self.time_length = time_length or MT()
         self.file_name_or_content = file_name_or_content
         self.isFile = isFile
         self.legacyJson = legacyJson
@@ -343,7 +344,7 @@ class CaptionsFormat:
             file = ".".join((val for val in file.split('.') if val not in languages))+"."+".".join(languages)
 
         return file+extension
-    
+
     @staticmethod
     def getFilename(filename: str, directory: str = None):
         if not directory:
@@ -381,7 +382,7 @@ class CaptionsFormat:
         else:
             return None
         return languages
-    
+
     @staticmethod
     def getLanguagesAndFilename(filename: str, directory: str = None):
         if not directory:
@@ -472,6 +473,7 @@ class CaptionsFormat:
 
     def toJson(self, file: str, **kwargs):
         encoding = kwargs.get("encoding") or "UTF-8"
+
         def serializer(obj):
             if hasattr(obj, '__json__'):
                 return obj.__json__()
@@ -565,4 +567,3 @@ class CaptionsFormat:
     def getEncoding(self, file: str):
         with open(file, "rb") as f:
             return detect_encoding(f.read()).get("encoding")
-        

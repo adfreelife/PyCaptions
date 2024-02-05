@@ -5,7 +5,7 @@ from collections import defaultdict
 from langcodes import standardize_tag, tag_is_valid
 from .microTime import MicroTime as MT
 from .styleFormat import cssParser
-from .style import Styling
+from .styling import Styling
 
 
 class BlockType:
@@ -136,7 +136,7 @@ class Block:
 
     def copy(self):
         return Block(self.block_type, self.default_language, self.start_time,
-                     self.end_time, languages=copy.deepcopy(self.languages), 
+                     self.end_time, languages=copy.deepcopy(self.languages),
                      options=copy.deepcopy(self.options))
 
     def get(self, lang: str, lines: int = -1, **kwargs) -> str:
@@ -149,7 +149,7 @@ class Block:
         return Styling(self.languages.get(lang), "html.parser")
 
     def get_lines(self, lang: str = None, lines: int = 0, character_limit: int = 47,
-                 split_ratios: list[float] = [0.7, 1], **kwargs) -> list[str]:
+                  split_ratios: list[float] = [0.7, 1], **kwargs) -> list[str]:
         """
         Format text of specific language into multiple lines.
 
@@ -162,7 +162,7 @@ class Block:
         Returns:
             list[str]: A list of text lines.
         """
-        
+
         lang = lang or self.default_language
         separator = " "
         if "separator" in kwargs:
@@ -171,7 +171,7 @@ class Block:
 
         if lines == 1:
             return [text]
-        
+
         standardized = standardize_tag(kwargs.get("parser_language") or lang, macro=True)
         standardized = standardized if tag_is_valid(standardized) else "und"
 
@@ -228,7 +228,6 @@ class Block:
             self.languages[lang] += separator + text.strip()
         else:
             self.languages[lang] = text.strip()
-        
 
     def append_without_common_part(self, text: str, lang: str = None):
         lang = lang or self.default_language

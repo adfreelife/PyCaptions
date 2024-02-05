@@ -17,7 +17,7 @@ class MicroTime:
         self.seconds = seconds
         self.minutes = minutes
         self.hours = hours
-        
+
     @property
     def milli(self):
         return self.milliseconds
@@ -183,11 +183,11 @@ class MicroTime:
         milliseconds, microseconds = divmod(reminder, 1_000)
         return MicroTime(microseconds=microseconds, milliseconds=milliseconds,
                          seconds=seconds, minutes=minutes, hours=hours)
-    
+
     def toTime(self) -> int:
         return (self.micro + self.milli*1_000 + self.seconds*1_000_000
                 + self.minutes*60_000_000 + self.hours*3_600_000_000)
-        
+
     @staticmethod
     def fromMicrotime(time: list | str, input_order="reverse", *args, **kwargs):
         if isinstance(time, str):
@@ -200,7 +200,7 @@ class MicroTime:
             time = time.split(sep)
         if input_order == "reverse":
             order = ["hours", "minutes", "seconds", "milliseconds", "microseconds"]
-        else: 
+        else:
             order = ["microseconds", "milliseconds", "seconds", "minutes", "hours"]
         return MicroTime(**{t: int(i) if t != "microseconds" else float(i) for i, t in zip(args, order)})
 
@@ -208,7 +208,7 @@ class MicroTime:
         if input_order == "reverse":
             return [self.hours, self.minutes, self.seconds, self.milliseconds, self.microseconds]
         return [self.microseconds, self.milliseconds, self.seconds, self.minutes, self.hours]
-    
+
     @staticmethod
     def fromSRTTime(time: str, *args, **kwargs):
         return MicroTime(hours=int(time[0:2]), minutes=int(time[3:5]),
@@ -302,8 +302,7 @@ class MicroTime:
 
     def toTTMLTime(self):
         return self.toVTTTime()
-    
-    
+
     time_formats = {
         "time": fromTime,
         "microtime": fromMicrotime,
