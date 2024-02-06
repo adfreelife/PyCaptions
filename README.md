@@ -42,8 +42,7 @@ Read the [Wiki](https://github.com/adfreelife/PyCaptions/wiki)
 - [Timed Text Markup Language (TTML, DFXP, XML)](https://www.w3.org/TR/ttml/) (reader* + writer*)
 - [Web Video Text Tracks Format (VTT)](https://www.w3.org/TR/webvtt/) (reader + writer*)
 
-*reader\* - does not read styling/layout/metadata*
-<br>*writer\* - does not write styling layout/metadata*
+\*Limited functionality
 
 ## Future plans
 - add writers to all supported formats
@@ -121,27 +120,30 @@ with Captions("tests/test.en.srt") as captions:
 ```
 
 ## Changelog
-## v0.6.0
-Release date: 2024-01-26
+### v0.7.0
+Release date: 2024-02-06
 
 Changes:
-- Added support for inline style conversion for MicroDVD
-- Added `style` argument to readers, possible values `None` (no styling), default `full` (converts inline styles only for now)
-- Added `lines` argument to readers, possible values default `-1` (preserves original), `0` (automatically determins number of lines, works only with `style=None` for now), `1` (fits everything in one line), `n` (positive integer bigger than 1, fits text into `n` lines, works only with `style=None` for now)
-- Removed `no_styling` argument, replaced by `style=None`
-- Renamed `Block.getLines` to `Block.get_lines`
-- TTML writer now writes multilingual files the same way as other writers by default, add `mark_language_type=True` to make it write the same as before
-- Added dependency for `webcolors` to transform web color names to hex colors
-- Added decorators `@captionsDetector`, `@captionsReader`, `@captionsWriter` for better code structure
-- Added `MicroTime.recalculate` to recalculate time into the right values (e.g. 99min -> 1h 39min)
-- Moved `CaptionsFormat.checkContent` and `CaptionsFormat.getGenerator` to decorators that used them
-- Added `Captions.detectors` and improved `Captions.get_format` function
+- **Added cli support** (e.g `pycaptions "path/to/file/file.srt" -f vtt`)
+- Added autoformat for all values of `lines`
+- Added function `CaptionsFormat.getLanguagesAndFilename`
+- Added function `CaptionsFormat.getFilename`
+- Added `MicroTime.fromMicrotime` creates a MicroTime from a list
+- Added `MicroTime.toMicrotime` returns a MicroTime as a list
+- Added `MicroTime.fromAnyFormat` returns a MicroTime from provided format (case insensitive)
+- `MicroTime.fromSUBTime` and `MicroTime.toSUBTime` now supports framerate as string
+- `Captions.save` output_format is now case insensitive
+- Improved MicroDVD style conversion
+- Internal restructure for faster development
+- Invalid `style` argument will result in `style=None`
+- Added `style_options` for changing style globaly, default `style="full"` `lines=-1`, this affects how the style is parsed. (e.g. `style_options.style=None` and then using argument `style="full"` will not convert any style due to optimizations for faster conversion)
+- Hypens at the end of the lines (e.g "Some-<br/>thing") will be removed if `lines` is >-1
+- `Styling` is now split into `StyleFormat` and `Styling(StyleFormat)`
 
 Fixes:
-- Fixed `detectTTML` not seeking file to the original offset
-- Fixed `MicroTime.fromTTMLTime` returning 0 instead of infinity if no valid values are provided
-- Fixed `TTML.reader` not adding section time to end block time
-- Fixed `Block.copy` not returning a deepcopy of itself
-- Fixed `Block` substraction and addition not using `Block.copy`
+- Fixed "lxml is not installed" error
+- Fixed `Styling.getTTML` converting invalid css properties into ttml properties. To-do: add value checks for these properties.
+- Fixed `CaptionsFormat.getLanguagesFromFilename` getting languages from directory path (e.g. `\path.to.file\file.en.srt` -> `["to", "en"]`)
+- Fixed width and height not being saved to json
 
 Read past changes [here](https://github.com/adfreelife/PyCaptions/blob/main/CHANGELOG.md).

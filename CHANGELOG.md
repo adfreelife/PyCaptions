@@ -12,8 +12,8 @@ Table of Contents
 - [v0.2.1 [broken]](#v021)
 
 ### v0.7.0
-Release date: TBA
-<br>Commit: TBA
+Release date: 2024-02-06
+<br>Commit: [fdfed84](https://github.com/adfreelife/PyCaptions/commit/fdfed842ea43de1484d7b1367d001a3159edede3)
 
 Changes:
 - **Added cli support** (e.g `pycaptions "path/to/file/file.srt" -f vtt`)
