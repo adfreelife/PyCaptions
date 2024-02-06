@@ -13,84 +13,6 @@ from ..options import FileExtensions, save_extensions
 JSON_VERSION = 1
 
 
-def captionsDetector(func):
-    def wrapper(content):
-        if not isinstance(content, io.IOBase):
-            if not isinstance(content, str):
-                raise ValueError("The content is not a unicode string or I/O stream.")
-            content = io.StringIO(content)
-        offset = content.tell()
-        result = func(content=content)
-        content.seek(offset)
-        return result
-    return wrapper
-
-
-def captionsWriter(extension: str, generator_type: str = None, new_line: str = "\n"):
-    def decorator(func):
-        def wrapper(self, filename: str, languages: list[str] = None, **kwargs):
-            filename = self.makeFilename(filename=filename, extension=getattr(self.extensions, extension),
-                                         languages=languages, **kwargs)
-            encoding = kwargs.get("file_encoding") or "UTF-8"
-            languages = languages or [self.default_language]
-
-            if "lines" in kwargs:
-                lines = kwargs["lines"]
-                del kwargs["lines"]
-            else:
-                lines = -1
-
-            if "new_line" in kwargs:
-                line_separator = kwargs["new_line"]
-            else:
-                line_separator = new_line
-
-            if kwargs.get("generator"):
-                generator = kwargs.get("generator")
-            else:
-                if "style" in kwargs and kwargs["style"] != "full":
-                    if kwargs["style"] is None:
-                        generator = (((line_separator.join(data.get(lang=i, lines=lines, **kwargs)) for i in languages), data) for data in self)
-                    else:
-                        raise ValueError(f"Incorect argument value of style, expected 'full' or None, got {kwargs['style']}")
-                else:
-                    generator = (((getattr(data.get_style(i), generator_type)(lines=lines, options=self.options, **kwargs) for i in languages), data) for data in self)
-
-            try:
-                with open(filename, "w", encoding=encoding) as file:
-                    func(self=self, filename=filename, languages=languages, generator=generator, file=file, **kwargs)
-            except IOError as e:
-                print(f"I/O error({e.errno}): {e.strerror}")
-            except Exception as e:
-                print(f"Error {e}")
-
-        return wrapper
-    return decorator
-
-
-def captionsReader(func):
-    """
-    Decorator for captions readers
-
-    Parameters:
-    - content (str | io.IOBase): Content of file or string
-    - languages (list[str], optional): list of languages (default self.default_language)
-    - time_offset (MicroTime, optional): Used for shifting time on read (default is 0)
-    """
-    def wrapper(self, content: str | io.IOBase, languages: list[str] = None,
-                time_offset: MT = None, **kwargs):
-        if not isinstance(content, io.IOBase):
-            if not not isinstance(content, str):
-                raise ValueError("The content is not a unicode string or I/O stream.")
-            content = io.StringIO(content)
-        languages = languages or [self.default_language]
-        time_offset = kwargs.get("time_offset") or MT()
-        func(self, content, languages, **kwargs)
-        self.shift_time(time_offset)
-
-    return wrapper
-
-
 class CaptionsFormat:
     """
     Represents a format for handling captions in a multimedia context.
@@ -428,6 +350,8 @@ class CaptionsFormat:
         self.time_length = data["time_length"]
         self.default_language = data["default_language"]
         self.filename = data["filename"]
+        self.media_height = data.get("media_height") or 1080
+        self.media_width = data.get("media_width") or 1920
         for key, value in data[kwargs.get("file_extensions") or "file_extensions"].items():
             setattr(save_extensions, key, value)
         self.options = data["options"]
@@ -463,7 +387,8 @@ class CaptionsFormat:
                     raise ValueError("Incorect json format: File data does not contain 'identifier' with value of 'pycaptions'" +
                                      "\nIf you have saves before 0.5.1 run your arguments with 'fromLegacyJson' function.")
                 compatibility = dict()
-                if not data.get("json_version") == JSON_VERSION:
+                version = data.get("json_version")
+                if not version == JSON_VERSION:
                     pass
                 self._loadJson(data, **compatibility)
         except IOError as e:
@@ -490,6 +415,8 @@ class CaptionsFormat:
                     "default_language": self.default_language,
                     "time_length": self.time_length,
                     "filename": filename,
+                    "media_height": self.media_height,
+                    "media_width": self.media_width,
                     "file_extensions": vars(self.extensions),
                     "options": self.options,
                     "block_list": self._block_list

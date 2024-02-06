@@ -2,6 +2,11 @@ import re
 
 from ..development.colors import get_hexrgb
 
+
+@staticmethod
+def fromSUBunstyled(text, pattern, options):
+    return re.sub(pattern, "", text)
+
 @staticmethod
 def fromSUB(text, pattern, options):
     start = ""
@@ -53,12 +58,12 @@ def fromSUB(text, pattern, options):
 
     return start+re.sub(pattern, "", text)+end
 
-def getSUB(self, lines:int = -1, options: dict = None, 
-            add_metadata: bool = True, **kwargs):
-    text_lines = list(self.get_lines())
-    index = 0
+def getSUB(self, lines:int = -1, options: dict = None,
+           add_metadata: bool = True, **kwargs):
+    self.format_lines(lines=lines, **kwargs)
     y = {"bold":False, "italic": False, "underline":False}
     props = {"color":False, "size":False, "font":False}
+    new_line = self.find(string=True)
     for tag in self.find_all():
         if tag.name:
             if tag.get("style"):
@@ -68,13 +73,13 @@ def getSUB(self, lines:int = -1, options: dict = None,
                     prop_value = str(prop.value)
                     if prop_name == "color" and not props["color"]:
                         props["color"] = True
-                        text_lines[index] = "{C:$"+"".join(reversed(get_hexrgb(prop_value)))+"}"+text_lines[index]
+                        new_line.insert_before("{C:$"+"".join(reversed(get_hexrgb(prop_value)))+"}")
                     elif prop_name == "font-size"and not props["size"]:
                         props["size"] = True
-                        text_lines[index] = "{S:"+prop_value+"}"+text_lines[index]
+                        new_line.insert_before("{S:"+prop_value+"}")
                     elif prop_name == "font-family"and not props["font"]:
                         props["font"] = True
-                        text_lines[index] = "{F:"+prop_value+"}"+text_lines[index]
+                        new_line.insert_before("{F:"+prop_value+"}")
                     elif prop_name == "font-weight" and prop_value == "bold":
                         y["bold"] = True
                     elif prop_name == "font-style" and prop_value == "italic":
@@ -85,7 +90,7 @@ def getSUB(self, lines:int = -1, options: dict = None,
                 for i in tag.get('class'):
                     if "micro_dvd_" in i:
                         for control_code, value in options["micro_dvd"]["control_codes"][i].items():
-                            text_lines[index] = "{"+control_code+":"+value+"}"+text_lines[index]
+                            new_line.insert_before("{"+control_code+":"+value+"}")
             if tag.name == "b":
                 y["bold"] = True
             elif tag.name == "i":
@@ -95,13 +100,14 @@ def getSUB(self, lines:int = -1, options: dict = None,
             elif tag.name == "br":
                 props = {"color":False, "size":False, "font":False}
                 if sum(y.values()):
-                    print("adding style")
-                    text_lines[index] = "{Y:"+",".join(style[0] for style, value in y.items() if value)+"}"+text_lines[index]
+                    new_line.insert_before("{Y:"+",".join(style[0] for style, value in y.items() if value)+"}")
                     y = {"bold":False, "italic": False, "underline":False}
-                index += 1
+                new_line = tag.find_next(string=True)
+                new_line.insert_before("|")
+            tag.unwrap()
             
     if sum(y.values()):
-        text_lines[index] = "{Y:"+",".join(style[0] for style, value in y.items() if value)+"}"+text_lines[index]
-    if lines == 1:
-        return " ".join(text_lines)
-    return "|".join(text_lines)
+        new_line.insert_before("{Y:"+",".join(style[0] for style, value in y.items() if value)+"}")
+
+
+    return  str(self)

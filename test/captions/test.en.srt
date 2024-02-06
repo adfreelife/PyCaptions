@@ -1,9 +1,47 @@
 1
-00:00:00,500 --> 00:00:02,000
-<font color="white">This</font> is a <font color="white">test file</font>
+00:00:10,000 --> 00:00:13,000
+<font color="white">It</font> seems a paradox, <font color="white">does it not</font>,
 
 2
-00:00:02,500 --> 00:00:04,000
-This 
-is 
-multiline sentence
+00:00:15,000 --> 00:00:20,000
+that the image formed on the Retina should be inverted?
+
+3
+00:00:20,000 --> 00:00:26,000
+It is puzzling, why is it
+we do not see things upside-down?
+
+4
+00:00:27,200 --> 00:00:33,000
+You have never heard the Theory,
+then, that the Brain also is <font color="white">inverted</font>?
+
+5
+00:00:33,000 --> 00:00:37,000
+No indeed! What a beautiful fact!
+
+6
+00:00:38,000 --> 00:00:44,600
+But how is it proved?
+
+7
+00:00:38,000 --> 00:00:44,600
+Thus: what we call
+
+8
+00:00:44,600 --> 00:00:55,000
+the vertex of the Brain
+is really its base
+
+9
+00:00:55,000 --> 00:01:00,000
+and what we call its base
+<i>is really its vertex,</i>
+
+10
+00:01:00,000 --> 00:01:00,000
+it is simply a question of nomenclature.
+
+11
+00:01:00,000 --> 00:01:00,000
+How truly delightful!

@@ -15,8 +15,9 @@ Table of Contents
 Release date: TBA
 <br>Commit: TBA
 
-Changes: 
+Changes:
 - **Added cli support** (e.g `pycaptions "path/to/file/file.srt" -f vtt`)
+- Added autoformat for all values of `lines`
 - Added function `CaptionsFormat.getLanguagesAndFilename`
 - Added function `CaptionsFormat.getFilename`
 - Added `MicroTime.fromMicrotime` creates a MicroTime from a list
@@ -26,10 +27,16 @@ Changes:
 - `Captions.save` output_format is now case insensitive
 - Improved MicroDVD style conversion
 - Internal restructure for faster development
+- Invalid `style` argument will result in `style=None`
+- Added `style_options` for changing style globaly, default `style="full"` `lines=-1`, this affects how the style is parsed. (e.g. `style_options.style=None` and then using argument `style="full"` will not convert any style due to optimizations for faster conversion)
+- Hypens at the end of the lines (e.g "Some-<br/>thing") will be removed if `lines` is >-1
+- `Styling` is now split into `StyleFormat` and `Styling(StyleFormat)`
 
 Fixes:
+- Fixed "lxml is not installed" error
 - Fixed `Styling.getTTML` converting invalid css properties into ttml properties. To-do: add value checks for these properties.
 - Fixed `CaptionsFormat.getLanguagesFromFilename` getting languages from directory path (e.g. `\path.to.file\file.en.srt` -> `["to", "en"]`)
+- Fixed width and height not being saved to json
 
 ### v0.6.0
 Release date: 2024-01-26

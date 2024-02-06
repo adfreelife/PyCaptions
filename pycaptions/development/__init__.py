@@ -1,7 +1,8 @@
-from .captionsFormat import (
-    CaptionsFormat,
+from .captionsFormat import CaptionsFormat
+from .block import Block
+from .blockType import BlockType
+from .wrappers import (
+    captionsWriter,
     captionsDetector,
-    captionsReader,
-    captionsWriter
-    )
-from .block import Block, BlockType
+    captionsReader
+)
