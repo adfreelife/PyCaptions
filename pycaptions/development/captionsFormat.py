@@ -350,6 +350,8 @@ class CaptionsFormat:
         self.time_length = data["time_length"]
         self.default_language = data["default_language"]
         self.filename = data["filename"]
+        self.media_height = data.get("media_height") or 1080
+        self.media_width = data.get("media_width") or 1920
         for key, value in data[kwargs.get("file_extensions") or "file_extensions"].items():
             setattr(save_extensions, key, value)
         self.options = data["options"]
@@ -385,7 +387,8 @@ class CaptionsFormat:
                     raise ValueError("Incorect json format: File data does not contain 'identifier' with value of 'pycaptions'" +
                                      "\nIf you have saves before 0.5.1 run your arguments with 'fromLegacyJson' function.")
                 compatibility = dict()
-                if not data.get("json_version") == JSON_VERSION:
+                version = data.get("json_version")
+                if not version == JSON_VERSION:
                     pass
                 self._loadJson(data, **compatibility)
         except IOError as e:
@@ -412,6 +415,8 @@ class CaptionsFormat:
                     "default_language": self.default_language,
                     "time_length": self.time_length,
                     "filename": filename,
+                    "media_height": self.media_height,
+                    "media_width": self.media_width,
                     "file_extensions": vars(self.extensions),
                     "options": self.options,
                     "block_list": self._block_list

@@ -1,11 +1,6 @@
 @staticmethod
-def fromVTTLine(text, pattern, options):
+def fromVTTunstyled(text, pattern, options):
     pass
-
-
-def getVTTLine(self, lines:int = -1, options: dict = None, 
-               add_metadata: bool = True, **kwargs):
-    return "\n".join(self.get_lines())
 
 @staticmethod
 def fromVTT(text, style):
@@ -13,6 +8,7 @@ def fromVTT(text, style):
 
 def getVTT(self, lines:int = -1, options: dict = None,
            add_metadata: bool = True, **kwargs):
+    self.format_lines(lines=lines, **kwargs)
     for tag in self.find_all():
         if tag.name:
             if tag.name == "br":

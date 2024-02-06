@@ -26,16 +26,17 @@ def main():
     parser.add_argument("filenames", nargs="+", help="List of input filenames.")
     parser.add_argument("-f", "--format", nargs="+", default="all", help=f"Specify output format(s).\nOptions:\n - 'all' (default): exports to all formats specified in FileExtensions\n{extensions}")
     parser.add_argument("-j", "--join", nargs="+", default="end_time", help="Specify join criteria.\nOptions:\n - 'end_time' (default): Adds next file to the end of previous\n - 'add': Adds new language to existing file\n - 'offset [TIME_FORMAT_FORMAT ...]': Specify length of each file")
-    parser.add_argument("-tf", "--time-format", nargs="+", default=default_time_format, help=f"Specify time format.\nOptions:\n - '{default_time_format}' (default): {MT.time_formats_help[default_time_format]}\n{time_formats}")
-    parser.add_argument("-l", "--languages", nargs="+", help="List of languages.")
+    parser.add_argument("-tf", "--time-format", nargs="+", default=default_time_format, help=f"Specify time format.\nOptions:\n - '{default_time_format}' (default): {time_formats_help[default_time_format]}\n{time_formats}")
+    parser.add_argument("-l", "--languages", nargs="+", help="List of languages. For more than one language in the\nsame file it's recomended to set '-li 1' for better visibility.")
     parser.add_argument("-o", "--output-filenames", nargs="+", help="List of output filenames.")
     parser.add_argument("-od", "--output-directory", help="Output directory path.\nCreates new directory in current working\ndirectory if it doesn't exist.")
-    parser.add_argument("-li", "--lines", nargs=int, help="Number of lines per language.\nOptions:\n - '-1': preservs original\n - '0': auto format (style = None)\n - n: positive integer")
-    parser.add_argument("-s", "--style", help="Either 'full' (default) or 'None'")
+    parser.add_argument("-li", "--lines", type=int, help="Number of lines per language.\nOptions:\n - '-1': preservs original\n - '0': auto format \n - n: positive integer")
+    parser.add_argument("-s", "--style", help="Either 'full' (default) or 'none'", default="full")
     args = parser.parse_args()
 
     style_options.style = args.style
-    style_options.lines = args.lines
+    if args.lines:
+        style_options.lines = args.lines
 
     formats = None
     languages = None
@@ -72,9 +73,6 @@ def main():
 
     if not languages:
         languages = [args.languages for _ in args.filenames]
-
-    print(out_filenames)
-    print(languages)
 
     if not args.join:
         for _in, _out, _lang, _format in zip(args.filenames, out_filenames, languages, formats):

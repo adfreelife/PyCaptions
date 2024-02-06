@@ -36,11 +36,11 @@ class StyleFormat(BS):
     def parseStyle(self, string):
         return cssParser.parseStyle(string, encoding="UTF-8")
     
-    def get_raw_lines(self):
+    def get_lines(self):
         return (BS(line.strip(), 'html.parser').get_text() for index, line in enumerate(str(self).split("<br/>")))
 
-    def get_lines(self, lines: int = 0, character_limit: int = 47,
-                  split_ratios: list[float] = [0.7, 1], smaller_first_line: bool = True, **kwargs) -> str:
+    def format_lines(self, lines: int = 0, character_limit: int = 47,
+                     split_ratios: list[float] = [0.7, 1], smaller_first_line: bool = True, **kwargs) -> str:
         if lines == -1:
             return
         
@@ -68,7 +68,7 @@ class StyleFormat(BS):
             current_line = []
 
             for index, phrase in enumerate(phrases):
-                current_ratio_index = min(len(formated_lines), len(split_ratios) - 1)
+                current_ratio_index = min(formated_lines, len(split_ratios) - 1)
                 effective_limit = int(character_limit * split_ratios[current_ratio_index])
                 if current_character_count + len(phrase) <= effective_limit:
                     current_line.append(phrase)
@@ -80,7 +80,8 @@ class StyleFormat(BS):
                     chunks.append(separator.join(current_line))
                     current_line= [phrase]
                     current_character_count = len(phrase) + 1
-
+            if current_line:
+                chunks.append(separator.join(current_line))
             text_node.replace_with(BS('<br/>'.join(chunks), 'html.parser'))
 
     def removeLineBreaks(self):

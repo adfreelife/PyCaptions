@@ -20,7 +20,6 @@ class StyleOptions:
         else:
             print(f"Invalid line value {value}. Expected: n >= -1")
             self.lines_value = -1
-        changeStyleOption(self.style_value, self.lines)
 
     @property
     def style(self):
@@ -46,4 +45,4 @@ class StyleOptions:
         else:      
             print(f"Invalid style option {value}. Expected: none {' '.join(self.style_option)}")
             self.style_value = None
-        changeStyleOption(self.style_value, self.lines)
+        changeStyleOption(self.style_value)

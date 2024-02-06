@@ -145,20 +145,20 @@ class Block:
         lang = lang or self.default_language
 
         if lines == -1:
-            return Styling(self.languages.get(lang), "html.parser").get_raw_lines()
+            return Styling(self.languages.get(lang), "html.parser").get_lines()
 
         separator = " "
         if "separator" in kwargs:
             separator = kwargs["separator"]
 
-        text_lines = Styling(self.languages.get(lang), "html.parser").get_raw_lines()
-        text = lines[0]
+        text_lines = Styling(self.languages.get(lang), "html.parser").get_lines()
+        text = next(text_lines)
         if text.endswith("-"):
             add_separator = False
         else:
             add_separator = True
 
-        for i in text_lines[1:]:
+        for i in text_lines:
             if add_separator:
                 text += separator
             if i.endswith("-"):

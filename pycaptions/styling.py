@@ -9,27 +9,17 @@ class FullStyle(StyleFormat):
     from .vtt.style import fromVTT, getVTT
 
 
-class NewLinesStyle(StyleFormat):
-
-    from .srt.style import fromSRTLine as fromSRT, getSRTLine as getSRT
-    from .sub.style import fromSUBLine as fromSUB, getSUBLine as getSUB
-    from .ttml.style import fromTTMLLine as fromTTML, getTTMLLine as getTTML
-    from .vtt.style import fromVTTLine as fromVTT, getVTTLine as getVTT
-
-
 class NoStyle(StyleFormat):
 
-    from .srt.style import fromSRT, getSRT
-    from .sub.style import fromSUB, getSUB
-    from .ttml.style import fromTTML, getTTML
-    from .vtt.style import fromVTT, getVTT
+    from .srt.style import fromSRTunstyled as fromSRT, getSRT
+    from .sub.style import fromSUBunstyled as fromSUB, getSUB
+    from .ttml.style import fromTTMLunstyled as fromTTML, getTTML
+    from .vtt.style import fromVTTunstyled as fromVTT, getVTT
 
 
-def changeStyleOption(style, lines):
+def changeStyleOption(style):
     if style == "full":
         Styling = FullStyle
-    elif lines == -1:
-        Styling = NewLinesStyle
     else:
         Styling = NoStyle
 
