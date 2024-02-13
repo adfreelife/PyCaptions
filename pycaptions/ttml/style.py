@@ -23,9 +23,9 @@ def getTTML(self, lines:int = -1, options: dict = None,
                     if prop_name in TTML_FROM_CSS:
                         ttml_property = TTML_FROM_CSS[prop_name]
                         if prop_name in ["color", "background-color"]:
-                            tag["tts:"+ttml_property] = "#"+"".join(get_hexrgb(prop.value))
+                            tag[ttml_property] = "#"+"".join(get_hexrgb(prop.value))
                         else:
-                            tag["tts:"+ttml_property] = str(prop.value)
+                            tag[ttml_property] = str(prop.value)
                 del tag["style"]
             if tag.name == "br" and lines == 1:
                 tag.insert_before(" ")

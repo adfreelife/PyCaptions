@@ -18,9 +18,8 @@ class SAMI(CaptionsFormat):
     read = readSAMI
     save = saveSAMI
 
-    from ..lrc.functions import saveLRC
-    from ..srt.functions import saveSRT
-    from ..sub.functions import saveSUB
-    from ..ttml.functions import saveTTML
-    from ..usf.functions import saveUSF
-    from ..vtt.functions import saveVTT
+    from ..development.readers import (
+        # readLRC, readUSF,
+        readSRT, readSUB, 
+        readTTML, readVTT
+    )

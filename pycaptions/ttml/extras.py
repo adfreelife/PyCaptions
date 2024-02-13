@@ -1,11 +1,11 @@
 # this structure is subject to change
 TTML_PROPERTIES = {
-    "backgroundClip": {
+    "tts:backgroundClip": {
         "css": "background-clip",
         "values": ["border", "content", "padding"],
         "tags": ["body", "div", "image", "p", "region", "span"]
     },
-    "backgrounColor": {
+    "tts:backgrounColor": {
         "css": "background-color",
         "values-map": {
             "fuchsia": "magenta",
@@ -14,27 +14,27 @@ TTML_PROPERTIES = {
         "values": ["<color>"],
         "tags": ["body", "div", "image", "p", "region", "span"]
     },
-    "backgroundExtent": {
+    "tts:backgroundExtent": {
         "css": "background-size",
         "values": ["<extent>"],
         "tags": ["body", "div", "image", "p", "region", "span"]
     },
-    "backgroundImage": {
+    "tts:backgroundImage": {
         "css": "background-image",
         "values": ["none", "<image>"],
         "tags": ["body", "div", "image", "p", "region", "span"]
     },
-    "backgroundOrigin": {
+    "tts:backgroundOrigin": {
         "css": "background-origin",
         "values": ["border", "content", "padding"],
         "tags": ["body", "div", "image", "p", "region", "span"]
     },
-    "backgroundPosition": {
+    "tts:backgroundPosition": {
         "css": "background-position",
         "values": ["<position>"],
         "tags": ["body", "div", "image", "p", "region", "span"]
     },
-    "backgroundRepeat": {
+    "tts:backgroundRepeat": {
         "css": "background-repeat",
         "values-map": {
             "repeatX": "repeat-x",
@@ -44,17 +44,17 @@ TTML_PROPERTIES = {
         "values": ["repeat", "repeatX", "repeatY", "noRepeat"],
         "tags": ["body", "div", "image", "p", "region", "span"]
     },
-    "border": {
+    "tts:border": {
         "css": "border",
         "values": ["<border>"],
         "tags": ["body", "div", "image", "p", "region", "span"]
     },
-    "bpd": {
+    "tts:bpd": {
         "css": None,
         "values": ["<measures>"],
         "tags": ["body", "div", "p", "span"]
     },
-    "color": {
+    "tts:color": {
         "css": "color",
         "values-map": {
             "fuchsia": "magenta",
@@ -63,17 +63,17 @@ TTML_PROPERTIES = {
         "values": ["<color>"],
         "tags": ["span"]
     },
-    "direction": {
+    "tts:direction": {
         "css": "direction",
         "values": ["ltr", "rtl"],
         "tags": ["p", "span"]
     },
-    "disparity": {
+    "tts:disparity": {
         "css": None,
         "values": ["<length>"],
         "tags": ["div", "p", "region"]
     },
-    "display": {
+    "tts:display": {
         "css": "display",
         "values-map": {
             "inlineBlock": "inline-block"
@@ -81,7 +81,7 @@ TTML_PROPERTIES = {
         "values": ["auto", "none", "inlineBlock"],
         "tags": ["body", "div", "image", "p", "region", "span"]
     },
-    "displayAlign": {
+    "tts:displayAlign": {
         "css": "display-align",
         "values-map": {
             "before": "flex-start",
@@ -91,143 +91,143 @@ TTML_PROPERTIES = {
         "values": ["before", "center", "after", "justify"],
         "tags": ["body", "div", "p", "region"]
     },
-    "extent": {
+    "tts:extent": {
         "css": None,
         "values": ["<extent>"],
         "tags": ["tt", "div", "image", "p", "region"]
     },
-    "fontFamily": {
+    "tts:fontFamily": {
         "css": "font-family",
         "values": ["<font-families>"],
         "tags": ["span"]
     },
-    "fontKerning": {
+    "tts:fontKerning": {
         "css": "font-kerning",
         "values": ["none", "normal"],
         "tags": ["span"]
     },
-    "fontSelectionStrategy": {
+    "tts:fontSelectionStrategy": {
         "css": None,
         "values": ["auto", "character"],
         "tags": ["span"]
     },
-    "fontShear": {
+    "tts:fontShear": {
         "css": None, #skewX skewY
         "values": ["<percentage>"],
         "tags": ["span"]
     },
-    "fontSize": {
+    "tts:fontSize": {
         "css": "font-size",
         "values": ["<font-size>"],
         "tags": ["span"]
     },
-    "fontStyle": {
+    "tts:fontStyle": {
         "css": "font-style",
         "values": ["normal", "italic", "oblique"],
         "tags": ["span"]
     },
-    "fontVariant": {
+    "tts:fontVariant": {
         "css": None,
         "values": ["<font-variant>"],
         #font-variant-east-asian: Only full-width, rubyfont-variant-position: normal, sub, superfont-feature-settings: Only hwid
         "tags": ["span"]
     },
-    "fontWeight": {
+    "tts:fontWeight": {
         "css": "font-weight",
         "values": ["normal", "bold"],
         "tags": ["span"]
     },
-    "ipd": {
+    "tts:ipd": {
         "css": None,
         "values": ["<measure>"],
         "tags": ["body", "div", "p", "span"]
     },
-    "letterSpacing": {
+    "tts:letterSpacing": {
         "css": "letter-spacing",
         "values": ["normal", "<length>"],
         "tags": ["span"]
     },
-    "lineHeight": {
+    "tts:lineHeight": {
         "css": "line-height",
         "values": ["normal", "<length>"],
         "tags": ["p"]
     },
-    "lineShear": {
+    "tts:lineShear": {
         "css": None, #skewX skewY
         "values": ["<percentage>"],
         "tags": ["p"]
     },
-    "luminanceGain": {
+    "tts:luminanceGain": {
         "css": None,
         "values": ["<non-negative-number>"],
         "tags": ["region"]
     },
-    "opacity": {
+    "tts:opacity": {
         "css": "opacity",
         "values": ["<alpha>"],
         "tags": ["body", "div", "image", "p", "region", "span"]
     },
-    "origin": {
+    "tts:origin": {
         "css": None,
         "values": ["<origin>"],
         "tags": ["div", "p", "region"]
     },
-    "overflow": {
+    "tts:overflow": {
         "css": "overflow",
         "values": ["visible", "hidden"],
         "tags": ["region"]
     },
-    "padding": {
+    "tts:padding": {
         "css": "padding",
         "values": ["<padding>"],
         "tags": ["body", "div", "image", "p", "region", "span"]
     },
-    "position": {
+    "tts:position": {
         "css": "background-position",
         "values": ["<position>"],
         "tags": ["body", "div", "image", "p", "region", "span"]
     },
-    "ruby": {
+    "tts:ruby": {
         "css": "ruby",
         "values": ["none", "container", "base", "baseContainer", "text", "textContainer", "delimiter"],
         "tags": ["span"]
     },
-    "rubyAlign": {
+    "tts:rubyAlign": {
         "css": "ruby-align",
         "values": ["start", "center", "end", "spaceAround", "spaceBetween", "withBase"],
         "tags": ["span"]
     },
-    "rubyPosition": {
+    "tts:rubyPosition": {
         "css": None,
         "values": ["before", "after", "outside"],
         "tags": ["span"]
     },
-    "rubyReserve": {
+    "tts:rubyReserve": {
         "css": None,
         "values": ["<ruby-reserve>"],
         "tags": ["p"]
     },
-    "shear": {
+    "tts:shear": {
         "css": None, #skewX skewY
         "values": ["<percentage>"],
         "tags": ["p"]
     },
-    "showBackground": {
+    "tts:showBackground": {
         "css": None,
         "values": ["always", "whenActive"],
         "tags": ["region"]
     },
-    "textAlign": {
+    "tts:textAlign": {
         "css": "text-align",
         "values": ["left", "center", "right", "start", "end", "justify"],
         "tags": ["p"]
     },
-    "textCombine": {
+    "tts:textCombine": {
         "css": "text-combine-upright",
         "values": ["<text-combine>"],
         "tags": ["span"]
     },
-    "textDecoration": {
+    "tts:textDecoration": {
         "css": "text-decoration",
         "values-map": {
             "line-through": "lineThrough",
@@ -238,28 +238,28 @@ TTML_PROPERTIES = {
         "values": ["<text-decoration>"],
         "tags": ["span"]
     },
-    "textEmphasis": {
+    "tts:textEmphasis": {
         "css": "text-emphasis-position",
         #emphasis-style maps to text-emphasis-style; emphasis-color maps to text-emphasis-color; emphasis-position maps to text-emphasis-position
         "values": ["<text-emphasis>"],
         "tags": ["span"]
     },
-    "textOrientation": {
+    "tts:textOrientation": {
         "css": "text-orientation",
         "values": ["mixed", "sideways", "upright"],
         "tags": ["span"]
     },
-    "textOutline": {
+    "tts:textOutline": {
         "css": None,
         "values": ["<text-outline>"],
         "tags": ["span"]
     },
-    "textShadow": {
+    "tts:textShadow": {
         "css": "text-shadow",
         "values": ["<text-shadow>"],
         "tags": ["span"]
     },
-    "unicodeBidi": {
+    "tts:unicodeBidi": {
         "css": "unicode-bidi",
         "values-map": {
             "isolate": None
@@ -267,22 +267,22 @@ TTML_PROPERTIES = {
         "values": ["normal", "embed", "bidiOverride", "isolate"],
         "tags": ["p", "span"]
     },
-    "visibility": {
+    "tts:visibility": {
         "css": "visibility",
         "values": ["visible", "hidden"],
         "tags": ["body", "div", "image", "p", "region", "span"]
     },
-    "wrapOption": {
+    "tts:wrapOption": {
         "css": None,
         "values": ["wrap", "noWrap"],
         "tags": ["span"]
     },
-    "writingMode": {
+    "tts:writingMode": {
         "css": None,
         "values": ["lrtb", "rltb", "tbrl", "tblr", "lr", "rl", "tb"],
         "tags": ["region"]
     },
-    "zIndex": {
+    "tts:zIndex": {
         "css": "z-index",
         "values": ["auto", "<integer>"],
         "tags": ["region"]
@@ -290,39 +290,39 @@ TTML_PROPERTIES = {
 }
 
 TTML_FROM_CSS = {
-    "background-clip": "backgroundClip",
-    "background-color": "backgrounColor",
-    "background-size": "backgroundExtent",
-    "background-image": "backgroundImage",
-    "background-origin": "backgroundOrigin",
-    "background-position": "position",
-    "background-repeat": "backgroundRepeat",
-    "border": "border",
-    "color": "color",
-    "direction": "direction",
-    "display": "display",
-    "display-align": "displayAlign",
-    "font-family": "fontFamily",
-    "font-kerning": "fontKerning",
-    "font-size": "fontSize",
-    "font-style": "fontStyle",
-    "font-weight": "fontWeight",
-    "letter-spacing": "letterSpacing",
-    "line-height": "lineHeight",
-    "opacity": "opacity",
-    "overflow": "overflow",
-    "padding": "padding",
-    "ruby": "ruby",
-    "ruby-align": "rubyAlign",
-    "text-align": "textAlign",
-    "text-combine-upright": "textCombine",
-    "text-decoration": "textDecoration",
-    "text-emphasis-position": "textEmphasis",
-    "text-orientation": "textOrientation",
-    "text-shadow": "textShadow",
-    "unicode-bidi": "unicodeBidi",
-    "visibility": "visibility",
-    "z-index": "zIndex"
+    "background-clip": "tts:backgroundClip",
+    "background-color": "tts:backgrounColor",
+    "background-size": "tts:backgroundExtent",
+    "background-image": "tts:backgroundImage",
+    "background-origin": "tts:backgroundOrigin",
+    "background-position": "tts:position",
+    "background-repeat": "tts:backgroundRepeat",
+    "border": "tts:border",
+    "color": "tts:color",
+    "direction": "tts:direction",
+    "display": "tts:display",
+    "display-align": "tts:displayAlign",
+    "font-family": "tts:fontFamily",
+    "font-kerning": "tts:fontKerning",
+    "font-size": "tts:fontSize",
+    "font-style": "tts:fontStyle",
+    "font-weight": "tts:fontWeight",
+    "letter-spacing": "tts:letterSpacing",
+    "line-height": "tts:lineHeight",
+    "opacity": "tts:opacity",
+    "overflow": "tts:overflow",
+    "padding": "tts:padding",
+    "ruby": "tts:ruby",
+    "ruby-align": "tts:rubyAlign",
+    "text-align": "tts:textAlign",
+    "text-combine-upright": "tts:textCombine",
+    "text-decoration": "tts:textDecoration",
+    "text-emphasis-position": "tts:textEmphasis",
+    "text-orientation": "tts:textOrientation",
+    "text-shadow": "tts:textShadow",
+    "unicode-bidi": "tts:unicodeBidi",
+    "visibility": "tts:visibility",
+    "z-index": "tts:zIndex"
 }
 
 def tryparse(func):

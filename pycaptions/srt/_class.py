@@ -18,9 +18,7 @@ class SubRip(CaptionsFormat):
     read = readSRT
     save = saveSRT
 
-    from ..lrc.functions import saveLRC
-    from ..sami.functions import saveSAMI
-    from ..sub.functions import saveSUB
-    from ..ttml.functions import saveTTML
-    from ..usf.functions import saveUSF
-    from ..vtt.functions import saveVTT
+    from ..development.readers import (
+        # readLRC, readSAMI, readUSF,
+        readSUB, readTTML, readVTT
+    )

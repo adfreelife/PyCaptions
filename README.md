@@ -45,8 +45,7 @@ Read the [Wiki](https://github.com/adfreelife/PyCaptions/wiki)
 \*Limited functionality
 
 ## Future plans
-- add writers to all supported formats
-- auto-fit lines into multilines or split captions blocks into two parts
+- split captions blocks into two parts
 - add support for more formats
     - [Synchronized Accessible Media Interchange (SAMI)](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/dnacc/understanding-sami-1.0)
     - [Universal Subtitle Format (USF)](https://en.wikipedia.org/wiki/Universal_Subtitle_Format)
@@ -54,6 +53,9 @@ Read the [Wiki](https://github.com/adfreelife/PyCaptions/wiki)
     - open an issue with "enhancement" label for more
 
 ## Examples
+
+### CLI
+`pycaptions "path/to/file" -f vtt`
 
 ### Generic from file name
 ```python

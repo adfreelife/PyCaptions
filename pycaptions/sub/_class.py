@@ -17,9 +17,7 @@ class MicroDVD(CaptionsFormat):
     _read = readSUB
     _save = saveSUB
 
-    from ..lrc.functions import saveLRC
-    from ..sami.functions import saveSAMI
-    from ..srt.functions import saveSRT
-    from ..ttml.functions import saveTTML
-    from ..usf.functions import saveUSF
-    from ..vtt.functions import saveVTT
+    from ..development.readers import (
+        # readLRC, readSAMI, readUSF,
+        readSRT, readTTML, readVTT
+    )

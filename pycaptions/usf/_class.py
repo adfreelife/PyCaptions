@@ -18,9 +18,8 @@ class USF(CaptionsFormat):
     read = readUSF
     save = saveUSF
 
-    from ..lrc.functions import saveLRC
-    from ..sami.functions import saveSAMI
-    from ..srt.functions import saveSRT
-    from ..sub.functions import saveSUB
-    from ..ttml.functions import saveTTML
-    from ..vtt.functions import saveVTT   
+    from ..development.readers import (
+        # readLRC, readSAMI,
+        readSRT, readSUB, 
+        readTTML, readVTT
+    )
