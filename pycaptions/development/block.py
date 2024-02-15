@@ -3,10 +3,11 @@ import copy
 from collections import defaultdict
 from langcodes import standardize_tag, tag_is_valid
 from ..microTime import MicroTime as MT
-from .styleFormat import cssParser
 from ..styling import Styling
 from .blockType import BlockType
-from .text import get_phrases, get_lines_ratio
+from .textFormat import get_phrases, get_lines_ratio
+from .css import cssParser
+
 
 
 class Block:

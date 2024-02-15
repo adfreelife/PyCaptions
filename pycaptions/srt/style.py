@@ -1,15 +1,12 @@
-from bs4 import BeautifulSoup as BS
-
 from ..development.colors import get_hexrgb
 
+@classmethod
+def fromSRTunstyled(cls, text):
+    return cls(text, "html.parser").get_text()
 
-@staticmethod
-def fromSRTunstyled(text):
-    return BS(text, "html.parser").get_text()
-
-@staticmethod
-def fromSRT(text):
-    bs = BS(text, "html.parser")
+@classmethod
+def fromSRT(cls, text):
+    bs = cls(text, "html.parser")
     if bs.font:
         for tag in bs.find_all("font"):
             tag.name = "span"
@@ -23,7 +20,7 @@ def fromSRT(text):
                 tag["style"] = tag.get("style", "")+f'font-family: {tag["face"]};'
                 del tag["face"]
     return str(bs)
-
+    
 def getSRT(self, lines:int = -1, options: dict =  None, 
             add_metadata: bool = True, **kwargs):
     self.format_lines(lines=lines, **kwargs)

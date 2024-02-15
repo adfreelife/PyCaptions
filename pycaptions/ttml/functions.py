@@ -33,6 +33,8 @@ def detectTTML(content: str | io.IOBase) -> bool:
     return False
 
 
+
+
 # ttp:frameRate, ttp:frameRateMultiplier, ttp:subFrameRate, ttp:tickRate, ttp:timeBase
 @captionsReader
 def readTTML(self, content: str | io.IOBase, languages: list[str] = None, **kwargs):
@@ -41,31 +43,57 @@ def readTTML(self, content: str | io.IOBase, languages: list[str] = None, **kwar
         if content.tt.get("xml:lang"):
             languages = [content.tt.get("xml:lang")]
             self.setDefaultLanguage(languages[0])
-    for index, langs in enumerate(content.body.find_all("div")):
-        lang = langs.get("xml:lang")
-        p_start, p_end = MT.fromTTMLTime(langs.get("begin"), langs.get("dur"), langs.get("end"))
-        for block, line in enumerate(langs.find_all("p")):
-            start, end = MT.fromTTMLTime(line.get("begin"), line.get("dur"), line.get("end"))
-            start += p_start
-            end += p_start
-            if start > p_end:
-                start = p_end
-                end = p_end
-            elif end > p_end:
-                end = p_end
-            
-            if index == 0:
-                caption = Block(BlockType.CAPTION, start_time=start, end_time=end)
-            else:
-                caption = self[block]
-            for lang_index, text in enumerate(line.get_text().strip().split("\n")):
-                if len(languages) > 1:
-                    caption.append(text, lang or languages[lang_index])
-                else:
-                    caption.append(text, lang or languages[0])
-            if index == 0:
-                self.append(caption)
 
+    if len(languages) > 1:
+        for index, langs in enumerate(content.body.find_all("div")):
+            lang = langs.get("xml:lang")
+            p_start, p_end = MT.fromTTMLTime(langs.get("begin"), langs.get("dur"), langs.get("end"))
+            if index == 0:
+                for block, line in enumerate(langs.find_all("p")):
+                    start, end = MT.fromTTMLTime(line.get("begin"), line.get("dur"), line.get("end"))
+                    start += p_start
+                    end += p_start
+                    if start > p_end:
+                        start = p_end
+                        end = p_end
+                    elif end > p_end:
+                        end = p_end
+
+                    caption = Block(BlockType.CAPTION, start_time=start, end_time=end)
+
+                    for lang_index, text in enumerate(line.get_text().strip().split("\n")):
+                        caption.append(text, lang or languages[lang_index])
+                    self.append(caption)
+            else:
+                for block, line in enumerate(langs.find_all("p")):
+                    caption = self[block]
+                    for lang_index, text in enumerate(line.get_text().strip().split("\n")):
+                        caption.append(text, lang or languages[lang_index])
+    else:
+        for index, langs in enumerate(content.body.find_all("div")):
+            lang = langs.get("xml:lang")
+            p_start, p_end = MT.fromTTMLTime(langs.get("begin"), langs.get("dur"), langs.get("end"))
+            if index == 0:
+                for block, line in enumerate(langs.find_all("p")):
+                    start, end = MT.fromTTMLTime(line.get("begin"), line.get("dur"), line.get("end"))
+                    start += p_start
+                    end += p_start
+                    if start > p_end:
+                        start = p_end
+                        end = p_end
+                    elif end > p_end:
+                        end = p_end
+
+                    caption = Block(BlockType.CAPTION, start_time=start, end_time=end)
+
+                    for text in line.get_text().strip().split("\n"):
+                        caption.append(text, lang or languages[0])
+                    self.append(caption)
+            else:
+                for block, line in enumerate(langs.find_all("p")):
+                    caption = self[block]
+                    for text in line.get_text().strip().split("\n"):
+                        caption.append(text, lang or languages[0])
 
 @captionsWriter("TTML", "getTTML", "<br/>")
 def saveTTML(self, filename: str, languages: list[str] = None, generator: list = None, 

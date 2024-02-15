@@ -2,12 +2,12 @@ from ..development.colors import get_hexrgb
 
 from .extras import TTML_FROM_CSS
 
-@staticmethod
-def fromTTMLunstyled(text, pattern, options):
+@classmethod
+def fromTTMLunstyled(cls, text, pattern, options):
     pass
 
-@staticmethod
-def fromTTML(text):
+@classmethod
+def fromTTML(cls, text):
     pass
 
 

@@ -67,26 +67,40 @@ def readSRT(self, content: str | io.IOBase, languages: list[str] = None, **kwarg
     width = kwargs.get("media_width") or self.media_width
     height = kwargs.get("media_height") or self.media_height
 
-    counter = 0
     id = content.readline()
-    while id:
-        start, end = content.readline().split(" --> ")
-        end = end.strip().split(" ", 1)
+    if len(languages) > 1:
+        while id:
+            start, end = content.readline().split(" --> ")
+            end = end.strip().split(" ", 1)
 
-        caption = Block(BlockType.CAPTION, languages[0], MT.fromSRTTime(start),
-                        MT.fromSRTTime(end[0]))
-        if len(end) == 2:
-            convertFromSRTLayout(self, id.strip(), end[1], width, height)
-        line = content.readline().strip()
-        while line:
-            if len(languages) > 1:
+            caption = Block(BlockType.CAPTION, languages[0], MT.fromSRTTime(start),
+                            MT.fromSRTTime(end[0]))
+            if len(end) == 2:
+                convertFromSRTLayout(self, id.strip(), end[1], width, height)
+            line = content.readline().strip()
+            counter = 0
+            while line:
                 caption.append(Styling.fromSRT(line), languages[counter])
                 counter += 1
-            else:
-                caption.append(Styling.fromSRT(line), languages[0])
+                line = content.readline().strip()
+            self.append(caption)
+            id = content.readline()
+    else:
+        while id:
+            start, end = content.readline().split(" --> ")
+            end = end.strip().split(" ", 1)
+
+            caption = Block(BlockType.CAPTION, languages[0], MT.fromSRTTime(start),
+                            MT.fromSRTTime(end[0]))
+            if len(end) == 2:
+                convertFromSRTLayout(self, id.strip(), end[1], width, height)
             line = content.readline().strip()
-        self.append(caption)
-        id = content.readline()
+            while line:
+                caption.append(Styling.fromSRT(line), languages[0])
+                line = content.readline().strip()
+            self.append(caption)
+            id = content.readline()
+
 
 
 @captionsWriter("SRT", "getSRT")
@@ -101,16 +115,34 @@ def saveSRT(self, filename: str, languages: list[str] = None, generator: list = 
     width = kwargs.get("media_width") or self.media_width
     height = kwargs.get("media_height") or self.media_height
     isExtended = kwargs.get("srt_extended") or False
-    extended = ""
     index = 1
-    for text, data in generator:
-        if data.block_type != BlockType.CAPTION:
-            continue
-        elif index != 1:
-            file.write("\n\n")
-        if isExtended:
-            extended = getSRTLayout(self, index, width, height)
+    text, data = next(generator)
+    while data.block_type != BlockType.CAPTION:
+        text, data = next(generator)
+    if isExtended:
+        extended = getSRTLayout(self, index, width, height)
         file.write(f"{index}\n")
         file.write(f"{data.start_time.toSRTTime()} --> {data.end_time.toSRTTime()}{extended}\n")
         file.write("\n".join(i for i in text))
-        index += 1
+        for text, data in generator:
+            index += 1
+            if data.block_type != BlockType.CAPTION:
+                continue
+            file.write("\n\n")
+            extended = getSRTLayout(self, index, width, height)
+            file.write(f"{index}\n")
+            file.write(f"{data.start_time.toSRTTime()} --> {data.end_time.toSRTTime()}{extended}\n")
+            file.write("\n".join(i for i in text))
+    else:
+        file.write(f"{index}\n")
+        file.write(f"{data.start_time.toSRTTime()} --> {data.end_time.toSRTTime()}\n")
+        file.write("\n".join(i for i in text))
+        for text, data in generator:
+            index += 1
+            if data.block_type != BlockType.CAPTION:
+                continue
+            file.write("\n\n")
+            file.write(f"{index}\n")
+            file.write(f"{data.start_time.toSRTTime()} --> {data.end_time.toSRTTime()}\n")
+            file.write("\n".join(i for i in text))
+            

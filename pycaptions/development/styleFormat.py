@@ -1,24 +1,8 @@
-from collections.abc import Sequence
-from typing import Any
-from bs4.builder import TreeBuilder
-from bs4.element import PageElement as PageElement, SoupStrainer as SoupStrainer
-import cssutils
 
 from bs4 import BeautifulSoup as BS
-from cssutils import CSSParser
-from cssutils.css import CSSStyleSheet as originalCSSStyleSheet
 
-from .text import get_lines_ratio, get_phrases
-
-class StyleSheet(originalCSSStyleSheet):
-    def __json__(self):
-        return str(self.cssText)
-
-
-cssutils.css.CSSStyleSheet = StyleSheet
-
-cssParser = CSSParser(validate=False)
-
+from .textFormat import get_lines_ratio, get_phrases
+from .css import cssParser
 
 class StyleFormat(BS):
 

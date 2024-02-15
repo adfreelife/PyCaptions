@@ -1,4 +1,4 @@
-from .development.styleFormat import StyleFormat, cssParser
+from .development.styleFormat import StyleFormat
 
 
 class FullStyle(StyleFormat):

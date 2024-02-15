@@ -130,12 +130,14 @@ def readVTT(self, content: str | io.IOBase, languages: list[str] = None, **kwarg
 def saveVTT(self, filename: str, languages: list[str] = None, generator: list = None, 
             file: io.FileIO = None, **kwargs):
     file.write("WEBVTT\n\n")
-    index = 1
+    text, data = next(generator)
+    while data.block_type != BlockType.CAPTION:
+        text, data = next(generator)
+    file.write(f"{data.start_time.toVTTTime()} --> {data.end_time.toVTTTime()}\n")
+    file.write("\n".join(i for i in text))
     for text, data in generator:
         if data.block_type != BlockType.CAPTION:
             continue
-        elif index != 1:
-            file.write("\n\n")
+        file.write("\n\n")
         file.write(f"{data.start_time.toVTTTime()} --> {data.end_time.toVTTTime()}\n")
         file.write("\n".join(i for i in text))
-        index += 1

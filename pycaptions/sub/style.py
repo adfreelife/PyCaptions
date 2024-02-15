@@ -3,12 +3,12 @@ import re
 from ..development.colors import get_hexrgb
 
 
-@staticmethod
-def fromSUBunstyled(text, pattern, options):
+@classmethod
+def fromSUBunstyled(cls, text, pattern, options):
     return re.sub(pattern, "", text)
 
-@staticmethod
-def fromSUB(text, pattern, options):
+@classmethod
+def fromSUB(cls, text, pattern, options):
     start = ""
     end = ""
     font_vars = []

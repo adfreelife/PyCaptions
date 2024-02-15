@@ -1,9 +1,9 @@
-@staticmethod
-def fromVTTunstyled(text, pattern, options):
+@classmethod
+def fromVTTunstyled(cls, text, pattern, options):
     pass
 
-@staticmethod
-def fromVTT(text, style):
+@classmethod
+def fromVTT(cls, text, style):
     pass
 
 def getVTT(self, lines:int = -1, options: dict = None,

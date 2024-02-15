@@ -41,23 +41,38 @@ def readSUB(self, content: str | io.IOBase, languages: list[str] = None, **kwarg
         }
 
     line = content.readline().strip()
-    while line:
-        if line.startswith(r"{DEFAULT}"):
-            self.options["blocks"].append(Block(BlockType.STYLE, style=line))
-        else:
-            lines = line.split("|")
-            params = re.findall(PATTERN, lines[0])
-            start = MT.fromSUBTime(params[0].strip("{} "), frame_rate)
-            end = MT.fromSUBTime(params[1].strip("{} "), frame_rate)
-            caption = Block(BlockType.CAPTION, start_time=start, end_time=end)
-            for counter, line in enumerate(lines):
-                line = Styling.fromSUB(line, PATTERN, self.options["micro_dvd"]) 
-                if len(languages) > 1:
+    if len(languages) > 1:
+        while line:
+            if line.startswith(r"{DEFAULT}"):
+                self.options["blocks"].append(Block(BlockType.STYLE, style=line))
+            else:
+                lines = line.split("|")
+                params = re.findall(PATTERN, lines[0])
+                start = MT.fromSUBTime(params[0].strip("{} "), frame_rate)
+                end = MT.fromSUBTime(params[1].strip("{} "), frame_rate)
+                caption = Block(BlockType.CAPTION, start_time=start, end_time=end)
+                for counter, line in enumerate(lines):
+                    line = Styling.fromSUB(line, PATTERN, self.options["micro_dvd"]) 
                     caption.append(line, languages[counter])
-                else:
-                    caption.append(line, languages[0])
-            self.append(caption)
-        line = content.readline().strip()
+                self.append(caption)
+            line = content.readline().strip()
+
+    else:
+        while line:
+            if line.startswith(r"{DEFAULT}"):
+                self.options["blocks"].append(Block(BlockType.STYLE, style=line))
+            else:
+                lines = line.split("|")
+                params = re.findall(PATTERN, lines[0])
+                start = MT.fromSUBTime(params[0].strip("{} "), frame_rate)
+                end = MT.fromSUBTime(params[1].strip("{} "), frame_rate)
+                caption = Block(BlockType.CAPTION, start_time=start, end_time=end)
+                for line in lines:
+                    line = Styling.fromSUB(line, PATTERN, self.options["micro_dvd"]) 
+                    caption.append(line, languages[0])  
+                self.append(caption)
+            line = content.readline().strip()
+                        
 
     if "language" in self.options["micro_dvd"]:
         self.add_metadata("default", Block(BlockType.METADATA, id="default", 
@@ -71,12 +86,14 @@ def readSUB(self, content: str | io.IOBase, languages: list[str] = None, **kwarg
 def saveSUB(self, filename: str, languages: list[str] = None, generator: list = None, 
             file: io.FileIO = None, **kwargs):
     frame_rate = kwargs.get("frame_rate") or self.options.get("frame_rate") or 25
-    index = 1
+    text, data = next(generator)
+    while data.block_type != BlockType.CAPTION:
+        text, data = next(generator)
+    file.write("{"+data.start_time.toSUBTime(frame_rate)+"}{"+data.end_time.toSUBTime(frame_rate)+"}")
+    file.write("|".join(i for i in text))
     for text, data in generator:
         if data.block_type != BlockType.CAPTION:
             continue
-        elif index != 1:
-            file.write("\n")
+        file.write("\n")
         file.write("{"+data.start_time.toSUBTime(frame_rate)+"}{"+data.end_time.toSUBTime(frame_rate)+"}")
         file.write("|".join(i for i in text))
-        index += 1

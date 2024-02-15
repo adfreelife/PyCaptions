@@ -17,8 +17,11 @@ Release date: TBA
 
 Changes:
 - Added `development.detectors`, `development.readers` and `development.savers` for easier creation of custom classes.
+- Improvements with readers and writers
 
 Fixes:
+- Fixed `Block` addition (Block + Block)
+- Fixed multilingual srt index out of bounds error
 
 ### v0.7.0
 Release date: 2024-02-06
