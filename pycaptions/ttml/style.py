@@ -1,19 +1,21 @@
 from ..development.colors import get_hexrgb
+from ..development.wrappersStyle import styleGetter
 
 from .extras import TTML_FROM_CSS
 
 @classmethod
-def fromTTMLunstyled(cls, text, pattern, options):
+def fromTTMLunstyled(cls, text):
     pass
 
 @classmethod
 def fromTTML(cls, text):
-    pass
+    bs = cls(text, "html.parser")
 
+    return bs
 
+@styleGetter
 def getTTML(self, lines:int = -1, options: dict = None, 
             add_metadata: bool = True, **kwargs):
-    self.format_lines(lines=lines, **kwargs)
     for tag in self.find_all():
         if tag.name:
             if tag.get("style"):

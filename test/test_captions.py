@@ -56,7 +56,7 @@ class TestCaptions(unittest.TestCase):
     def test_json(self):
         for filename in TEST_FILES:
             with Captions(TEST_FILES_PATH+filename, encoding="auto") as c:
-                c.toJson(f"tmp/from_{filename.split('.')[-1]}")
+                c.toJson(f"tmp/from_{filename.split('.')[-1]}", compress=False)
                 self.check_json_fields(f"tmp/from_{filename.split('.')[-1]}.json")
 
     def test_style(self):
@@ -89,10 +89,10 @@ class TestCaptions(unittest.TestCase):
         for filename in TEST_FILES:
             _in = f"tmp/from_{filename.split('.')[-1]}.json"
             with Captions(TEST_FILES_PATH+filename, encoding="auto") as c:
-                c.toJson(_in)
+                c.toJson(_in, compress=False)
             _out = f"tmp/from_{filename.split('.')[-1]}_json.json"
             with Captions(_in) as c:
-                c.toJson(_out)
+                c.toJson(_out, compress=False)
             self.compare_json_ignore_field(_in, _out, IGNORE_JSON_FIELDS)
 
     def test_multilingual(self):

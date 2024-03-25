@@ -1,6 +1,7 @@
 import io
 
-from ..development import Block, BlockType, captionsDetector, captionsReader, captionsWriter
+from ..development import BlockType, captionsDetector, captionsReader, captionsWriter
+from ..development.blocks import CaptionBlock, LayoutBlock
 from ..microTime import MicroTime as MT
 
 from ..styling import Styling
@@ -35,7 +36,7 @@ def convertFromSRTLayout(self, id, layout, width, height):
         x2 = int(layout[1][3:])
         y1 = int(layout[2][3:])
         y2 = int(layout[3][3:])
-        self.addLayout(id, Block(BlockType.LAYOUT, id=id, layout={
+        self.addLayout(id, LayoutBlock(id=id, layout={
                 "width": (x2-x1) / width,
                 "height": (y2-y1) / height,
                 "viewportanchor": [x1 / width, y1 / height],
@@ -73,8 +74,8 @@ def readSRT(self, content: str | io.IOBase, languages: list[str] = None, **kwarg
             start, end = content.readline().split(" --> ")
             end = end.strip().split(" ", 1)
 
-            caption = Block(BlockType.CAPTION, languages[0], MT.fromSRTTime(start),
-                            MT.fromSRTTime(end[0]))
+            caption = CaptionBlock(language=languages[0], start_time=MT.fromSRTTime(start),
+                            end_time=MT.fromSRTTime(end[0]))
             if len(end) == 2:
                 convertFromSRTLayout(self, id.strip(), end[1], width, height)
             line = content.readline().strip()
@@ -90,15 +91,18 @@ def readSRT(self, content: str | io.IOBase, languages: list[str] = None, **kwarg
             start, end = content.readline().split(" --> ")
             end = end.strip().split(" ", 1)
 
-            caption = Block(BlockType.CAPTION, languages[0], MT.fromSRTTime(start),
-                            MT.fromSRTTime(end[0]))
             if len(end) == 2:
                 convertFromSRTLayout(self, id.strip(), end[1], width, height)
+
             line = content.readline().strip()
-            while line:
-                caption.append(Styling.fromSRT(line), languages[0])
-                line = content.readline().strip()
-            self.append(caption)
+            text = line
+            for i in content:
+                line = i.strip()
+                if not line:
+                    break
+                text += "<br/>" + line
+            self.append(CaptionBlock(language=languages[0], start_time=MT.fromSRTTime(start),
+                            end_time=MT.fromSRTTime(end[0]), value=Styling.fromSRT(text)))
             id = content.readline()
 
 

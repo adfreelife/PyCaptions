@@ -1,4 +1,5 @@
 from ..development.colors import get_hexrgb
+from ..development.wrappersStyle import styleGetter
 
 @classmethod
 def fromSRTunstyled(cls, text):
@@ -19,11 +20,11 @@ def fromSRT(cls, text):
             if "face" in tag.attrs:
                 tag["style"] = tag.get("style", "")+f'font-family: {tag["face"]};'
                 del tag["face"]
-    return str(bs)
-    
+    return bs
+
+@styleGetter
 def getSRT(self, lines:int = -1, options: dict =  None, 
             add_metadata: bool = True, **kwargs):
-    self.format_lines(lines=lines, **kwargs)
     for tag in self.find_all():
         if tag.name:
             if tag.get("style"):

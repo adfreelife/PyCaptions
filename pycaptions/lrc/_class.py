@@ -2,7 +2,6 @@ from ..development import CaptionsFormat
 
 from .functions import detectLRC, readLRC, saveLRC
 
-
 class LyRiCs(CaptionsFormat):
     """
     Synchronized Accessible Media Interchange
@@ -20,6 +19,6 @@ class LyRiCs(CaptionsFormat):
 
     from ..development.readers import (
         # readSAMI, readUSF,
-        readSRT, readSUB, 
+        readSRT, readSUB,
         readTTML, readVTT
     )

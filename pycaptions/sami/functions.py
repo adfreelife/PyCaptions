@@ -1,6 +1,6 @@
 import io
 
-from ..development import Block, BlockType, captionsDetector, captionsReader, captionsWriter
+from ..development import BlockType, captionsDetector, captionsReader, captionsWriter
 from ..microTime import MicroTime as MT
 from bs4 import BeautifulSoup
 

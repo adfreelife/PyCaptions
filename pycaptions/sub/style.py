@@ -1,7 +1,8 @@
 import re
+import copy
 
 from ..development.colors import get_hexrgb
-
+from ..development.wrappersStyle import styleGetter
 
 @classmethod
 def fromSUBunstyled(cls, text, pattern, options):
@@ -56,11 +57,11 @@ def fromSUB(cls, text, pattern, options):
         start += f"<p {_class}style='"+";".join(font_vars)+";'>"
         end += "</p>"
 
-    return start+re.sub(pattern, "", text)+end
+    return cls(start+re.sub(pattern, "", text)+end, "html.parser")
 
+@styleGetter
 def getSUB(self, lines:int = -1, options: dict = None,
            add_metadata: bool = True, **kwargs):
-    self.format_lines(lines=lines, **kwargs)
     y = {"bold":False, "italic": False, "underline":False}
     props = {"color":False, "size":False, "font":False}
     new_line = self.find(string=True)

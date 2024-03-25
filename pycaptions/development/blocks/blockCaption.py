@@ -1,16 +1,14 @@
-import copy
 
 from collections import defaultdict
 from langcodes import standardize_tag, tag_is_valid
-from ..microTime import MicroTime as MT
-from ..styling import Styling
-from .blockType import BlockType
-from .textFormat import get_phrases, get_lines_ratio
-from .css import cssParser
+from ...microTime import MicroTime as MT
+from ...styling import Styling
+from ..textFormat import get_phrases, get_lines_ratio
+from .blockFormat import BlockFormat
+from ..blockType import BlockType
 
 
-
-class Block:
+class CaptionBlock(BlockFormat):
     """
     Represents a block of content in a multimedia file or document.
 
@@ -35,98 +33,84 @@ class Block:
         __iter__: Iterator for iterating through the block languages.
         __next__: Iterator method returning a tuple of language and text.
     """
-    def __init__(self, block_type: int, default_language: str = "und", start_time: MT = None,
-                 end_time: MT = None, text: str = "", **options):
+    def __init__(self, value: Styling = None, language: str = "und", start_time: MT = None,
+                 end_time: MT = None, **options):
         """
         Initialize a new instance of the Block class.
 
         Parameters:
-        - block_type (int): The type of the block, represented as an integer, options in BlockType class
-        - lang (str, optional): The language of the text in the block (default is "und" for undefined).
+        - language (str, optional): The language of the text in the block (default is "und" for undefined).
         - start_time (int, optional): The starting time of the block in microseconds (default is 0).
         - end_time (int, optional): The ending time of the block in microseconds (default is 0).
-        - text (str, optional): The content of the block (default is an empty string).
         - **options: Additional keyword arguments for customization (e.g style, layout, ...).
         """
-        self.block_type = block_type
-        self.languages = defaultdict(str)
-        if options.get("languages"):
-            for i, j in options.get("languages").items():
-                self.languages[i] = j
-            del options["languages"]
-        self.default_language = default_language
-        if text:
-            self.languages[default_language] = text.strip()
-        self.start_time = start_time
-        self.end_time = end_time
-        if "options" in options:
-            self.options = options["options"]
-        else:
-            self.options = options or {}
-
-        if block_type == BlockType.STYLE and isinstance(self.options["style"], str):
-            self.options["style"] = cssParser.parseString(cssText=self.options["style"], encoding="UTF-8")
-
+        super().__init__(BlockType.CAPTION, None, start_time=start_time, end_time=end_time, **options)
+        self.value = defaultdict(str)
+        if value:
+            if isinstance(value, dict):
+                for i, j in value.items():
+                    self[i] = j
+            else:
+                self.value[language] = value
+        
     def __getitem__(self, index: str):
-        return self.languages[index]
-
-    def __setitem__(self, index: str, value: str):
-        self.languages[index] = value
+        return self.value[index]
+    
+    def __setitem__(self, index: str, value):
+        self.value[index] = Styling(value, "html.parser")
 
     def __delitem__(self, index: str):
-        del self.languages[index]
+        del self.value[index]
 
     def __str__(self):
-        temp = '\n'.join(f" {lang}: {text}" for lang, text in self.languages.items())
+        temp = '\n'.join(f" {lang}: {text}" for lang, text in self.value.items())
         return f"start: {self.start_time} end: {self.end_time}\n{temp}"
 
     def __iadd__(self, value):
-        if not isinstance(value, Block):
+        if not isinstance(value, CaptionBlock):
             raise ValueError("Unsupported type. Must be an instance of `Block`")
         for key, language in value:
-            self.languages[key] = language
+            self.value[key] = language
         return self
 
     def __add__(self, value):
-        if not isinstance(value, Block):
+        if not isinstance(value, CaptionBlock):
             raise ValueError("Unsupported type. Must be an instance of `Block`")
         out = self.copy()
         for key, language, comment in value:
-            out.languages[key] = language
+            out.value[key] = language
         return out
 
     def __isub__(self, language: str):
-        if language in self.languages:
-            del self.languages[language]
+        if language in self.value:
+            del self.value[language]
         return self
 
     def __sub__(self, language: str):
         out = self.copy()
-        if language in out.languages:
-            del out.languages[language]
+        if language in out.value:
+            del out.value[language]
         return out
 
     def __iter__(self):
-        self._keys_iterator = iter(self.languages)
+        self._keys_iterator = iter(self.value)
         return self
 
     def __next__(self):
         try:
             key = next(self._keys_iterator)
-            return key, self.languages.get(key)
+            return key, self.value.get(key)
         except StopIteration:
             raise StopIteration
-
-    def copy(self):
-        return Block(self.block_type, self.default_language, self.start_time,
-                     self.end_time, languages=copy.deepcopy(self.languages),
-                     options=copy.deepcopy(self.options))
 
     def get(self, lang: str, lines: int = -1, **kwargs) -> str:
         return self.get_lines(lang, lines, **kwargs)
 
     def get_style(self, lang: str) -> str:
-        return Styling(self.languages.get(lang), "html.parser")
+        return self.value.get(lang)
+    
+    def _language_lines(self, lang):
+        return self.value.get(lang).get_lines()
 
     def get_lines(self, lang: str = None, lines: int = 0, character_limit: int = 47,
                   split_ratios: list[float] = [0.7, 1], smaller_first_line: bool = True, **kwargs) -> list[str]:
@@ -143,16 +127,16 @@ class Block:
             list[str]: A list of text lines.
         """
 
-        lang = lang or self.default_language
+        lang = lang or next(iter(self.value))
 
         if lines == -1:
-            return Styling(self.languages.get(lang), "html.parser").get_lines()
+            return self._language_lines(lang)
 
         separator = " "
         if "separator" in kwargs:
             separator = kwargs["separator"]
 
-        text_lines = Styling(self.languages.get(lang), "html.parser").get_lines()
+        text_lines = self._language_lines(lang)
         text = next(text_lines)
         if text.endswith("-"):
             add_separator = False
@@ -204,24 +188,25 @@ class Block:
 
         return formatted_lines
 
-    def append(self, text: str, lang: str = None, separator: str = "<br>"):
-        lang = lang or self.default_language
-        if self.languages[lang]:
-            self.languages[lang] += separator + text.strip()
+    def append(self, text: Styling, lang: str = None, separator: str = "<br>"):
+        lang = lang or next(iter(self.value))
+        if self.value[lang]:
+            self.value[lang].append(separator)
+            self.value[lang].append(text)
         else:
-            self.languages[lang] = text.strip()
+            self.value[lang] = text
 
     def append_without_common_part(self, text: str, lang: str = None):
-        lang = lang or self.default_language
+        lang = lang or next(iter(self.value))
         common_lenght = 0
-        current = self.get(lang)
+        current = self.get(lang).get_lines()
         min_length = min(len(current), len(text))
 
         for i in range(min_length):
             if current[-i:] == text[:i]:
                 common_lenght = i
 
-        self.languages[lang] = current + text[common_lenght:]
+        self[lang] = current + text[common_lenght:]
 
     def shift_time_us(self, microseconds: int):
         self.start_time += microseconds

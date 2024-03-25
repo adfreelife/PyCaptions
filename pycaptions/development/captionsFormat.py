@@ -2,10 +2,14 @@ import json
 import io
 import os
 import copy
+import zipfile
+import gzip
+import platform
 
 from langcodes import standardize_tag, tag_is_valid
 from charset_normalizer import detect as detect_encoding
-from .block import Block, BlockType
+from .blocks import BlockFormat as Block, CaptionBlock, CommentBlock, StyleBlock, LayoutBlock, MetadataBlock
+from .blockType import BlockType
 from ..microTime import MicroTime as MT
 from ..options import FileExtensions, save_extensions
 
@@ -46,6 +50,14 @@ class CaptionsFormat:
         __enter__: Enter the context for managing resources.
         __exit__: Exit the context, handling exceptions.
     """
+
+    blocks = {
+        BlockType.CAPTION: CaptionBlock,
+        BlockType.COMMENT: CommentBlock,
+        BlockType.STYLE: StyleBlock,
+        BlockType.LAYOUT: LayoutBlock,
+        BlockType.METADATA: MetadataBlock
+    }
 
     def __init__(self, file_name_or_content: str = None, default_language: str = "und",
                  time_length: MT = None, file_extensions: FileExtensions = None,
@@ -327,7 +339,7 @@ class CaptionsFormat:
         return languages, os.path.join(directory, ".".join(filename))
 
     def append(self, item: Block):
-        if item.end_time and item.end_time > self.time_length:
+        if item.block_type == BlockType.CAPTION and item.end_time and item.end_time > self.time_length:
             self.time_length = item.end_time
         self._block_list.append(item)
 
@@ -354,8 +366,8 @@ class CaptionsFormat:
         self.media_width = data.get("media_width") or 1920
         for key, value in data[kwargs.get("file_extensions") or "file_extensions"].items():
             setattr(save_extensions, key, value)
-        self.options = data["options"]
-        self._block_list = [Block(**caption) for caption in data["block_list"]]
+        self.options = data["options"]        
+        self._block_list = [self.blocks[caption.pop("block_type")](**caption) for caption in data["block_list"]]
 
     def fromLegacyJson(self, file: str, **kwargs):
         encoding = kwargs.get("encoding") or "UTF-8"
@@ -396,7 +408,7 @@ class CaptionsFormat:
         except Exception as e:
             print(f"Error {e}")
 
-    def toJson(self, file: str, **kwargs):
+    def toJson(self, file: str, compress: bool = True, **kwargs):
         encoding = kwargs.get("encoding") or "UTF-8"
 
         def serializer(obj):
@@ -433,10 +445,35 @@ class CaptionsFormat:
                     raise ValueError(f"Invalid save_as value, got {kwargs.get('save_as')}" +
                                      ", expected string, dict, caption_array")
             else:
-                if not file.endswith(".json"):
-                    file += ".json"
-                with open(file, "w", encoding=encoding) as f:
-                    json.dump(data, f, default=serializer)
+                print(compress)                
+                if compress:
+                    compression_format = kwargs.get("compression_format")
+                    
+                    if compression_format not in ["zip", "gzip"]:
+                        if compression_format:
+                            print(f"Invalid compress format, expected 'zip' or 'gzip' got '{compression_format}'\nDefaulting to system default.")
+                        compression_format = "zip" if platform.system() == "Windows" else "gzip"
+                    if compression_format == "zip":
+                        out_file = os.path.basename(file)
+                        if not out_file.endswith(".json"):
+                            out_file += ".json"
+                        if not file.endswith(".zip"):
+                            file += ".zip"
+                        with zipfile.ZipFile(file, "w") as zip:
+                            zip.writestr(out_file, json.dumps(data, default=serializer))
+                    else:
+                        if not file.endswith(".gz"):
+                            if not file.endswith(".json"):
+                                file += ".json"
+                            file += ".gz"
+                        with gzip.open(file, "wt") as gzipf:
+                            json.dump(data, gzipf, default=serializer)
+                    
+                else:
+                    if not file.endswith(".json"):
+                        file += ".json"
+                    with open(file, "w", encoding=encoding) as f:
+                        json.dump(data, f, default=serializer)
         except IOError as e:
             print(f"I/O error({e.errno}): {e.strerror}")
         except Exception as e:

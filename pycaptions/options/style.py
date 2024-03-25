@@ -1,4 +1,5 @@
 from ..styling import changeStyleOption
+#from ..development.block import changeStyleOption as changeBlockStyleOption
 
 
 class StyleOptions:
@@ -46,3 +47,5 @@ class StyleOptions:
             print(f"Invalid style option {value}. Expected: none {' '.join(self.style_option)}")
             self.style_value = None
         changeStyleOption(self.style_value)
+        #changeBlockStyleOption(self.style_value)
+        

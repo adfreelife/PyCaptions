@@ -1,14 +1,18 @@
+from ..development.wrappersStyle import styleGetter
+
 @classmethod
 def fromVTTunstyled(cls, text, pattern, options):
     pass
 
 @classmethod
 def fromVTT(cls, text, style):
-    pass
+    bs = cls(text, "html.parser")
 
+    return bs
+
+@styleGetter
 def getVTT(self, lines:int = -1, options: dict = None,
            add_metadata: bool = True, **kwargs):
-    self.format_lines(lines=lines, **kwargs)
     for tag in self.find_all():
         if tag.name:
             if tag.name == "br":

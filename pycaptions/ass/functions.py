@@ -7,7 +7,8 @@ from ..microTime import MicroTime as MT
 
 @staticmethod
 @captionsDetector
-def detectLRC(content: str | io.IOBase) -> bool:
+
+def detectASS(content: str | io.IOBase) -> bool:
     r"""
     Used to detect Synchronized Accessible Media Interchange caption format.
 
@@ -21,11 +22,11 @@ def detectLRC(content: str | io.IOBase) -> bool:
     return False
 
 @captionsReader
-def readLRC(self, content: str | io.IOBase, languages: list[str] = None, **kwargs):
+def readASS(self, content: str | io.IOBase, languages: list[str] = None, **kwargs):
     raise ValueError("Not Implemented")
 
 
-@captionsWriter("LRC", "getLRC")
-def saveLRC(self, filename: str, languages: list[str] = None, generator: list = None, 
+@captionsWriter("ASS", "getASS")
+def saveASS(self, filename: str, languages: list[str] = None, generator: list = None,
             file: io.FileIO = None, **kwargs):
     raise ValueError("Not Implemented")

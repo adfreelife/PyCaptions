@@ -1,8 +1,10 @@
 import io
 import re
 
-from ..development import Block, BlockType, captionsDetector, captionsReader, captionsWriter
+from ..development import BlockType, captionsDetector, captionsReader, captionsWriter
+from ..development.blocks import CaptionBlock, MetadataBlock, StyleBlock, LayoutBlock, CommentBlock
 from ..microTime import MicroTime as MT
+from ..styling import Styling
 
 
 STYLE_PATERN = re.compile(r"::cue\((#[^)]+)\)")
@@ -24,7 +26,7 @@ def detectVTT(content: str | io.IOBase) -> bool:
 
 @captionsReader
 def readVTT(self, content: str | io.IOBase, languages: list[str] = None, **kwargs):
-    metadata = Block(BlockType.METADATA, id="default")
+    metadata = MetadataBlock(id="default")
     content.readline()
     line = content.readline().strip()
     while line:
@@ -39,7 +41,7 @@ def readVTT(self, content: str | io.IOBase, languages: list[str] = None, **kwarg
         line = line.strip()
         if line.startswith("NOTE"):
             temp = line.split(" ", 1)
-            comment = Block(BlockType.COMMENT)
+            comment = CommentBlock()
             if len(temp) > 1:
                 comment.append(temp[1])
             line = content.readline().strip()
@@ -65,7 +67,7 @@ def readVTT(self, content: str | io.IOBase, languages: list[str] = None, **kwarg
                     self.options["style_metadata"]["identifier_to_new"][match.group(1)] = style_name
                     return style_name
                 return match.group(1)
-            self.addStyle(str(style_block_count), Block(BlockType.STYLE, id=str(style_block_count),
+            self.addStyle(str(style_block_count), StyleBlock(id=str(style_block_count),
                                                         style=re.sub(STYLE_PATERN, replace_style, style)))
         elif line == "REGION":
             line = content.readline().strip()
@@ -84,46 +86,76 @@ def readVTT(self, content: str | io.IOBase, languages: list[str] = None, **kwarg
             if temp.get("viewportanchor"):
                 vp = temp["viewportanchor"].split(",")
                 temp["viewportanchor"] = [int(vp[0][:-1])/100.0, int(vp[1][:-1])/100.0]
-            self.addLayout(temp["id"], Block(BlockType.LAYOUT, id=temp["id"], layout=temp))
+            self.addLayout(temp["id"], LayoutBlock(id=temp["id"], layout=temp))
         else:
             break
         line = content.readline()
 
-    while line:
-        if line.startswith("NOTE"):
-            temp = line.split(" ", 1)
-            comment = Block(BlockType.COMMENT)
-            if len(temp) > 1:
-                comment.append(temp[1])
-            line = content.readline().strip()
-            while line:
-                comment.append(line)
+    if len(languages) > 1:
+        while line:
+            if line.startswith("NOTE"):
+                temp = line.split(" ", 1)
+                comment = CommentBlock()
+                if len(temp) > 1:
+                    comment.append(temp[1])
                 line = content.readline().strip()
-            self.append(comment)
-        else:
-            caption = Block(BlockType.CAPTION)
-            if "-->" not in line:
-                caption.options["id"] = line.strip()
+                while line:
+                    comment.append(line)
+                    line = content.readline().strip()
+                self.append(comment)
+            else:
+                caption = CaptionBlock()
+                if "-->" not in line:
+                    caption.options["id"] = line.strip()
+                    line = content.readline().strip()
+                start, end = line.split(" --> ", 1)
+                end = end.split(" ", 1)
+                if len(end) > 1:
+                    caption.options["style"] = end[1]
+                caption.start_time = MT.fromVTTTime(start)
+                caption.end_time = MT.fromVTTTime(end[0])
+                counter = 1
                 line = content.readline().strip()
-            start, end = line.split(" --> ", 1)
-            end = end.split(" ", 1)
-            if len(end) > 1:
-                caption.options["style"] = end[1]
-            caption.start_time = MT.fromVTTTime(start)
-            caption.end_time = MT.fromVTTTime(end[0])
-            counter = 1
-            line = content.readline().strip()
-            if line.startswith("{"):
-                caption.block_type = BlockType.METADATA
-            while line:
-                if len(languages) > 1:
-                    caption.append(line, languages[counter])
+                if line.startswith("{"):
+                    caption.block_type = BlockType.METADATA
+                while line:
+                    caption.append(Styling.fromVTT(line, None), languages[counter])
                     counter += 1
-                else:
-                    caption.append(line, languages[0])
+                    line = content.readline().strip()
+                self.append(caption)
+            line = content.readline()
+    else:
+        while line:
+            if line.startswith("NOTE"):
+                temp = line.split(" ", 1)
+                comment = CommentBlock()
+                if len(temp) > 1:
+                    comment.append(temp[1])
                 line = content.readline().strip()
-            self.append(caption)
-        line = content.readline()
+                while line:
+                    comment.append(line)
+                    line = content.readline().strip()
+                self.append(comment)
+            else:
+                caption = CaptionBlock()
+                if "-->" not in line:
+                    caption.options["id"] = line.strip()
+                    line = content.readline().strip()
+                start, end = line.split(" --> ", 1)
+                end = end.split(" ", 1)
+                if len(end) > 1:
+                    caption.options["style"] = end[1]
+                caption.start_time = MT.fromVTTTime(start)
+                caption.end_time = MT.fromVTTTime(end[0])
+                line = content.readline().strip()
+                if line.startswith("{"):
+                    caption.block_type = BlockType.METADATA
+                while line:
+                    caption.append(Styling.fromVTT(line, None), languages[0])
+                    line = content.readline().strip()
+                self.append(caption)
+            line = content.readline()
+            
 
 
 @captionsWriter("VTT", "getVTT")

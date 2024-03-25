@@ -2,7 +2,8 @@ import io
 import re
 import langcodes 
 
-from ..development import Block, BlockType, captionsDetector, captionsReader, captionsWriter
+from ..development import BlockType, captionsDetector, captionsReader, captionsWriter
+from ..development.blocks import CaptionBlock, StyleBlock, MetadataBlock
 from ..microTime import MicroTime as MT
 from ..styling import Styling
 
@@ -44,13 +45,13 @@ def readSUB(self, content: str | io.IOBase, languages: list[str] = None, **kwarg
     if len(languages) > 1:
         while line:
             if line.startswith(r"{DEFAULT}"):
-                self.options["blocks"].append(Block(BlockType.STYLE, style=line))
+                self.options["blocks"].append(StyleBlock(style=line))
             else:
                 lines = line.split("|")
                 params = re.findall(PATTERN, lines[0])
                 start = MT.fromSUBTime(params[0].strip("{} "), frame_rate)
                 end = MT.fromSUBTime(params[1].strip("{} "), frame_rate)
-                caption = Block(BlockType.CAPTION, start_time=start, end_time=end)
+                caption = CaptionBlock(language=languages[0], start_time=start, end_time=end)
                 for counter, line in enumerate(lines):
                     line = Styling.fromSUB(line, PATTERN, self.options["micro_dvd"]) 
                     caption.append(line, languages[counter])
@@ -60,13 +61,13 @@ def readSUB(self, content: str | io.IOBase, languages: list[str] = None, **kwarg
     else:
         while line:
             if line.startswith(r"{DEFAULT}"):
-                self.options["blocks"].append(Block(BlockType.STYLE, style=line))
+                self.options["blocks"].append(StyleBlock(style=line))
             else:
                 lines = line.split("|")
                 params = re.findall(PATTERN, lines[0])
                 start = MT.fromSUBTime(params[0].strip("{} "), frame_rate)
                 end = MT.fromSUBTime(params[1].strip("{} "), frame_rate)
-                caption = Block(BlockType.CAPTION, start_time=start, end_time=end)
+                caption = CaptionBlock(language=languages[0], start_time=start, end_time=end)
                 for line in lines:
                     line = Styling.fromSUB(line, PATTERN, self.options["micro_dvd"]) 
                     caption.append(line, languages[0])  
@@ -75,7 +76,7 @@ def readSUB(self, content: str | io.IOBase, languages: list[str] = None, **kwarg
                         
 
     if "language" in self.options["micro_dvd"]:
-        self.add_metadata("default", Block(BlockType.METADATA, id="default", 
+        self.add_metadata("default", MetadataBlock(id="default", 
                                            Language=langcodes.find(self.options["micro_dvd"]["language"]).language))
 
     if not self.options["micro_dvd"]["control_codes"]:

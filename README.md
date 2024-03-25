@@ -37,16 +37,20 @@ Read the [Wiki](https://github.com/adfreelife/PyCaptions/wiki)
     ```
 
 ## Supported Formats
-- [SubRip (SRT)](https://en.wikipedia.org/wiki/SubRip) (reader + writer)
-- [MicroDVD (SUB)](https://en.wikipedia.org/wiki/MicroDVD) (reader + writer)
-- [Timed Text Markup Language (TTML, DFXP, XML)](https://www.w3.org/TR/ttml/) (reader* + writer*)
-- [Web Video Text Tracks Format (VTT)](https://www.w3.org/TR/webvtt/) (reader + writer*)
+- [SubRip (SRT)](https://en.wikipedia.org/wiki/SubRip)
+- [MicroDVD (SUB)](https://en.wikipedia.org/wiki/MicroDVD)
+- [Timed Text Markup Language (TTML, DFXP, XML)](https://www.w3.org/TR/ttml/)
+- [Web Video Text Tracks Format (VTT)](https://www.w3.org/TR/webvtt/)
 
-\*Limited functionality
+*Note that only inline styles are converted*
 
-## Future plans
-- split captions blocks into two parts
-- add support for more formats
+## Roadmap
+- v1.0.0
+    - full support for srt, sub, ttml, vtt reader/writer
+    - converting all styles and layouts
+    - split captions blocks into two parts, join caption blocks together
+- add support for more formats (after v1.0)
+    - [(Advanced) SubStation Alpha (ASS, SSA)](http://www.tcax.org/docs/ass-specs.htm)
     - [Synchronized Accessible Media Interchange (SAMI)](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/dnacc/understanding-sami-1.0)
     - [Universal Subtitle Format (USF)](https://en.wikipedia.org/wiki/Universal_Subtitle_Format)
     - [LyRiCs (LRC)](https://en.wikipedia.org/wiki/LRC_(file_format))

@@ -17,6 +17,9 @@ class StyleFormat(BS):
         
         super().__init__(markup, features, builder, parse_only, from_encoding, exclude_encodings, element_classes, **kwargs)
 
+    def __json__(self):
+        return str(self)
+
     def parseStyle(self, string):
         return cssParser.parseStyle(string, encoding="UTF-8")
     

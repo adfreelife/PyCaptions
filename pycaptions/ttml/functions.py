@@ -1,8 +1,10 @@
 import io
 
 from bs4 import BeautifulSoup
-from ..development import Block, BlockType, captionsDetector, captionsReader, captionsWriter
+from ..development import BlockType, captionsDetector, captionsReader, captionsWriter
+from ..development.blocks import CaptionBlock
 from ..microTime import MicroTime as MT
+from ..styling import Styling
 
 
 @staticmethod
@@ -59,16 +61,16 @@ def readTTML(self, content: str | io.IOBase, languages: list[str] = None, **kwar
                     elif end > p_end:
                         end = p_end
 
-                    caption = Block(BlockType.CAPTION, start_time=start, end_time=end)
+                    caption = CaptionBlock(start_time=start, end_time=end)
 
                     for lang_index, text in enumerate(line.get_text().strip().split("\n")):
-                        caption.append(text, lang or languages[lang_index])
+                        caption.append(Styling.fromTTML(text), lang or languages[lang_index])
                     self.append(caption)
             else:
                 for block, line in enumerate(langs.find_all("p")):
                     caption = self[block]
                     for lang_index, text in enumerate(line.get_text().strip().split("\n")):
-                        caption.append(text, lang or languages[lang_index])
+                        caption.append(Styling.fromTTML(text), lang or languages[lang_index])
     else:
         for index, langs in enumerate(content.body.find_all("div")):
             lang = langs.get("xml:lang")
@@ -84,18 +86,18 @@ def readTTML(self, content: str | io.IOBase, languages: list[str] = None, **kwar
                     elif end > p_end:
                         end = p_end
 
-                    caption = Block(BlockType.CAPTION, start_time=start, end_time=end)
+                    caption = CaptionBlock(start_time=start, end_time=end)
 
                     for text in line.get_text().strip().split("\n"):
-                        caption.append(text, lang or languages[0])
+                        caption.append(Styling.fromTTML(text), lang or languages[0])
                     self.append(caption)
             else:
                 for block, line in enumerate(langs.find_all("p")):
                     caption = self[block]
                     for text in line.get_text().strip().split("\n"):
-                        caption.append(text, lang or languages[0])
+                        caption.append(Styling.fromTTML(text), lang or languages[0])
 
-@captionsWriter("TTML", "getTTML", "<br/>")
+@captionsWriter("TTML", "getTTML", "<br />")
 def saveTTML(self, filename: str, languages: list[str] = None, generator: list = None, 
              file: io.FileIO = None, **kwargs):
     mark_language_type = kwargs.get("mark_language_type") or False

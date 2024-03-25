@@ -17,7 +17,9 @@ Release date: TBA
 
 Changes:
 - Added `development.detectors`, `development.readers` and `development.savers` for easier creation of custom classes.
-- Improvements with readers and writers
+- Readers and writers now parse and convert up to 2x faster (especially with `lines` parameter and converting to multiformats at the same time)
+- Added compression when saving to json, it's enabled by default. If you wish to stil save as raw json use `compress=False`. You can specify `compression_format` as `zip` or `gzip`, by default it saves as zip on windows and gzip on other platforms.
+- Changed json structure
 
 Fixes:
 - Fixed `Block` addition (Block + Block)
